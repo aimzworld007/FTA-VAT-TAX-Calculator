@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UAE Corporate Tax Calculator</title>
+  <style>
+    :root{
+      --bg:#f5f7fb;--card:#ffffff;--text:#172033;--muted:#64748b;--primary:#0f766e;--primary2:#115e59;--soft:#e6fffb;--line:#dbe3ef;--danger:#b91c1c;--warn:#b45309;--ok:#047857;--shadow:0 14px 38px rgba(15,23,42,.10);--radius:20px;
+    }
+    *{box-sizing:border-box} body{margin:0;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;background:linear-gradient(135deg,#eef7f6 0%,#f8fafc 40%,#eef2ff 100%);color:var(--text);padding:24px 24px 100px}.wrap{max-width:1180px;margin:auto}.header{background:linear-gradient(135deg,#fff,#f0fdfa);border:1px solid var(--line);border-radius:28px;padding:26px;box-shadow:var(--shadow);display:flex;gap:22px;align-items:center;justify-content:space-between}.brand{display:flex;gap:16px;align-items:center}.logo{width:84px;height:84px;border-radius:18px;background:#fff;border:1px solid var(--line);padding:8px;object-fit:contain}.eyebrow{font-size:13px;font-weight:800;color:var(--primary);text-transform:uppercase;letter-spacing:.08em}.title{font-size:34px;line-height:1.1;margin:6px 0 8px;font-weight:900}.subtitle{color:var(--muted);font-size:15px;max-width:760px}.badge{background:var(--soft);border:1px solid #99f6e4;color:#134e4a;border-radius:999px;padding:10px 14px;font-weight:800;white-space:nowrap}.grid{display:grid;grid-template-columns:1.15fr .85fr;gap:18px;margin-top:18px}.card{background:rgba(255,255,255,.9);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px}.card h2{margin:0 0 14px;font-size:19px}.formgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.field{display:flex;flex-direction:column;gap:7px}.field.full{grid-column:1/-1}label{font-size:13px;color:#334155;font-weight:800}input,select,textarea{width:100%;border:1px solid var(--line);border-radius:14px;padding:12px 13px;background:#fff;font-size:14px;color:var(--text);outline:none}input:focus,textarea:focus,select:focus{border-color:var(--primary);box-shadow:0 0 0 4px rgba(15,118,110,.12)}textarea{min-height:92px;resize:vertical}.kpis{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.kpi{border:1px solid var(--line);border-radius:18px;padding:15px;background:linear-gradient(180deg,#fff,#f8fafc)}.kpi span{display:block;color:var(--muted);font-size:12px;font-weight:800;text-transform:uppercase}.kpi strong{display:block;font-size:24px;margin-top:8px}.kpi.tax{background:linear-gradient(135deg,#ecfdf5,#fff);border-color:#a7f3d0}.kpi.tax strong{color:var(--ok)}.kpi.warn strong{color:var(--warn)}.section-title{margin-top:18px;border-top:1px solid var(--line);padding-top:16px}.table{width:100%;border-collapse:separate;border-spacing:0;margin-top:8px;overflow:hidden;border-radius:16px;border:1px solid var(--line)}.table th,.table td{padding:12px;border-bottom:1px solid var(--line);font-size:13px;text-align:left}.table th{background:#f8fafc;color:#334155;text-transform:uppercase;font-size:11px}.table tr:last-child td{border-bottom:0}.note{background:#fffbeb;border:1px solid #fde68a;color:#78350f;border-radius:16px;padding:14px;font-size:13px;line-height:1.55;margin-top:14px}.footer-actions{position:fixed;left:0;right:0;bottom:0;background:rgba(255,255,255,.92);backdrop-filter:blur(12px);border-top:1px solid var(--line);padding:12px 22px;z-index:10}.actions{max-width:1180px;margin:auto;display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}.btn{border:0;border-radius:14px;padding:12px 16px;font-weight:900;cursor:pointer}.btn.primary{background:var(--primary);color:#fff}.btn.primary:hover{background:var(--primary2)}.btn.secondary{background:#e2e8f0;color:#0f172a}.btn.danger{background:#fee2e2;color:#991b1b}.small{font-size:12px;color:var(--muted);line-height:1.5}.status{display:inline-flex;align-items:center;gap:7px;border-radius:999px;padding:8px 11px;font-weight:900;font-size:12px}.status.ok{background:#dcfce7;color:#166534}.status.warn{background:#fef3c7;color:#92400e}.pillrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.mini{padding:8px 10px;border-radius:999px;background:#f1f5f9;border:1px solid var(--line);font-size:12px;font-weight:800;color:#334155}@media(max-width:900px){.grid{grid-template-columns:1fr}.header{align-items:flex-start;flex-direction:column}.formgrid{grid-template-columns:1fr}.kpis{grid-template-columns:1fr}.title{font-size:26px}body{padding:14px 14px 110px}.actions{justify-content:stretch}.btn{flex:1}}
+    @media print{body{background:#fff;padding:0}.footer-actions{display:none}.wrap{max-width:none}.card,.header{box-shadow:none;break-inside:avoid}.header{border-radius:0}.grid{grid-template-columns:1fr}.no-print{display:none}.logo{width:70px;height:70px}}
+  </style>
+</head>
+<body>
+  <div class="wrap" id="report">
+    <header class="header">
+      <div class="brand">
+        <img class="logo" src="https://eservices.tax.gov.ae/sap/public/bc/ui2/zmcf_fmca_public/user_management/img/FTA_logo_new.png" alt="FTA Logo" />
+        <div>
+          <div class="eyebrow">UAE Corporate Tax Estimator</div>
+          <div class="title">Corporate Tax Calculation Report</div>
+          <div class="subtitle">Input yearly revenue, deductible expenses, non-deductible adjustments and exempt income. The page estimates UAE Corporate Tax using the standard 0% / 9% threshold rules.</div>
+        </div>
+      </div>
+      <div class="badge">FTA-ready internal worksheet</div>
+    </header>
+
+    <div class="grid">
+      <section class="card">
+        <h2>1. Business & Tax Period</h2>
+        <div class="formgrid">
+          <div class="field"><label>Business Name</label><input id="businessName" value="Your Business Name" /></div>
+          <div class="field"><label>TRN / CT Registration No.</label><input id="trn" placeholder="Enter TRN or CT number" /></div>
+          <div class="field"><label>Financial Year Start</label><input type="date" id="fyStart" value="2026-01-01" /></div>
+          <div class="field"><label>Financial Year End</label><input type="date" id="fyEnd" value="2026-12-31" /></div>
+          <div class="field"><label>Small Business Relief?</label><select id="sbr"><option value="no">No / Not selected</option><option value="yes">Yes, eligible and selected</option></select></div>
+          <div class="field"><label>Entity Type</label><select id="entityType"><option>Mainland / Normal UAE Business</option><option>Free Zone - normal rate</option><option>Free Zone - qualifying income review needed</option><option>Natural person business</option></select></div>
+        </div>
+
+        <h2 class="section-title">2. Income & Expenses</h2>
+        <div class="formgrid">
+          <div class="field"><label>Total Revenue / Sales (AED)</label><input type="number" id="revenue" value="0" min="0" step="0.01" /></div>
+          <div class="field"><label>Cost of Sales / Direct Costs (AED)</label><input type="number" id="cost" value="0" min="0" step="0.01" /></div>
+          <div class="field"><label>Deductible Expenses (AED)</label><input type="number" id="deductible" value="0" min="0" step="0.01" /></div>
+          <div class="field"><label>Non-Deductible Expenses (AED)</label><input type="number" id="nonDeductible" value="0" min="0" step="0.01" /></div>
+          <div class="field"><label>Exempt / Non-Taxable Income (AED)</label><input type="number" id="exemptIncome" value="0" min="0" step="0.01" /></div>
+          <div class="field"><label>Tax Loss Carried Forward (AED)</label><input type="number" id="loss" value="0" min="0" step="0.01" /></div>
+          <div class="field full"><label>Explanation Notes</label><textarea id="notes" placeholder="Example: Expense review done, owner personal expenses excluded, filing documents pending..."></textarea></div>
+        </div>
+      </section>
+
+      <aside class="card">
+        <h2>Estimated Result</h2>
+        <div class="kpis">
+          <div class="kpi"><span>Accounting Profit</span><strong id="accountingProfit">AED 0.00</strong></div>
+          <div class="kpi"><span>Taxable Income</span><strong id="taxableIncome">AED 0.00</strong></div>
+          <div class="kpi tax"><span>Estimated CT</span><strong id="taxDue">AED 0.00</strong></div>
+          <div class="kpi warn"><span>Effective Rate</span><strong id="effectiveRate">0.00%</strong></div>
+        </div>
+        <div class="pillrow">
+          <span class="mini">0% up to AED 375,000</span>
+          <span class="mini">9% above AED 375,000</span>
+          <span class="mini">SBR revenue test: AED 3M</span>
+        </div>
+        <div class="note" id="statusNote">Enter figures to calculate estimated UAE Corporate Tax.</div>
+        <p class="small">This is an internal estimate. Final filing should be reviewed with an accountant/tax advisor, especially for Free Zone income, exempt income, related-party transactions, tax losses, or Small Business Relief.</p>
+      </aside>
+    </div>
+
+    <section class="card" style="margin-top:18px">
+      <h2>Corporate Tax Calculation Summary</h2>
+      <table class="table">
+        <tbody>
+          <tr><th>Item</th><th>Formula</th><th>Amount</th></tr>
+          <tr><td>Total Revenue</td><td>Input</td><td id="rowRevenue">AED 0.00</td></tr>
+          <tr><td>Accounting Profit</td><td>Revenue - Cost - Deductible Expenses - Non-Deductible Expenses</td><td id="rowProfit">AED 0.00</td></tr>
+          <tr><td>Tax Adjustments</td><td>+ Non-Deductible Expenses - Exempt Income - Tax Loss</td><td id="rowAdjustments">AED 0.00</td></tr>
+          <tr><td>Taxable Income</td><td>Accounting Profit + Adjustments</td><td id="rowTaxable">AED 0.00</td></tr>
+          <tr><td>Taxable Amount Above Threshold</td><td>Taxable Income - AED 375,000</td><td id="rowAbove">AED 0.00</td></tr>
+          <tr><td>Estimated Corporate Tax</td><td>9% of amount above AED 375,000</td><td id="rowTax">AED 0.00</td></tr>
+        </tbody>
+      </table>
+    </section>
+  </div>
+
+  <div class="footer-actions no-print">
+    <div class="actions">
+      <button class="btn secondary" onclick="calculateTax()">Calculate</button>
+      <button class="btn primary" onclick="window.print()">Print / Save PDF</button>
+      <button class="btn danger" onclick="resetForm()">Reset</button>
+    </div>
+  </div>
+
+  <script>
+    const AED = new Intl.NumberFormat('en-AE',{style:'currency',currency:'AED'});
+    const THRESHOLD = 375000;
+    const RATE = 0.09;
+    const SBR_REVENUE_LIMIT = 3000000;
+    const ids = ['businessName','trn','fyStart','fyEnd','sbr','entityType','revenue','cost','deductible','nonDeductible','exemptIncome','loss','notes'];
+    function num(id){ return Math.max(0, parseFloat(document.getElementById(id).value || 0)); }
+    function money(v){ return AED.format(Number.isFinite(v)?v:0); }
+    function calculateTax(){
+      const revenue = num('revenue'), cost = num('cost'), deductible = num('deductible'), nonDeductible = num('nonDeductible'), exemptIncome = num('exemptIncome'), loss = num('loss');
+      const accountingProfit = revenue - cost - deductible - nonDeductible;
+      const adjustments = nonDeductible - exemptIncome - loss;
+      let taxableIncome = Math.max(0, accountingProfit + adjustments);
+      let above = Math.max(0, taxableIncome - THRESHOLD);
+      let taxDue = above * RATE;
+      const sbr = document.getElementById('sbr').value === 'yes';
+      if(sbr && revenue <= SBR_REVENUE_LIMIT){ taxableIncome = 0; above = 0; taxDue = 0; }
+      const effectiveRate = taxableIncome > 0 ? (taxDue / taxableIncome) * 100 : 0;
+      document.getElementById('accountingProfit').textContent = money(accountingProfit);
+      document.getElementById('taxableIncome').textContent = money(taxableIncome);
+      document.getElementById('taxDue').textContent = money(taxDue);
+      document.getElementById('effectiveRate').textContent = effectiveRate.toFixed(2) + '%';
+      document.getElementById('rowRevenue').textContent = money(revenue);
+      document.getElementById('rowProfit').textContent = money(accountingProfit);
+      document.getElementById('rowAdjustments').textContent = money(adjustments);
+      document.getElementById('rowTaxable').textContent = money(taxableIncome);
+      document.getElementById('rowAbove').textContent = money(above);
+      document.getElementById('rowTax').textContent = money(taxDue);
+      let note = '';
+      if(sbr && revenue <= SBR_REVENUE_LIMIT){ note = 'Small Business Relief selected: estimated Corporate Tax is AED 0, subject to eligibility and correct election.'; }
+      else if(taxableIncome <= THRESHOLD){ note = 'Taxable income is within the AED 375,000 0% band. Estimated Corporate Tax: AED 0.'; }
+      else { note = 'Taxable income exceeds AED 375,000. Estimated Corporate Tax is calculated at 9% on the excess amount only.'; }
+      if(document.getElementById('entityType').value.includes('Free Zone')) note += ' Free Zone treatment may require separate review for qualifying income conditions.';
+      document.getElementById('statusNote').textContent = note;
+      saveLocal();
+    }
+    function resetForm(){ if(!confirm('Reset all values?')) return; ids.forEach(id=>{ const el=document.getElementById(id); if(el.type==='date') return; if(el.tagName==='SELECT') el.selectedIndex=0; else el.value=''; }); document.getElementById('fyStart').value='2026-01-01'; document.getElementById('fyEnd').value='2026-12-31'; ['revenue','cost','deductible','nonDeductible','exemptIncome','loss'].forEach(id=>document.getElementById(id).value='0'); localStorage.removeItem('uaeCorporateTaxCalc'); calculateTax(); }
+    function saveLocal(){ const data={}; ids.forEach(id=>data[id]=document.getElementById(id).value); localStorage.setItem('uaeCorporateTaxCalc',JSON.stringify(data)); }
+    function loadLocal(){ try{ const data=JSON.parse(localStorage.getItem('uaeCorporateTaxCalc')||'{}'); Object.entries(data).forEach(([k,v])=>{ if(document.getElementById(k)) document.getElementById(k).value=v; }); }catch(e){} calculateTax(); }
+    ids.forEach(id=>document.getElementById(id).addEventListener('input',calculateTax));
+    loadLocal();
+  </script>
+</body>
+</html>
