@@ -1,58 +1,16 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Building2, Calculator, FileText, RotateCcw, Save, Printer, Landmark, BadgeCheck } from 'lucide-react';
 import './styles.css';
+import { money } from './domain/shared/money';
+import { toNumber as number } from './domain/shared/number';
+import { VAT_RULES_2026 } from './domain/vat/rules';
+import { calculateVat } from './domain/vat/calculator';
+import { CORPORATE_TAX_RULES_2026 } from './domain/corporateTax/rules';
+import { calculateCorporateTax } from './domain/corporateTax/calculator';
+import { usePersistentState } from './infrastructure/storage/usePersistentState';
 
 const FTA_LOGO = 'https://eservices.tax.gov.ae/sap/public/bc/ui2/zmcf_fmca_public/user_management/img/FTA_logo_new.png';
-const VAT_RATE = 0.05;
-const CT_THRESHOLD = 375000;
-const CT_RATE = 0.09;
-const SBR_REVENUE_LIMIT = 3000000;
-
-const emirates = {
-  '1a': 'Abu Dhabi - Box 1a',
-  '1b': 'Dubai - Box 1b',
-  '1c': 'Sharjah - Box 1c',
-  '1d': 'Ajman - Box 1d',
-  '1e': 'Umm Al Quwain - Box 1e',
-  '1f': 'Ras Al Khaimah - Box 1f',
-  '1g': 'Fujairah - Box 1g',
-};
-
-function money(value) {
-  return new Intl.NumberFormat('en-AE', { style: 'currency', currency: 'AED' }).format(Number(value || 0));
-}
-
-function number(value) {
-  return Number.parseFloat(value || 0) || 0;
-}
-
-function splitVat(total, mode) {
-  const amount = number(total);
-  if (mode === 'inclusive') {
-    const vat = amount * 5 / 105;
-    return { taxable: amount - vat, vat };
-  }
-  return { taxable: amount, vat: amount * VAT_RATE };
-}
-
-function usePersistentState(key, initialValue) {
-  const [state, setState] = useState(() => {
-    try {
-      const saved = localStorage.getItem(key);
-      return saved ? { ...initialValue, ...JSON.parse(saved) } : initialValue;
-    } catch {
-      return initialValue;
-    }
-  });
-
-  useEffect(() => {
-    localStorage.setItem(key, JSON.stringify(state));
-  }, [key, state]);
-
-  return [state, setState];
-}
-
 function Field({ label, children }) {
   return <label className="field"><span>{label}</span>{children}</label>;
 }
@@ -72,7 +30,7 @@ function App() {
 
   const [vat, setVat] = usePersistentState('uaeTaxSuiteVat', {
     emirate: '1c',
-    mode: 'inclusive',
+    mode: VAT_RULES_2026.defaultMode,
     zeroRated: 0,
     exemptSales: 0,
     salesAdjustmentVat: 0,
@@ -106,45 +64,11 @@ function App() {
       expenses: acc.expenses + number(row.expenses),
     }), { sales: 0, purchases: 0, expenses: 0 });
 
-    const salesSplit = splitVat(totals.sales, vat.mode);
-    const inputSplit = splitVat(totals.purchases + totals.expenses, vat.mode);
-    const outputVat = salesSplit.vat + number(vat.salesAdjustmentVat);
-    const inputVat = inputSplit.vat + number(vat.expenseAdjustmentVat);
-    const netVat = outputVat - inputVat;
-
-    return {
-      ...totals,
-      taxableSales: salesSplit.taxable,
-      taxableInputs: inputSplit.taxable,
-      outputVat,
-      inputVat,
-      netVat,
-      isPayable: netVat >= 0,
-    };
+    return calculateVat(vat, VAT_RULES_2026);
   }, [vat]);
 
   const ctResult = useMemo(() => {
-    const revenue = number(ct.revenue);
-    const accountingProfit = revenue - number(ct.cost) - number(ct.deductible) - number(ct.nonDeductible);
-    const adjustments = number(ct.nonDeductible) - number(ct.exemptIncome) - number(ct.loss);
-    let taxableIncome = Math.max(0, accountingProfit + adjustments);
-    let aboveThreshold = Math.max(0, taxableIncome - CT_THRESHOLD);
-    let taxDue = aboveThreshold * CT_RATE;
-    const sbrApplied = ct.smallBusinessRelief === 'yes' && revenue <= SBR_REVENUE_LIMIT;
-    if (sbrApplied) {
-      taxableIncome = 0;
-      aboveThreshold = 0;
-      taxDue = 0;
-    }
-    return {
-      accountingProfit,
-      adjustments,
-      taxableIncome,
-      aboveThreshold,
-      taxDue,
-      effectiveRate: taxableIncome > 0 ? (taxDue / taxableIncome) * 100 : 0,
-      sbrApplied,
-    };
+    return calculateCorporateTax(ct, CORPORATE_TAX_RULES_2026);
   }, [ct]);
 
   function resetAll() {
@@ -214,7 +138,7 @@ function VatModule({ vat, setVat, result, profile }) {
     setVat({ ...vat, months });
   };
 
-  const rows = Object.entries(emirates).map(([box, label]) => ({
+  const rows = Object.entries(VAT_RULES_2026.emirates).map(([box, label]) => ({
     box,
     label,
     amount: box === vat.emirate ? result.taxableSales : 0,
@@ -240,7 +164,7 @@ function VatModule({ vat, setVat, result, profile }) {
     <section className="card">
       <div className="card-title"><h2>VAT Return Inputs</h2><span className="badge">3-month VAT period</span></div>
       <div className="form-grid three">
-        <Field label="Main Emirate"><select value={vat.emirate} onChange={e => update('emirate', e.target.value)}>{Object.entries(emirates).map(([k,v]) => <option key={k} value={k}>{v}</option>)}</select></Field>
+        <Field label="Main Emirate"><select value={vat.emirate} onChange={e => update('emirate', e.target.value)}>{Object.entries(VAT_RULES_2026.emirates).map(([k,v]) => <option key={k} value={k}>{v}</option>)}</select></Field>
         <Field label="Amount Type"><select value={vat.mode} onChange={e => update('mode', e.target.value)}><option value="inclusive">VAT Inclusive</option><option value="exclusive">VAT Exclusive</option></select></Field>
         <Field label="Sales Adjustment VAT"><input type="number" value={vat.salesAdjustmentVat} onChange={e => update('salesAdjustmentVat', e.target.value)} /></Field>
         <Field label="Zero Rated Sales"><input type="number" value={vat.zeroRated} onChange={e => update('zeroRated', e.target.value)} /></Field>
