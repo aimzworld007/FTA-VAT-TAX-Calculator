@@ -1,94 +1,42 @@
-UAE VAT Return Calculator 🇦🇪
+# UAE Tax Suite
 
-A simple and professional UAE VAT Return Calculator built with pure HTML, CSS, and JavaScript.
+Deploy-ready Vite + React app for UAE VAT Return and UAE Corporate Tax estimation.
 
-Designed for:
+## Features
 
-Supermarkets
-Typing Centers
-Travel Agencies
-Small Businesses
-Service Companies
-Accountants & VAT Filing
+- UAE VAT Return calculator for 3-month VAT periods
+- VAT inclusive / VAT exclusive calculation mode
+- Emirate-wise VAT201-style box mapping
+- UAE Corporate Tax calculator with AED 375,000 threshold
+- Small Business Relief switch with AED 3,000,000 revenue test
+- Shared business profile
+- Browser autosave using localStorage
+- Print / Save PDF support
+- Responsive Material-style UI
 
-This tool helps calculate UAE FTA VAT201 return values automatically by entering monthly:
+## Local Development
 
-Sales
-Purchases
-Expenses
+```bash
+npm install
+npm run dev
+```
 
-for a 3-month VAT quarter.
+## Production Build
 
-Features
+```bash
+npm run build
+```
 
-✅ Quarterly VAT Calculation
-✅ Auto VAT Inclusive → Exclusive conversion
-✅ Auto Output VAT calculation
-✅ Auto Recoverable VAT calculation
-✅ Auto Net VAT Payable calculation
-✅ UAE Emirate Mapping:
+## Deploy to Vercel
 
-Abu Dhabi → Box 1a
-Dubai → Box 1b
-Sharjah → Box 1c
-Ajman → Box 1d
-Umm Al Quwain → Box 1e
-Ras Al Khaimah → Box 1f
-Fujairah → Box 1g
+1. Push this folder to GitHub.
+2. Open Vercel → New Project.
+3. Import the GitHub repository.
+4. Framework preset: Vite.
+5. Build command: `npm run build`.
+6. Output directory: `dist`.
+7. Deploy.
 
-✅ VAT201 Style Layout
-✅ Instant Calculation
-✅ Responsive UI
-✅ No Backend Required
-✅ Offline Supported
+## Disclaimer
 
-How It Works
-Select Emirate
-Enter:
-Monthly Sales
-Monthly Purchases
-Monthly Expenses
-System automatically calculates:
-Taxable Amount
-Output VAT
-Recoverable VAT
-Net VAT Due
-Ready to copy into UAE FTA VAT Return portal
-VAT Logic
-
-Assumes:
-
-5% UAE VAT
-VAT Inclusive values
-Standard Rated Supplies
-Valid UAE Tax Invoices
-
-Formula used:
-
-VAT = Total × 5 / 105
-
-Technologies Used
-HTML5
-CSS3
-Vanilla JavaScript
-
-No frameworks.
-No dependencies.
-
-Use Case
-
-Perfect for businesses that currently calculate VAT manually using Excel or paper and want a lightweight web-based VAT calculator.
-
-Disclaimer
-
-This project is for estimation and assistance purposes only.
-
-Always verify:
-
-UAE FTA regulations
-Valid Tax Invoices
-Exempt / Zero Rated supplies
-Accountant or auditor review before official submission
-License
-
-MIT License
+This app is an internal calculation aid only. Final UAE VAT and Corporate Tax filing should be reviewed with a qualified accountant or tax advisor.
