@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>UAE VAT Return Calculator - 3 Months</title>
+  <style>
+    :root{--bg:#f6f8fb;--card:#fff;--text:#172033;--muted:#667085;--line:#d8deea;--brand:#0f766e;--brand2:#115e59;--danger:#b42318;--ok:#027a48;--blue:#175cd3}
+    *{box-sizing:border-box} body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(--text)}
+    .wrap{max-width:1180px;margin:0 auto;padding:24px}.hero{background:linear-gradient(135deg,var(--brand),#0b3f3a);color:#fff;border-radius:20px;padding:24px;margin-bottom:18px;box-shadow:0 12px 30px rgba(15,118,110,.16)}
+    .hero h1{margin:0 0 8px;font-size:28px}.hero p{margin:0;opacity:.9}.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:16px;box-shadow:0 8px 22px rgba(16,24,40,.06)}
+    h2{font-size:18px;margin:0 0 14px}.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:12px}.field{grid-column:span 3}.field.wide{grid-column:span 4}.field.small{grid-column:span 2}.field.full{grid-column:1/-1}
+    label{display:block;font-size:12px;font-weight:700;color:#344054;margin-bottom:6px} input,select{width:100%;padding:10px 11px;border:1px solid #cbd5e1;border-radius:10px;background:#fff;font-size:14px;color:#111827} input:focus,select:focus{outline:2px solid rgba(15,118,110,.18);border-color:var(--brand)}
+    table{width:100%;border-collapse:collapse;font-size:13px} th,td{border:1px solid var(--line);padding:9px;text-align:right} th:first-child,td:first-child{text-align:left} th{background:#eef4f3;color:#253432}.total-row{font-weight:800;background:#f8fafc}.box{font-weight:800;color:var(--brand2)}
+    .summary{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.kpi{border:1px solid var(--line);border-radius:14px;padding:14px;background:#fbfdff}.kpi span{font-size:12px;color:var(--muted);font-weight:700}.kpi b{display:block;font-size:22px;margin-top:6px}.payable b{color:var(--danger)}.refund b{color:var(--ok)}
+    .actions{display:flex;gap:10px;flex-wrap:wrap}.btn{border:0;border-radius:10px;padding:11px 14px;font-weight:800;cursor:pointer}.primary{background:var(--brand);color:#fff}.secondary{background:#e6f4f1;color:var(--brand2)}.plain{background:#fff;border:1px solid var(--line);color:#172033}
+    .note{font-size:13px;color:#475467;line-height:1.6}.warn{background:#fff7ed;border-color:#fed7aa;color:#9a3412}.hidden{display:none}@media print{body{background:#fff}.actions,.hero .note{display:none}.card,.hero{box-shadow:none}.wrap{max-width:none;padding:0}.hero{color:#111;background:#fff;border:1px solid #ddd}}@media(max-width:800px){.field,.field.wide,.field.small{grid-column:1/-1}.summary{grid-template-columns:1fr} th,td{font-size:12px;padding:7px}.wrap{padding:12px}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="hero">
+      <h1>UAE VAT Return Calculator</h1>
+      <p>Input 3 months sales, purchases, and expenses. The calculator will prepare VAT201 boxes automatically.</p>
+    </section>
+
+    <section class="card">
+      <h2>Settings</h2>
+      <div class="grid">
+        <div class="field wide"><label>Company Name</label><input id="company" value="NAJMAT AL FALAQ SUPERMARKET LLC"></div>
+        <div class="field small"><label>Emirate for Sales Box</label><select id="emirate"><option value="1a">Abu Dhabi - Box 1a</option><option value="1b">Dubai - Box 1b</option><option value="1c" selected>Sharjah - Box 1c</option><option value="1d">Ajman - Box 1d</option><option value="1e">Umm Al Quwain - Box 1e</option><option value="1f">Ras Al Khaimah - Box 1f</option><option value="1g">Fujairah - Box 1g</option></select></div>
+        <div class="field small"><label>Input Amounts Are</label><select id="mode"><option value="inclusive" selected>VAT Inclusive</option><option value="exclusive">VAT Exclusive</option></select></div>
+        <div class="field small"><label>VAT Rate</label><input id="rate" type="number" value="5" step="0.01"></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>3 Months Input</h2>
+      <table>
+        <thead><tr><th>Month</th><th>Sales</th><th>Purchases</th><th>Expenses</th></tr></thead>
+        <tbody id="inputRows">
+          <tr><td><input value="Feb-26"></td><td><input class="sales" type="number" step="0.01" value="153280"></td><td><input class="purchases" type="number" step="0.01" value="112671.67"></td><td><input class="expenses" type="number" step="0.01" value="13975.19"></td></tr>
+          <tr><td><input value="Mar-26"></td><td><input class="sales" type="number" step="0.01" value="169973.87"></td><td><input class="purchases" type="number" step="0.01" value="137318.25"></td><td><input class="expenses" type="number" step="0.01" value="14365"></td></tr>
+          <tr><td><input value="Apr-26"></td><td><input class="sales" type="number" step="0.01" value="150821.21"></td><td><input class="purchases" type="number" step="0.01" value="122288.10"></td><td><input class="expenses" type="number" step="0.01" value="14611.50"></td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="card">
+      <h2>VAT Summary</h2>
+      <div class="summary">
+        <div class="kpi"><span>Total Sales</span><b id="kSales">0.00</b></div>
+        <div class="kpi"><span>Output VAT</span><b id="kOut">0.00</b></div>
+        <div class="kpi"><span>Recoverable VAT</span><b id="kIn">0.00</b></div>
+        <div class="kpi payable" id="payCard"><span>VAT Payable / Refund</span><b id="kNet">0.00</b></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>VAT201 Boxes - Copy These Values</h2>
+      <table id="vatTable"><thead><tr><th>Box</th><th>Description</th><th>Amount AED</th><th>VAT Amount AED</th><th>Adjustment AED</th></tr></thead><tbody></tbody></table>
+    </section>
+
+    <section class="card warn">
+      <h2>Important</h2>
+      <p class="note">Use this as a working calculator only. Claim input VAT only when you have valid UAE tax invoices with supplier TRN and business-related expenses. If some sales are zero-rated/exempt or some expenses are non-recoverable, adjust the values before filing.</p>
+    </section>
+
+    <div class="actions">
+      <button class="btn primary" onclick="window.print()">Print / Save PDF</button>
+      <button class="btn secondary" onclick="downloadCSV()">Download CSV</button>
+      <button class="btn plain" onclick="resetBlank()">Clear Inputs</button>
+    </div>
+  </div>
+<script>
+const emirateNames={"1a":"Standard rated supplies in Abu Dhabi","1b":"Standard rated supplies in Dubai","1c":"Standard rated supplies in Sharjah","1d":"Standard rated supplies in Ajman","1e":"Standard rated supplies in Umm Al Quwain","1f":"Standard rated supplies in Ras Al Khaimah","1g":"Standard rated supplies in Fujairah"};
+const boxes=["1a","1b","1c","1d","1e","1f","1g"];
+function n(v){return Number(v||0)} function money(v){return (Math.round((v+Number.EPSILON)*100)/100).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}
+function calcVAT(total,rate,mode){ if(mode==='exclusive') return {base:total,vat:total*rate/100,gross:total*(1+rate/100)}; const vat=total*rate/(100+rate); return {base:total-vat,vat,gross:total}; }
+function sum(cls){return [...document.querySelectorAll('.'+cls)].reduce((a,e)=>a+n(e.value),0)}
+function calculate(){
+ const rate=n(document.getElementById('rate').value), mode=document.getElementById('mode').value, selected=document.getElementById('emirate').value;
+ const sales=sum('sales'), purchases=sum('purchases'), expenses=sum('expenses'), inputs=purchases+expenses;
+ const out=calcVAT(sales,rate,mode), inp=calcVAT(inputs,rate,mode), net=out.vat-inp.vat;
+ document.getElementById('kSales').textContent=money(sales); document.getElementById('kOut').textContent=money(out.vat); document.getElementById('kIn').textContent=money(inp.vat); document.getElementById('kNet').textContent=money(Math.abs(net))+(net>=0?' Payable':' Refund');
+ document.getElementById('payCard').className='kpi '+(net>=0?'payable':'refund');
+ const rows=[];
+ boxes.forEach(b=>rows.push({box:b,desc:emirateNames[b],amount:b===selected?out.base:0,vat:b===selected?out.vat:0,adj:0}));
+ rows.push({box:'2',desc:'Tax refunds provided to tourists',amount:0,vat:0,adj:0});
+ rows.push({box:'3',desc:'Supplies subject to reverse charge provisions',amount:0,vat:0,adj:0});
+ rows.push({box:'4',desc:'Zero rated supplies',amount:0,vat:0,adj:''});
+ rows.push({box:'5',desc:'Exempt supplies',amount:0,vat:'',adj:''});
+ rows.push({box:'6',desc:'Goods imported into the UAE',amount:0,vat:0,adj:''});
+ rows.push({box:'7',desc:'Adjustments to goods imported into the UAE',amount:0,vat:0,adj:''});
+ rows.push({box:'8',desc:'Totals - Output VAT',amount:out.base,vat:out.vat,adj:0,total:true});
+ rows.push({box:'9',desc:'Standard rated expenses',amount:inp.base,vat:inp.vat,adj:0});
+ rows.push({box:'10',desc:'Supplies subject to reverse charge provisions',amount:0,vat:0,adj:0});
+ rows.push({box:'11',desc:'Totals - Input VAT',amount:inp.base,vat:inp.vat,adj:0,total:true});
+ rows.push({box:'12',desc:'Total value of due tax for the period',amount:out.vat,vat:'',adj:'',total:true});
+ rows.push({box:'13',desc:'Total value of recoverable tax for the period',amount:inp.vat,vat:'',adj:'',total:true});
+ rows.push({box:'14',desc:'Payable tax for the period',amount:net,vat:'',adj:'',total:true});
+ const tbody=document.querySelector('#vatTable tbody'); tbody.innerHTML='';
+ rows.forEach(r=>{const tr=document.createElement('tr'); if(r.total) tr.className='total-row'; tr.innerHTML=`<td class="box">${r.box}</td><td>${r.desc}</td><td>${r.amount===''?'':money(r.amount)}</td><td>${r.vat===''?'':money(r.vat)}</td><td>${r.adj===''?'':money(r.adj)}</td>`; tbody.appendChild(tr);});
+ window.currentRows=rows;
+}
+function downloadCSV(){calculate(); let csv='Box,Description,Amount AED,VAT Amount AED,Adjustment AED\n'; window.currentRows.forEach(r=>csv+=`"${r.box}","${r.desc}","${r.amount===''?'':money(r.amount)}","${r.vat===''?'':money(r.vat)}","${r.adj===''?'':money(r.adj)}"\n`); const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'})); a.download='uae-vat-return-boxes.csv'; a.click();}
+function resetBlank(){document.querySelectorAll('#inputRows input[type=number]').forEach(e=>e.value=''); calculate();}
+document.addEventListener('input',calculate); document.addEventListener('change',calculate); calculate();
+</script>
+</body>
+</html>
