@@ -1,0 +1,1222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UAE VAT Return Calculator Pro</title>
+  <style>
+    :root {
+      --primary: #1565c0;
+      --primary-dark: #0d47a1;
+      --primary-soft: #e3f2fd;
+      --success: #15803d;
+      --warning: #b45309;
+      --danger: #b91c1c;
+      --bg: #f4f7fb;
+      --surface: #ffffff;
+      --surface-soft: #f8fafc;
+      --border: #e2e8f0;
+      --text: #0f172a;
+      --muted: #64748b;
+      --shadow: 0 18px 45px rgba(15, 23, 42, 0.08);
+      --radius: 18px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Inter, Roboto, Arial, sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(21, 101, 192, 0.14), transparent 32%),
+        linear-gradient(180deg, #f8fbff 0%, var(--bg) 100%);
+      color: var(--text);
+    }
+
+    .app-shell {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 28px 18px 48px;
+    }
+
+    .hero {
+      background: linear-gradient(135deg, #0d47a1, #1565c0 55%, #1e88e5);
+      color: white;
+      border-radius: 26px;
+      padding: 30px;
+      box-shadow: var(--shadow);
+      display: grid;
+      grid-template-columns: 1.5fr 1fr;
+      gap: 22px;
+      align-items: center;
+      margin-bottom: 22px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.16);
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 14px;
+    }
+
+    .hero h1 {
+      margin: 0 0 10px;
+      font-size: clamp(28px, 4vw, 46px);
+      line-height: 1.05;
+      letter-spacing: -1.1px;
+    }
+
+    .hero p {
+      margin: 0;
+      color: rgba(255,255,255,.86);
+      font-size: 16px;
+      line-height: 1.6;
+      max-width: 780px;
+    }
+
+    .hero-card {
+      background: rgba(255,255,255,.13);
+      border: 1px solid rgba(255,255,255,.22);
+      border-radius: 20px;
+      padding: 18px;
+      backdrop-filter: blur(10px);
+    }
+
+    .hero-card strong {
+      display: block;
+      font-size: 28px;
+      margin-top: 8px;
+    }
+
+    .grid {
+      display: grid;
+      gap: 18px;
+    }
+
+    .grid.two {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .grid.three {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .grid.four {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow);
+    }
+
+    .card-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .card-title h2 {
+      margin: 0;
+      font-size: 18px;
+      letter-spacing: -.25px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 6px 10px;
+      background: var(--primary-soft);
+      color: var(--primary-dark);
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    label {
+      display: block;
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      margin-bottom: 7px;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      border: 1px solid var(--border);
+      background: white;
+      border-radius: 13px;
+      padding: 12px 13px;
+      font-size: 15px;
+      color: var(--text);
+      outline: none;
+      transition: .18s ease;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(21, 101, 192, .12);
+    }
+
+    textarea {
+      min-height: 95px;
+      resize: vertical;
+    }
+
+    .field {
+      margin-bottom: 14px;
+    }
+
+    .month-row {
+      display: grid;
+      grid-template-columns: 1.1fr repeat(3, 1fr);
+      gap: 12px;
+      align-items: end;
+      padding: 14px;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: var(--surface-soft);
+      margin-bottom: 12px;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 13px;
+      padding: 12px 16px;
+      font-size: 14px;
+      font-weight: 850;
+      cursor: pointer;
+      transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+      box-shadow: 0 10px 22px rgba(21, 101, 192, .22);
+    }
+
+    .btn-secondary {
+      background: #e2e8f0;
+      color: #0f172a;
+    }
+
+    .btn-light {
+      background: #fff;
+      color: var(--primary-dark);
+      border: 1px solid rgba(255,255,255,.45);
+    }
+
+    .kpi {
+      padding: 18px;
+      border-radius: 18px;
+      background: linear-gradient(180deg, #ffffff, #f8fafc);
+      border: 1px solid var(--border);
+      min-height: 112px;
+    }
+
+    .kpi span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 850;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      margin-bottom: 9px;
+    }
+
+    .kpi strong {
+      display: block;
+      font-size: clamp(23px, 2.6vw, 31px);
+      letter-spacing: -.8px;
+    }
+
+    .kpi small {
+      display: block;
+      margin-top: 8px;
+      color: var(--muted);
+      line-height: 1.35;
+    }
+
+    .kpi.payable {
+      border-color: rgba(185, 28, 28, .22);
+      background: linear-gradient(180deg, #fff, #fff7f7);
+    }
+
+    .kpi.refund {
+      border-color: rgba(21, 128, 61, .22);
+      background: linear-gradient(180deg, #fff, #f1fff7);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      overflow: hidden;
+      border-radius: 16px;
+      font-size: 14px;
+    }
+
+    th {
+      background: #eff6ff;
+      color: #0d47a1;
+      text-align: left;
+      padding: 13px 12px;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+    }
+
+    td {
+      padding: 13px 12px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+
+    tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .amount {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+      font-weight: 750;
+    }
+
+    .muted {
+      color: var(--muted);
+    }
+
+    .info-list {
+      display: grid;
+      gap: 11px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .info-list li {
+      padding: 12px 13px;
+      background: var(--surface-soft);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      line-height: 1.45;
+    }
+
+    .screen-help {
+      margin-top: 18px;
+    }
+
+    .print-report {
+      display: none;
+    }
+
+
+    .hero-main {
+      display: flex;
+      align-items: flex-start;
+      gap: 18px;
+    }
+
+    .fta-logo-screen {
+      width: 86px;
+      height: auto;
+      object-fit: contain;
+      background: white;
+      padding: 10px;
+      border-radius: 18px;
+      box-shadow: 0 10px 26px rgba(15, 23, 42, 0.16);
+      flex-shrink: 0;
+    }
+
+    .fta-logo-print {
+      width: 96px;
+      height: auto;
+      object-fit: contain;
+      flex-shrink: 0;
+    }
+
+    .bottom-action-bar {
+      position: fixed;
+      left: 50%;
+      bottom: 18px;
+      transform: translateX(-50%);
+      z-index: 999;
+      width: min(920px, calc(100% - 28px));
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 12px;
+      border: 1px solid rgba(226, 232, 240, .88);
+      border-radius: 22px;
+      background: rgba(255, 255, 255, .92);
+      backdrop-filter: blur(16px);
+      box-shadow: 0 20px 50px rgba(15, 23, 42, .16);
+    }
+
+    .bottom-action-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 180px;
+    }
+
+    .bottom-action-info strong {
+      font-size: 14px;
+      color: var(--text);
+    }
+
+    .bottom-action-info span {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .bottom-action-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+
+    .btn-danger {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .app-shell {
+      padding-bottom: 118px;
+    }
+
+    @media (max-width: 760px) {
+      .hero-main {
+        flex-direction: column;
+      }
+
+      .bottom-action-bar {
+        align-items: stretch;
+        flex-direction: column;
+        bottom: 10px;
+      }
+
+      .bottom-action-buttons {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .bottom-action-buttons button {
+        width: 100%;
+      }
+    }
+
+    .signature-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin-top: 18px;
+    }
+
+    .signature-box {
+      border: 1px solid #cbd5e1;
+      min-height: 82px;
+      padding: 12px;
+      border-radius: 10px;
+    }
+
+    .footer-note {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.5;
+      margin-top: 16px;
+    }
+
+    @media (max-width: 900px) {
+      .hero, .grid.two, .grid.three, .grid.four {
+        grid-template-columns: 1fr;
+      }
+
+      .month-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media print {
+      @page {
+        size: A4;
+        margin: 12mm;
+      }
+
+      * {
+        box-shadow: none !important;
+      }
+
+      body {
+        background: white !important;
+        color: black;
+        font-size: 11px;
+      }
+
+      .app-shell {
+        max-width: none;
+        padding: 0;
+      }
+
+      .screen-ui,
+      .screen-help,
+      .actions,
+      .bottom-action-bar,
+      button,
+      .hide-in-pdf {
+        display: none !important;
+      }
+
+      .print-report {
+        display: block !important;
+      }
+
+      .print-card {
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        padding: 12px;
+        margin-bottom: 10px;
+        break-inside: avoid;
+      }
+
+      .print-header {
+        display: flex;
+        justify-content: space-between;
+        gap: 20px;
+        border-bottom: 2px solid #0f172a;
+        padding-bottom: 10px;
+        margin-bottom: 12px;
+      }
+
+      .print-header h1 {
+        margin: 0 0 5px;
+        font-size: 21px;
+      }
+
+      .print-header p {
+        margin: 0;
+        color: #475569;
+      }
+
+      h2 {
+        font-size: 14px;
+        margin: 0 0 8px;
+      }
+
+      table {
+        font-size: 10.5px;
+        border: 1px solid #cbd5e1;
+      }
+
+      th {
+        background: #e5e7eb !important;
+        color: #111827 !important;
+        padding: 7px;
+      }
+
+      td {
+        padding: 7px;
+      }
+
+      .grid.three,
+      .grid.four {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+      }
+
+      .kpi {
+        border: 1px solid #cbd5e1;
+        padding: 10px;
+        min-height: auto;
+      }
+
+      .kpi strong {
+        font-size: 18px;
+      }
+
+  
+    .hero-main {
+      display: flex;
+      align-items: flex-start;
+      gap: 18px;
+    }
+
+    .fta-logo-screen {
+      width: 86px;
+      height: auto;
+      object-fit: contain;
+      background: white;
+      padding: 10px;
+      border-radius: 18px;
+      box-shadow: 0 10px 26px rgba(15, 23, 42, 0.16);
+      flex-shrink: 0;
+    }
+
+    .fta-logo-print {
+      width: 96px;
+      height: auto;
+      object-fit: contain;
+      flex-shrink: 0;
+    }
+
+    .bottom-action-bar {
+      position: fixed;
+      left: 50%;
+      bottom: 18px;
+      transform: translateX(-50%);
+      z-index: 999;
+      width: min(920px, calc(100% - 28px));
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 12px;
+      border: 1px solid rgba(226, 232, 240, .88);
+      border-radius: 22px;
+      background: rgba(255, 255, 255, .92);
+      backdrop-filter: blur(16px);
+      box-shadow: 0 20px 50px rgba(15, 23, 42, .16);
+    }
+
+    .bottom-action-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 180px;
+    }
+
+    .bottom-action-info strong {
+      font-size: 14px;
+      color: var(--text);
+    }
+
+    .bottom-action-info span {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .bottom-action-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+
+    .btn-danger {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .app-shell {
+      padding-bottom: 118px;
+    }
+
+    @media (max-width: 760px) {
+      .hero-main {
+        flex-direction: column;
+      }
+
+      .bottom-action-bar {
+        align-items: stretch;
+        flex-direction: column;
+        bottom: 10px;
+      }
+
+      .bottom-action-buttons {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .bottom-action-buttons button {
+        width: 100%;
+      }
+    }
+
+    .signature-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+
+    <section class="hero screen-ui">
+      <div class="hero-main">
+        <img class="fta-logo-screen" src="https://eservices.tax.gov.ae/sap/public/bc/ui2/zmcf_fmca_public/user_management/img/FTA_logo_new.png" alt="Federal Tax Authority UAE Logo" />
+        <div>
+          <div class="eyebrow">🇦🇪 UAE VAT201 Filing Assistant Pro</div>
+          <h1>Premium UAE VAT Return Calculator</h1>
+          <p>Enter 3 months of sales, purchases, and expenses. The calculator prepares VAT201-style values, emirate box mapping, recoverable VAT, net payable/refund, and a clean accountant-ready PDF report.</p>
+        </div>
+      </div>
+      <div class="hero-card">
+        <span>Estimated Net VAT</span>
+        <strong id="heroNetVat">AED 0.00</strong>
+        <p id="heroStatus">Complete the form to calculate payable or refundable VAT.</p>
+      </div>
+    </section>
+
+    <main class="screen-ui grid two">
+      <section class="card">
+        <div class="card-title">
+          <h2>1. Company & VAT Period</h2>
+          <span class="badge">Business Info</span>
+        </div>
+
+        <div class="grid two">
+          <div class="field">
+            <label>Company Name</label>
+            <input id="companyName" placeholder="Example: Najmat Al Falaq Supermarket LLC" />
+          </div>
+          <div class="field">
+            <label>TRN</label>
+            <input id="trn" placeholder="1000XXXXXXXXXXX" />
+          </div>
+          <div class="field">
+            <label>VAT Period</label>
+            <input id="vatPeriod" placeholder="Example: Feb 2026 - Apr 2026" />
+          </div>
+          <div class="field">
+            <label>Prepared By</label>
+            <input id="preparedBy" placeholder="Name / Accountant" />
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Main Emirate for Standard Rated Sales</label>
+          <select id="emirate">
+            <option value="1a">Abu Dhabi - Box 1a</option>
+            <option value="1b">Dubai - Box 1b</option>
+            <option value="1c" selected>Sharjah - Box 1c</option>
+            <option value="1d">Ajman - Box 1d</option>
+            <option value="1e">Umm Al Quwain - Box 1e</option>
+            <option value="1f">Ras Al Khaimah - Box 1f</option>
+            <option value="1g">Fujairah - Box 1g</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Amount Type</label>
+          <select id="vatMode">
+            <option value="inclusive" selected>VAT Inclusive - totals already include 5% VAT</option>
+            <option value="exclusive">VAT Exclusive - VAT will be added separately</option>
+          </select>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-title">
+          <h2>2. Optional Adjustments</h2>
+          <span class="badge">Advanced</span>
+        </div>
+
+        <div class="grid two">
+          <div class="field">
+            <label>Zero Rated Sales</label>
+            <input id="zeroRated" type="number" step="0.01" value="0" />
+          </div>
+          <div class="field">
+            <label>Exempt Sales</label>
+            <input id="exemptSales" type="number" step="0.01" value="0" />
+          </div>
+          <div class="field">
+            <label>Sales Adjustment VAT</label>
+            <input id="salesAdjustmentVat" type="number" step="0.01" value="0" />
+          </div>
+          <div class="field">
+            <label>Expense Adjustment VAT</label>
+            <input id="expenseAdjustmentVat" type="number" step="0.01" value="0" />
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Internal Notes</label>
+          <textarea id="internalNotes" placeholder="Example: POS sales checked, purchase invoices verified, accountant to review before filing."></textarea>
+        </div>
+      </section>
+    </main>
+
+    <section class="card screen-ui" style="margin-top:18px;">
+      <div class="card-title">
+        <h2>3. Three-Month Quarter Input</h2>
+        <span class="badge">Monthly Entries</span>
+      </div>
+
+      <div id="monthInputs"></div>
+    </section>
+
+    <section class="screen-ui grid four" style="margin-top:18px;">
+      <div class="kpi">
+        <span>Taxable Sales</span>
+        <strong id="kpiTaxableSales">AED 0.00</strong>
+        <small>Standard rated sales excluding VAT.</small>
+      </div>
+      <div class="kpi">
+        <span>Output VAT</span>
+        <strong id="kpiOutputVat">AED 0.00</strong>
+        <small>VAT due on standard rated sales.</small>
+      </div>
+      <div class="kpi">
+        <span>Recoverable VAT</span>
+        <strong id="kpiInputVat">AED 0.00</strong>
+        <small>Input VAT from valid business invoices.</small>
+      </div>
+      <div class="kpi payable" id="netKpi">
+        <span>Net VAT</span>
+        <strong id="kpiNetVat">AED 0.00</strong>
+        <small id="netVatLabel">Payable or refundable result.</small>
+      </div>
+    </section>
+
+    <section class="card screen-ui" style="margin-top:18px;">
+      <div class="card-title">
+        <h2>4. VAT201 Box Summary</h2>
+        <span class="badge">Copy to FTA Portal</span>
+      </div>
+      <div style="overflow:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>Box</th>
+              <th>Description</th>
+              <th class="amount">Amount AED</th>
+              <th class="amount">VAT AED</th>
+              <th class="amount">Adjustment AED</th>
+            </tr>
+          </thead>
+          <tbody id="vatBoxRows"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="card screen-ui hide-in-pdf screen-help">
+      <div class="card-title">
+        <h2>5. VAT Guidance Notes</h2>
+        <span class="badge">Screen Only</span>
+      </div>
+      <ul class="info-list">
+        <li><strong>VAT Inclusive:</strong> Total already includes VAT. Example AED 105 = AED 100 value + AED 5 VAT. Formula: VAT = Total × 5 / 105.</li>
+        <li><strong>VAT Exclusive:</strong> VAT is not included yet. Example AED 100 + 5% VAT = AED 105 total.</li>
+        <li><strong>Recoverable VAT:</strong> Claim only business expenses with valid UAE tax invoices and supplier TRN.</li>
+        <li><strong>Non-claimable expenses:</strong> Do not claim VAT on personal, entertainment, or non-business expenses.</li>
+        <li><strong>Supermarket note:</strong> If you have zero-rated/exempt items, separate them before filing.</li>
+      </ul>
+    </section>
+
+    <section class="card screen-ui hide-in-pdf screen-help">
+      <div class="card-title">
+        <h2>6. Filing Checklist</h2>
+        <span class="badge">Screen Only</span>
+      </div>
+      <ul class="info-list">
+        <li>Sales report reconciled with POS and bank/cash collections.</li>
+        <li>Purchase and expense invoices checked with TRN and tax invoice format.</li>
+        <li>Zero-rated, exempt, and standard-rated sales separated correctly.</li>
+        <li>Adjustments documented before final submission.</li>
+        <li>Final values reviewed by accountant/auditor before filing.</li>
+      </ul>
+    </section>
+
+    <div class="bottom-action-bar screen-ui">
+      <div class="bottom-action-info">
+        <strong>VAT Return Actions</strong>
+        <span>Calculate, save draft, print PDF, or reset entries</span>
+      </div>
+      <div class="bottom-action-buttons">
+        <button class="btn-primary" onclick="calculateVAT()">Calculate</button>
+        <button class="btn-secondary" onclick="window.print()">Print / Save PDF</button>
+        <button class="btn-secondary" onclick="saveDraft()">Save Draft</button>
+        <button class="btn-danger" onclick="resetForm()">Reset</button>
+      </div>
+    </div>
+
+    <section class="print-report" id="printReport">
+      <div class="print-header">
+        <div style="display:flex;align-items:center;gap:16px;">
+          <img class="fta-logo-print" src="https://eservices.tax.gov.ae/sap/public/bc/ui2/zmcf_fmca_public/user_management/img/FTA_logo_new.png" alt="Federal Tax Authority UAE Logo" />
+          <div>
+            <h1>UAE VAT201 Return Summary</h1>
+            <p>Prepared from UAE VAT Return Calculator Pro</p>
+          </div>
+        </div>
+        <div style="text-align:right;">
+          <strong id="pCompany">Company Name</strong><br />
+          <span id="pTrn">TRN: -</span><br />
+          <span id="pPeriod">VAT Period: -</span>
+        </div>
+      </div>
+
+      <div class="print-card">
+        <h2>Company Information</h2>
+        <table>
+          <tbody>
+            <tr><td>Company Name</td><td id="pCompany2"></td><td>TRN</td><td id="pTrn2"></td></tr>
+            <tr><td>VAT Period</td><td id="pPeriod2"></td><td>Prepared By</td><td id="pPreparedBy"></td></tr>
+            <tr><td>Prepared Date</td><td id="pDate"></td><td>VAT Mode</td><td id="pVatMode"></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="print-card">
+        <h2>VAT Summary</h2>
+        <div class="grid three">
+          <div class="kpi"><span>Taxable Sales</span><strong id="pTaxableSales">AED 0.00</strong></div>
+          <div class="kpi"><span>Output VAT</span><strong id="pOutputVat">AED 0.00</strong></div>
+          <div class="kpi"><span>Recoverable VAT</span><strong id="pInputVat">AED 0.00</strong></div>
+        </div>
+        <div class="grid three" style="margin-top:8px;">
+          <div class="kpi"><span>Zero Rated</span><strong id="pZeroRated">AED 0.00</strong></div>
+          <div class="kpi"><span>Exempt</span><strong id="pExemptSales">AED 0.00</strong></div>
+          <div class="kpi"><span>Net VAT</span><strong id="pNetVat">AED 0.00</strong></div>
+        </div>
+      </div>
+
+      <div class="print-card">
+        <h2>VAT201 Box Summary</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Box</th>
+              <th>Description</th>
+              <th class="amount">Amount AED</th>
+              <th class="amount">VAT AED</th>
+              <th class="amount">Adjustment AED</th>
+            </tr>
+          </thead>
+          <tbody id="printVatBoxRows"></tbody>
+        </table>
+      </div>
+
+      <div class="print-card">
+        <h2>Monthly Input Summary</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Month</th>
+              <th class="amount">Sales</th>
+              <th class="amount">Purchases</th>
+              <th class="amount">Expenses</th>
+            </tr>
+          </thead>
+          <tbody id="printMonthRows"></tbody>
+        </table>
+      </div>
+
+      <div class="print-card">
+        <h2>Declaration / Signature</h2>
+        <div class="signature-grid">
+          <div class="signature-box">Prepared By<br><br><br>Signature:</div>
+          <div class="signature-box">Reviewed By<br><br><br>Signature:</div>
+          <div class="signature-box">Submission Date<br><br><br>Date:</div>
+        </div>
+        <p class="footer-note">This report is a calculation aid only. Verify UAE FTA rules, invoice eligibility, exempt/zero-rated supplies, and accounting records before official VAT submission.</p>
+      </div>
+    </section>
+  </div>
+
+<script>
+  const emirates = {
+    "1a": "Abu Dhabi - Standard rated supplies",
+    "1b": "Dubai - Standard rated supplies",
+    "1c": "Sharjah - Standard rated supplies",
+    "1d": "Ajman - Standard rated supplies",
+    "1e": "Umm Al Quwain - Standard rated supplies",
+    "1f": "Ras Al Khaimah - Standard rated supplies",
+    "1g": "Fujairah - Standard rated supplies"
+  };
+
+  const monthInputs = document.getElementById("monthInputs");
+
+  function initMonths() {
+    monthInputs.innerHTML = "";
+    for (let i = 1; i <= 3; i++) {
+      monthInputs.innerHTML += `
+        <div class="month-row">
+          <div class="field">
+            <label>Month ${i}</label>
+            <input id="month${i}" placeholder="Example: Feb 2026" />
+          </div>
+          <div class="field">
+            <label>Sales</label>
+            <input id="sales${i}" type="number" step="0.01" value="0" oninput="calculateVAT()" />
+          </div>
+          <div class="field">
+            <label>Purchases</label>
+            <input id="purchases${i}" type="number" step="0.01" value="0" oninput="calculateVAT()" />
+          </div>
+          <div class="field">
+            <label>Expenses</label>
+            <input id="expenses${i}" type="number" step="0.01" value="0" oninput="calculateVAT()" />
+          </div>
+        </div>
+      `;
+    }
+  }
+
+  function n(id) {
+    return parseFloat(document.getElementById(id)?.value || 0) || 0;
+  }
+
+  function text(id) {
+    return document.getElementById(id)?.value || "";
+  }
+
+  function money(value) {
+    const v = Number(value || 0);
+    return "AED " + v.toLocaleString("en-AE", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  function amount(value) {
+    const v = Number(value || 0);
+    return v.toLocaleString("en-AE", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  function splitVAT(total, mode) {
+    if (mode === "inclusive") {
+      const vat = total * 5 / 105;
+      const taxable = total - vat;
+      return { taxable, vat };
+    }
+    const taxable = total;
+    const vat = total * 0.05;
+    return { taxable, vat };
+  }
+
+  function getResults() {
+    let totalSales = 0, totalPurchases = 0, totalExpenses = 0;
+    let months = [];
+
+    for (let i = 1; i <= 3; i++) {
+      const row = {
+        month: text("month" + i) || `Month ${i}`,
+        sales: n("sales" + i),
+        purchases: n("purchases" + i),
+        expenses: n("expenses" + i)
+      };
+      months.push(row);
+      totalSales += row.sales;
+      totalPurchases += row.purchases;
+      totalExpenses += row.expenses;
+    }
+
+    const mode = document.getElementById("vatMode").value;
+    const sales = splitVAT(totalSales, mode);
+    const inputs = splitVAT(totalPurchases + totalExpenses, mode);
+
+    const zeroRated = n("zeroRated");
+    const exemptSales = n("exemptSales");
+    const salesAdjustmentVat = n("salesAdjustmentVat");
+    const expenseAdjustmentVat = n("expenseAdjustmentVat");
+
+    const outputVat = sales.vat + salesAdjustmentVat;
+    const inputVat = inputs.vat + expenseAdjustmentVat;
+    const netVat = outputVat - inputVat;
+
+    return {
+      mode,
+      totalSales,
+      totalPurchases,
+      totalExpenses,
+      taxableSales: sales.taxable,
+      outputVat,
+      taxableInputs: inputs.taxable,
+      inputVat,
+      netVat,
+      zeroRated,
+      exemptSales,
+      salesAdjustmentVat,
+      expenseAdjustmentVat,
+      months
+    };
+  }
+
+  function buildRows(r) {
+    const selectedBox = document.getElementById("emirate").value;
+    const rows = [];
+
+    Object.keys(emirates).forEach(box => {
+      rows.push({
+        box,
+        description: emirates[box],
+        amount: box === selectedBox ? r.taxableSales : 0,
+        vat: box === selectedBox ? r.outputVat : 0,
+        adjustment: box === selectedBox ? r.salesAdjustmentVat : 0
+      });
+    });
+
+    rows.push({ box: "2", description: "Tax refunds provided to tourists", amount: 0, vat: 0, adjustment: 0 });
+    rows.push({ box: "3", description: "Supplies subject to reverse charge provisions", amount: 0, vat: 0, adjustment: 0 });
+    rows.push({ box: "4", description: "Zero rated supplies", amount: r.zeroRated, vat: 0, adjustment: 0 });
+    rows.push({ box: "5", description: "Exempt supplies", amount: r.exemptSales, vat: 0, adjustment: 0 });
+    rows.push({ box: "6", description: "Goods imported into UAE", amount: 0, vat: 0, adjustment: 0 });
+    rows.push({ box: "7", description: "Adjustments to goods imported into UAE", amount: 0, vat: 0, adjustment: 0 });
+    rows.push({ box: "8", description: "Total output tax due", amount: r.taxableSales + r.zeroRated + r.exemptSales, vat: r.outputVat, adjustment: r.salesAdjustmentVat });
+    rows.push({ box: "9", description: "Standard rated expenses", amount: r.taxableInputs, vat: r.inputVat, adjustment: r.expenseAdjustmentVat });
+    rows.push({ box: "10", description: "Supplies subject to reverse charge provisions", amount: 0, vat: 0, adjustment: 0 });
+    rows.push({ box: "11", description: "Total recoverable tax", amount: r.taxableInputs, vat: r.inputVat, adjustment: r.expenseAdjustmentVat });
+    rows.push({ box: "12", description: "Total tax due", amount: 0, vat: r.outputVat, adjustment: 0 });
+    rows.push({ box: "13", description: "Total recoverable tax", amount: 0, vat: r.inputVat, adjustment: 0 });
+    rows.push({ box: "14", description: r.netVat >= 0 ? "Payable tax for the period" : "Refundable tax for the period", amount: 0, vat: r.netVat, adjustment: 0 });
+
+    return rows;
+  }
+
+  function renderRows(targetId, rows) {
+    const tbody = document.getElementById(targetId);
+    tbody.innerHTML = rows.map(row => `
+      <tr>
+        <td><strong>${row.box}</strong></td>
+        <td>${row.description}</td>
+        <td class="amount">${amount(row.amount)}</td>
+        <td class="amount">${amount(row.vat)}</td>
+        <td class="amount">${amount(row.adjustment)}</td>
+      </tr>
+    `).join("");
+  }
+
+  function calculateVAT() {
+    const r = getResults();
+    const rows = buildRows(r);
+
+    document.getElementById("kpiTaxableSales").textContent = money(r.taxableSales);
+    document.getElementById("kpiOutputVat").textContent = money(r.outputVat);
+    document.getElementById("kpiInputVat").textContent = money(r.inputVat);
+    document.getElementById("kpiNetVat").textContent = money(Math.abs(r.netVat));
+    document.getElementById("heroNetVat").textContent = money(Math.abs(r.netVat));
+
+    const isPayable = r.netVat >= 0;
+    document.getElementById("heroStatus").textContent = isPayable ? "Estimated VAT payable to FTA." : "Estimated VAT refundable / credit position.";
+    document.getElementById("netVatLabel").textContent = isPayable ? "Estimated VAT payable to FTA." : "Estimated VAT refundable / credit position.";
+
+    const netKpi = document.getElementById("netKpi");
+    netKpi.className = "kpi " + (isPayable ? "payable" : "refund");
+
+    renderRows("vatBoxRows", rows);
+    renderRows("printVatBoxRows", rows);
+
+    document.getElementById("pCompany").textContent = text("companyName") || "Company Name";
+    document.getElementById("pCompany2").textContent = text("companyName") || "-";
+    document.getElementById("pTrn").textContent = "TRN: " + (text("trn") || "-");
+    document.getElementById("pTrn2").textContent = text("trn") || "-";
+    document.getElementById("pPeriod").textContent = "VAT Period: " + (text("vatPeriod") || "-");
+    document.getElementById("pPeriod2").textContent = text("vatPeriod") || "-";
+    document.getElementById("pPreparedBy").textContent = text("preparedBy") || "-";
+    document.getElementById("pDate").textContent = new Date().toLocaleDateString("en-AE");
+    document.getElementById("pVatMode").textContent = r.mode === "inclusive" ? "VAT Inclusive" : "VAT Exclusive";
+
+    document.getElementById("pTaxableSales").textContent = money(r.taxableSales);
+    document.getElementById("pOutputVat").textContent = money(r.outputVat);
+    document.getElementById("pInputVat").textContent = money(r.inputVat);
+    document.getElementById("pZeroRated").textContent = money(r.zeroRated);
+    document.getElementById("pExemptSales").textContent = money(r.exemptSales);
+    document.getElementById("pNetVat").textContent = (r.netVat >= 0 ? "Payable " : "Refund ") + money(Math.abs(r.netVat));
+
+    document.getElementById("printMonthRows").innerHTML = r.months.map(m => `
+      <tr>
+        <td>${m.month}</td>
+        <td class="amount">${amount(m.sales)}</td>
+        <td class="amount">${amount(m.purchases)}</td>
+        <td class="amount">${amount(m.expenses)}</td>
+      </tr>
+    `).join("");
+
+    saveAutoDraft();
+  }
+
+  function collectForm() {
+    const data = {
+      companyName: text("companyName"),
+      trn: text("trn"),
+      vatPeriod: text("vatPeriod"),
+      preparedBy: text("preparedBy"),
+      emirate: document.getElementById("emirate").value,
+      vatMode: document.getElementById("vatMode").value,
+      zeroRated: text("zeroRated"),
+      exemptSales: text("exemptSales"),
+      salesAdjustmentVat: text("salesAdjustmentVat"),
+      expenseAdjustmentVat: text("expenseAdjustmentVat"),
+      internalNotes: text("internalNotes")
+    };
+    for (let i = 1; i <= 3; i++) {
+      data["month" + i] = text("month" + i);
+      data["sales" + i] = text("sales" + i);
+      data["purchases" + i] = text("purchases" + i);
+      data["expenses" + i] = text("expenses" + i);
+    }
+    return data;
+  }
+
+  function applyForm(data) {
+    if (!data) return;
+    Object.keys(data).forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = data[id];
+    });
+    calculateVAT();
+  }
+
+  function saveAutoDraft() {
+    localStorage.setItem("uaeVatCalculatorAutoDraft", JSON.stringify(collectForm()));
+  }
+
+  function saveDraft() {
+    localStorage.setItem("uaeVatCalculatorSavedDraft", JSON.stringify(collectForm()));
+    alert("Draft saved in this browser.");
+  }
+
+  function resetForm() {
+    if (!confirm("Reset all entries?")) return;
+    localStorage.removeItem("uaeVatCalculatorAutoDraft");
+    localStorage.removeItem("uaeVatCalculatorSavedDraft");
+    document.querySelectorAll("input, textarea").forEach(el => {
+      if (el.type === "number") el.value = "0";
+      else el.value = "";
+    });
+    document.getElementById("emirate").value = "1c";
+    document.getElementById("vatMode").value = "inclusive";
+    calculateVAT();
+  }
+
+  document.addEventListener("input", calculateVAT);
+  document.addEventListener("change", calculateVAT);
+
+  initMonths();
+
+  const saved = localStorage.getItem("uaeVatCalculatorSavedDraft") || localStorage.getItem("uaeVatCalculatorAutoDraft");
+  if (saved) {
+    try { applyForm(JSON.parse(saved)); } catch(e) { calculateVAT(); }
+  } else {
+    calculateVAT();
+  }
+</script>
+</body>
+</html>
