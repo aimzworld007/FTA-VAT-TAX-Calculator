@@ -1,150 +1,121 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>UAE VAT Return Calculator - VAT201</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UAE VAT Filing Assistant Pro</title>
   <style>
-    :root{--bg:#f5f7fb;--card:#fff;--text:#172033;--muted:#667085;--line:#d8deea;--brand:#0f766e;--brand2:#115e59;--danger:#b42318;--ok:#027a48;--soft:#eef4f3}
-    *{box-sizing:border-box} body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(--text)}
-    .wrap{max-width:1180px;margin:0 auto;padding:24px}.hero{background:linear-gradient(135deg,var(--brand),#0b3f3a);color:#fff;border-radius:20px;padding:24px;margin-bottom:18px;box-shadow:0 12px 30px rgba(15,118,110,.16)}
-    .hero h1{margin:0 0 8px;font-size:28px}.hero p{margin:0;opacity:.92}.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:16px;box-shadow:0 8px 22px rgba(16,24,40,.06)}
-    h2{font-size:18px;margin:0 0 14px}.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:12px}.field{grid-column:span 3}.field.wide{grid-column:span 4}.field.half{grid-column:span 6}.field.full{grid-column:1/-1}
-    label{display:block;font-size:12px;font-weight:800;color:#344054;margin-bottom:6px} input,select,textarea{width:100%;padding:10px 11px;border:1px solid #cbd5e1;border-radius:10px;background:#fff;font-size:14px;color:#111827} textarea{min-height:94px;resize:vertical;line-height:1.5} input:focus,select:focus,textarea:focus{outline:2px solid rgba(15,118,110,.18);border-color:var(--brand)}
-    table{width:100%;border-collapse:collapse;font-size:13px} th,td{border:1px solid var(--line);padding:9px;text-align:right;vertical-align:middle} th:first-child,td:first-child,th:nth-child(2),td:nth-child(2){text-align:left} th{background:var(--soft);color:#253432}.total-row{font-weight:800;background:#f8fafc}.box{font-weight:800;color:var(--brand2)}
-    .summary{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.kpi{border:1px solid var(--line);border-radius:14px;padding:14px;background:#fbfdff}.kpi span{font-size:12px;color:var(--muted);font-weight:800}.kpi b{display:block;font-size:22px;margin-top:6px}.payable b{color:var(--danger)}.refund b{color:var(--ok)}
-    .actions{display:flex;gap:10px;flex-wrap:wrap}.btn{border:0;border-radius:10px;padding:11px 14px;font-weight:800;cursor:pointer}.primary{background:var(--brand);color:#fff}.secondary{background:#e6f4f1;color:var(--brand2)}.plain{background:#fff;border:1px solid var(--line);color:#172033}
-    .note{font-size:13px;color:#475467;line-height:1.6}.warn{background:#fff7ed;border-color:#fed7aa;color:#9a3412}.print-only{display:none}.muted{color:var(--muted)}
-    .report-title{display:none;text-align:center;margin-bottom:10px}.report-title h1{font-size:18px;margin:0 0 4px}.report-title p{margin:0;font-size:11px;color:#555}
-    @page{size:A4;margin:10mm}
-    @media print{
-      body{background:#fff;color:#000;font-size:11px}.wrap{max-width:none;padding:0}.hero,.actions,.no-print{display:none!important}.print-only,.report-title{display:block}.card{box-shadow:none;border:1px solid #000;border-radius:0;padding:8px;margin-bottom:8px;break-inside:avoid}h2{font-size:13px;margin-bottom:6px;border-bottom:1px solid #000;padding-bottom:4px}.summary{grid-template-columns:repeat(4,1fr);gap:6px}.kpi{border:1px solid #000;border-radius:0;padding:7px;background:#fff}.kpi b{font-size:14px}.kpi span{font-size:10px;color:#000}table{font-size:10px}th,td{padding:4px;border:1px solid #000}th{background:#e9e9e9!important;color:#000}input,select,textarea{border:0;padding:0;background:transparent;font-size:10px}.monthly-input input{border-bottom:1px solid #aaa}.screen-note{display:none}.print-note-box{border:1px solid #000;padding:7px;min-height:50px;white-space:pre-wrap}.warn{background:#fff;color:#000}.page-break{break-before:page}
+    :root{
+      --bg:#f6f8fb;--card:#ffffff;--ink:#172033;--muted:#667085;--line:#e6eaf2;--brand:#0f766e;--brand2:#115e59;--soft:#ecfdf5;--danger:#b42318;--warn:#b54708;--ok:#027a48;--shadow:0 16px 40px rgba(16,24,40,.08);--radius:18px;
     }
-    @media(max-width:800px){.field,.field.wide,.field.half{grid-column:1/-1}.summary{grid-template-columns:1fr} th,td{font-size:12px;padding:7px}.wrap{padding:12px}}
+    *{box-sizing:border-box} body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:linear-gradient(180deg,#eef8f6 0%,var(--bg) 280px);color:var(--ink)}
+    .wrap{max-width:1220px;margin:0 auto;padding:28px 18px 60px}.hero{display:grid;grid-template-columns:1.4fr .9fr;gap:18px;align-items:stretch;margin-bottom:18px}.heroCard{background:linear-gradient(135deg,#0f766e,#0b4f4a);color:white;border-radius:26px;padding:28px;box-shadow:var(--shadow);position:relative;overflow:hidden}.heroCard:after{content:"";position:absolute;right:-70px;top:-70px;width:220px;height:220px;border-radius:50%;background:rgba(255,255,255,.12)}.badge{display:inline-flex;gap:8px;align-items:center;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);padding:8px 12px;border-radius:999px;font-size:13px}.hero h1{font-size:34px;line-height:1.1;margin:18px 0 10px}.hero p{margin:0;color:#d9fffa;max-width:760px}.panel{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px}.grid{display:grid;gap:14px}.g2{grid-template-columns:repeat(2,minmax(0,1fr))}.g3{grid-template-columns:repeat(3,minmax(0,1fr))}.g4{grid-template-columns:repeat(4,minmax(0,1fr))}.field label{display:block;font-size:12px;font-weight:700;color:#344054;margin:0 0 6px}.field input,.field select,.field textarea{width:100%;border:1px solid var(--line);border-radius:12px;padding:11px 12px;font-size:14px;background:#fff;color:var(--ink);outline:none}.field textarea{min-height:92px;resize:vertical}.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--brand);box-shadow:0 0 0 4px rgba(15,118,110,.10)}.switch{display:flex;background:#f1f5f9;border:1px solid var(--line);border-radius:14px;padding:4px;gap:4px}.switch button{flex:1;border:0;background:transparent;border-radius:11px;padding:10px;font-weight:800;color:#475467;cursor:pointer}.switch button.active{background:#fff;color:var(--brand);box-shadow:0 4px 12px rgba(16,24,40,.08)}.sectionTitle{display:flex;justify-content:space-between;gap:12px;align-items:end;margin:24px 0 12px}.sectionTitle h2{font-size:20px;margin:0}.sectionTitle p{font-size:13px;color:var(--muted);margin:4px 0 0}.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:18px;box-shadow:0 8px 24px rgba(16,24,40,.04)}.month{border-left:4px solid var(--brand)}.month h3{margin:0 0 12px;font-size:16px}.kpi{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px}.kpi span{display:block;color:var(--muted);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}.kpi strong{display:block;font-size:24px;margin-top:7px}.kpi.ok{background:var(--soft);border-color:#bbf7d0}.kpi.danger{background:#fff1f3;border-color:#fecdd3}.tableWrap{overflow:auto;border:1px solid var(--line);border-radius:16px;background:white}table{width:100%;border-collapse:collapse;min-width:780px}th,td{padding:12px;border-bottom:1px solid var(--line);text-align:right;font-size:13px}th:first-child,td:first-child{text-align:left}th{background:#f8fafc;color:#344054;font-size:12px;text-transform:uppercase;letter-spacing:.04em}.rowHi{background:#f8fffd;font-weight:800}.actions{position:sticky;bottom:0;background:rgba(246,248,251,.88);backdrop-filter:blur(10px);border-top:1px solid var(--line);padding:12px 0;margin-top:18px}.actionbar{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}.btn{border:0;border-radius:12px;padding:12px 16px;font-weight:800;cursor:pointer}.primary{background:var(--brand);color:#fff}.secondary{background:#fff;color:var(--ink);border:1px solid var(--line)}.ghost{background:#eef8f6;color:var(--brand2)}.noteBox{background:#fffbeb;border:1px solid #fedf89;color:#7a2e0e;border-radius:16px;padding:14px;font-size:13px;line-height:1.55}.guide{line-height:1.65;color:#344054}.guide h3{margin:18px 0 6px;color:var(--ink)}.checklist{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.check{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);border-radius:14px;padding:12px;background:#fff}.check input{margin-top:3px}.small{font-size:12px;color:var(--muted)}.printOnly{display:none}.brandLine{display:flex;gap:10px;align-items:center}.logo{width:42px;height:42px;border-radius:12px;background:#fff;color:var(--brand);display:grid;place-items:center;font-weight:900}.warnText{color:var(--warn);font-weight:800}.okText{color:var(--ok);font-weight:800}.dangerText{color:var(--danger);font-weight:800}
+    @media(max-width:900px){.hero,.g2,.g3,.g4,.checklist{grid-template-columns:1fr}.hero h1{font-size:28px}.wrap{padding:18px 12px 80px}.actionbar{justify-content:stretch}.btn{flex:1}}
+    @media print{body{background:#fff;color:#000}.wrap{max-width:none;padding:0}.noPrint,.actions,.hero,.inputSection,.guideScreen{display:none!important}.printOnly{display:block}.panel,.card,.tableWrap{box-shadow:none;border-color:#999;border-radius:0}.sectionTitle{margin:14px 0 8px}th,td{padding:8px;font-size:11px;border-color:#bbb}.kpi{border-color:#999}.g4{grid-template-columns:repeat(4,1fr)}.g2{grid-template-columns:repeat(2,1fr)}@page{size:A4;margin:12mm}.printHeader{display:flex;justify-content:space-between;border-bottom:2px solid #111;padding-bottom:10px;margin-bottom:12px}.sign{display:grid;grid-template-columns:1fr 1fr;gap:34px;margin-top:36px}.sign div{border-top:1px solid #111;padding-top:8px;font-size:12px}}
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <section class="hero">
-      <h1>UAE VAT Return Calculator</h1>
-      <p>Input 3 months sales, purchases, and expenses. The calculator prepares VAT201 boxes automatically.</p>
-    </section>
-
-    <div class="report-title">
-      <h1>UAE VAT Return Working Sheet</h1>
-      <p>Generated from VAT201 calculator — verify invoices before official FTA submission.</p>
+<div class="wrap">
+  <div class="hero noPrint">
+    <div class="heroCard">
+      <span class="badge">🇦🇪 UAE VAT201 Assistant</span>
+      <h1>UAE VAT Filing Assistant Pro</h1>
+      <p>Enter 3 months of sales, purchases, and expenses. The tool calculates taxable value, output VAT, recoverable VAT, net payable VAT, and tells you exactly which UAE VAT return box to fill.</p>
     </div>
-
-    <section class="card">
-      <h2>Company & VAT Settings</h2>
-      <div class="grid">
-        <div class="field wide"><label>Company Name</label><input id="company" value="NAJMAT AL FALAQ SUPERMARKET LLC"></div>
-        <div class="field wide"><label>Tax Period</label><input id="period" value="Feb-26 to Apr-26"></div>
-        <div class="field"><label>TRN / Reference</label><input id="trn" placeholder="Optional"></div>
-        <div class="field wide"><label>Emirate for Sales Box</label><select id="emirate"><option value="1a">Abu Dhabi - Box 1a</option><option value="1b">Dubai - Box 1b</option><option value="1c" selected>Sharjah - Box 1c</option><option value="1d">Ajman - Box 1d</option><option value="1e">Umm Al Quwain - Box 1e</option><option value="1f">Ras Al Khaimah - Box 1f</option><option value="1g">Fujairah - Box 1g</option></select></div>
-        <div class="field"><label>Input Amounts Are</label><select id="mode"><option value="inclusive" selected>VAT Inclusive</option><option value="exclusive">VAT Exclusive</option></select></div>
-        <div class="field"><label>VAT Rate</label><input id="rate" type="number" value="5" step="0.01"></div>
-      </div>
-    </section>
-
-    <section class="card monthly-input">
-      <h2>3 Months Input</h2>
-      <table>
-        <thead><tr><th>Month</th><th>Sales</th><th>Purchases</th><th>Expenses</th></tr></thead>
-        <tbody>
-          <tr><td><input class="month" value="Feb-26"></td><td><input class="sales" type="number" step="0.01" value="153280"></td><td><input class="purchases" type="number" step="0.01" value="112671.67"></td><td><input class="expenses" type="number" step="0.01" value="13975.19"></td></tr>
-          <tr><td><input class="month" value="Mar-26"></td><td><input class="sales" type="number" step="0.01" value="169973.87"></td><td><input class="purchases" type="number" step="0.01" value="137318.25"></td><td><input class="expenses" type="number" step="0.01" value="14365"></td></tr>
-          <tr><td><input class="month" value="Apr-26"></td><td><input class="sales" type="number" step="0.01" value="150821.21"></td><td><input class="purchases" type="number" step="0.01" value="122288.10"></td><td><input class="expenses" type="number" step="0.01" value="14611.50"></td></tr>
-        </tbody>
-      </table>
-    </section>
-
-    <section class="card no-print">
-      <h2>Explanation Notes / Accountant Notes</h2>
-      <div class="grid">
-        <div class="field half"><label>Sales Explanation</label><textarea id="salesNote">All sales are entered under Sharjah standard-rated supplies. Amounts are treated as VAT inclusive.</textarea></div>
-        <div class="field half"><label>Purchase / Expense Explanation</label><textarea id="inputNote">Purchases and expenses are claimed as standard-rated expenses only where valid UAE tax invoices are available.</textarea></div>
-        <div class="field full"><label>General Filing Notes</label><textarea id="generalNote">Check zero-rated/exempt items, non-recoverable expenses, supplier TRNs, and invoice dates before submitting to FTA.</textarea></div>
-      </div>
-    </section>
-
-    <section class="card print-only">
-      <h2>Explanation Notes</h2>
-      <b>Sales Explanation</b><div class="print-note-box" id="pSalesNote"></div><br>
-      <b>Purchase / Expense Explanation</b><div class="print-note-box" id="pInputNote"></div><br>
-      <b>General Filing Notes</b><div class="print-note-box" id="pGeneralNote"></div>
-    </section>
-
-    <section class="card">
-      <h2>VAT Summary</h2>
-      <div class="summary">
-        <div class="kpi"><span>Total Gross Sales</span><b id="kSales">0.00</b></div>
-        <div class="kpi"><span>Output VAT</span><b id="kOut">0.00</b></div>
-        <div class="kpi"><span>Recoverable VAT</span><b id="kIn">0.00</b></div>
-        <div class="kpi payable" id="payCard"><span>VAT Payable / Refund</span><b id="kNet">0.00</b></div>
-      </div>
-    </section>
-
-    <section class="card">
-      <h2>VAT201 Boxes - Copy These Values</h2>
-      <table id="vatTable"><thead><tr><th>Box</th><th>Description</th><th>Amount AED</th><th>VAT Amount AED</th><th>Adjustment AED</th></tr></thead><tbody></tbody></table>
-    </section>
-
-    <section class="card warn">
-      <h2>Important Disclaimer</h2>
-      <p class="note">This is a working calculator only. Claim input VAT only when you have valid UAE tax invoices with supplier TRN and business-related expenses. If some sales are zero-rated/exempt or some expenses are non-recoverable, adjust values before filing.</p>
-    </section>
-
-    <div class="actions">
-      <button class="btn primary" onclick="preparePrint();window.print()">Print / Save as PDF</button>
-      <button class="btn secondary" onclick="downloadCSV()">Download CSV</button>
-      <button class="btn plain" onclick="resetBlank()">Clear Inputs</button>
+    <div class="panel">
+      <div class="brandLine"><div class="logo">VAT</div><div><strong>Premium Filing Report</strong><div class="small">Save draft • Print PDF • Accountant notes</div></div></div>
+      <div style="height:16px"></div>
+      <div class="field"><label>VAT Mode</label><div class="switch" id="vatModeSwitch"><button class="active" data-mode="inclusive">VAT Inclusive</button><button data-mode="exclusive">VAT Exclusive</button></div></div>
+      <p class="small">Inclusive = VAT is already inside your totals. Exclusive = VAT must be added on top.</p>
     </div>
   </div>
+
+  <div class="printOnly printHeader">
+    <div><h2 style="margin:0">UAE VAT201 Filing Summary</h2><div id="printCompany"></div></div>
+    <div style="text-align:right"><strong>Generated Report</strong><br><span id="printDate"></span></div>
+  </div>
+
+  <div class="sectionTitle inputSection noPrint"><div><h2>1. Company & Tax Period</h2><p>Used in the printable accountant report.</p></div></div>
+  <div class="panel inputSection noPrint grid g4">
+    <div class="field"><label>Company Name</label><input id="company" placeholder="Example: NAJMAT AL FALAQ SUPERMARKET LLC"></div>
+    <div class="field"><label>TRN</label><input id="trn" placeholder="100xxxxxxxxxxxx"></div>
+    <div class="field"><label>Tax Period</label><input id="period" placeholder="Feb 2026 - Apr 2026"></div>
+    <div class="field"><label>Main Emirate</label><select id="emirate"><option value="1a">Abu Dhabi - Box 1a</option><option value="1b">Dubai - Box 1b</option><option value="1c" selected>Sharjah - Box 1c</option><option value="1d">Ajman - Box 1d</option><option value="1e">Umm Al Quwain - Box 1e</option><option value="1f">Ras Al Khaimah - Box 1f</option><option value="1g">Fujairah - Box 1g</option></select></div>
+  </div>
+
+  <div class="sectionTitle inputSection noPrint"><div><h2>2. Three-Month Figures</h2><p>Enter monthly gross sales, purchases, and expenses.</p></div></div>
+  <div class="grid g3 inputSection noPrint" id="months"></div>
+
+  <div class="sectionTitle inputSection noPrint"><div><h2>3. Optional VAT201 Adjustments</h2><p>Use only when your accountant confirms adjustments, zero-rated, exempt, or reverse charge values.</p></div></div>
+  <div class="panel inputSection noPrint grid g4">
+    <div class="field"><label>Zero Rated Supplies - Box 4</label><input id="zeroRated" type="number" step="0.01" value="0"></div>
+    <div class="field"><label>Exempt Supplies - Box 5</label><input id="exempt" type="number" step="0.01" value="0"></div>
+    <div class="field"><label>Reverse Charge Output VAT - Box 3 VAT</label><input id="reverseVat" type="number" step="0.01" value="0"></div>
+    <div class="field"><label>Non-Recoverable Input VAT</label><input id="nonRecoverable" type="number" step="0.01" value="0"></div>
+  </div>
+
+  <div class="sectionTitle"><div><h2>4. VAT Result Dashboard</h2><p>These are the main numbers for filing.</p></div></div>
+  <div class="grid g4" id="kpis"></div>
+
+  <div class="sectionTitle"><div><h2>5. Exact VAT201 Box Summary</h2><p>Copy these values into the UAE FTA VAT return form.</p></div></div>
+  <div class="tableWrap"><table id="vatTable"></table></div>
+
+  <div class="sectionTitle"><div><h2>6. Explanation Notes</h2><p>Included in print/PDF report.</p></div></div>
+  <div class="panel grid g2">
+    <div class="field"><label>Prepared By</label><input id="preparedBy" placeholder="Name"></div>
+    <div class="field"><label>Reviewed By</label><input id="reviewedBy" placeholder="Accountant / Auditor"></div>
+    <div class="field"><label>Sales Notes</label><textarea id="salesNotes" placeholder="Example: All sales treated as standard rated 5% under selected emirate."></textarea></div>
+    <div class="field"><label>Purchase / Expense Notes</label><textarea id="expenseNotes" placeholder="Example: Input VAT claimed only against valid UAE tax invoices."></textarea></div>
+    <div class="field" style="grid-column:1/-1"><label>General Filing Notes</label><textarea id="generalNotes" placeholder="Add any adjustment, non-recoverable VAT, zero-rated/exempt explanation, or accountant comments."></textarea></div>
+  </div>
+
+  <div class="sectionTitle noPrint"><div><h2>7. Filing Checklist</h2><p>Tick before submission.</p></div></div>
+  <div class="checklist noPrint" id="checklist">
+    <label class="check"><input type="checkbox"> <span>Sales report / POS summary matched with VAT period.</span></label>
+    <label class="check"><input type="checkbox"> <span>Purchase invoices checked and supplier TRN available.</span></label>
+    <label class="check"><input type="checkbox"> <span>Expense invoices are business related and recoverable.</span></label>
+    <label class="check"><input type="checkbox"> <span>Zero-rated / exempt sales reviewed separately.</span></label>
+    <label class="check"><input type="checkbox"> <span>Bank / cash / card totals reconciled.</span></label>
+    <label class="check"><input type="checkbox"> <span>Accountant reviewed final VAT payable/refund.</span></label>
+  </div>
+
+  <div class="sectionTitle guideScreen"><div><h2>VAT Guidance Notes</h2><p>Keep these notes with your report.</p></div></div>
+  <div class="panel guide guideScreen">
+    <h3>VAT Inclusive</h3><p>VAT is already included inside the total amount. Example: AED 105 includes AED 100 taxable value + AED 5 VAT. Formula: VAT = total × 5 ÷ 105.</p>
+    <h3>VAT Exclusive</h3><p>VAT is not included yet. Example: AED 100 taxable value + AED 5 VAT = AED 105 total. Formula: VAT = amount × 5%.</p>
+    <h3>Emirate Boxes</h3><p>Standard rated sales are reported by emirate: Abu Dhabi 1a, Dubai 1b, Sharjah 1c, Ajman 1d, Umm Al Quwain 1e, Ras Al Khaimah 1f, Fujairah 1g.</p>
+    <h3>Recoverable VAT</h3><p>Claim input VAT only when you have valid UAE tax invoices, the expense is business related, and the invoice belongs to the VAT period.</p>
+    <h3>Disclaimer</h3><p>This tool assists calculation only. Final UAE FTA filing should be verified by the business owner, accountant, or tax agent.</p>
+  </div>
+
+  <div class="printOnly">
+    <div class="sectionTitle"><h2>Notes & Review</h2></div>
+    <div class="panel"><p><strong>Prepared By:</strong> <span id="pPrepared"></span></p><p><strong>Reviewed By:</strong> <span id="pReviewed"></span></p><p><strong>Sales Notes:</strong> <span id="pSalesNotes"></span></p><p><strong>Expense Notes:</strong> <span id="pExpenseNotes"></span></p><p><strong>General Notes:</strong> <span id="pGeneralNotes"></span></p></div>
+    <div class="sign"><div>Prepared Signature</div><div>Reviewed Signature</div></div>
+  </div>
+
+  <div class="actions noPrint"><div class="actionbar"><button class="btn ghost" onclick="saveDraft()">Save Draft</button><button class="btn secondary" onclick="loadDraft()">Load Draft</button><button class="btn secondary" onclick="resetForm()">Reset</button><button class="btn primary" onclick="window.print()">Print / Save PDF</button></div></div>
+</div>
 <script>
-const emirateNames={"1a":"Standard rated supplies in Abu Dhabi","1b":"Standard rated supplies in Dubai","1c":"Standard rated supplies in Sharjah","1d":"Standard rated supplies in Ajman","1e":"Standard rated supplies in Umm Al Quwain","1f":"Standard rated supplies in Ras Al Khaimah","1g":"Standard rated supplies in Fujairah"};
-const boxes=["1a","1b","1c","1d","1e","1f","1g"];
-function n(v){return Number(v||0)}
-function money(v){return (Math.round((v+Number.EPSILON)*100)/100).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}
-function calcVAT(total,rate,mode){ if(mode==='exclusive') return {base:total,vat:total*rate/100,gross:total*(1+rate/100)}; const vat=total*rate/(100+rate); return {base:total-vat,vat,gross:total}; }
-function sum(cls){return [...document.querySelectorAll('.'+cls)].reduce((a,e)=>a+n(e.value),0)}
-function preparePrint(){
-  document.getElementById('pSalesNote').textContent=document.getElementById('salesNote').value;
-  document.getElementById('pInputNote').textContent=document.getElementById('inputNote').value;
-  document.getElementById('pGeneralNote').textContent=document.getElementById('generalNote').value;
-}
-function recalc(){
- const rate=n(document.getElementById('rate').value), mode=document.getElementById('mode').value, emirate=document.getElementById('emirate').value;
- const salesGross=sum('sales'), purchaseGross=sum('purchases'), expenseGross=sum('expenses'), inputsGross=purchaseGross+expenseGross;
- const sales=calcVAT(salesGross,rate,mode), inputs=calcVAT(inputsGross,rate,mode);
- const net=sales.vat-inputs.vat;
- document.getElementById('kSales').textContent=money(salesGross); document.getElementById('kOut').textContent=money(sales.vat); document.getElementById('kIn').textContent=money(inputs.vat); document.getElementById('kNet').textContent=money(Math.abs(net))+(net>=0?' Payable':' Refund');
- document.getElementById('payCard').className='kpi '+(net>=0?'payable':'refund');
- const rows=[];
- boxes.forEach(b=>rows.push([b,emirateNames[b],b===emirate?sales.base:0,b===emirate?sales.vat:0,0]));
- rows.push(['2','Tax refunds provided to tourists under the Tax Refunds for Tourists Scheme',0,0,0]);
- rows.push(['3','Supplies subject to reverse charge provisions',0,0,0]);
- rows.push(['4','Zero rated supplies',0,0,0]);
- rows.push(['5','Exempt supplies',0,0,0]);
- rows.push(['6','Goods imported into the UAE',0,0,0]);
- rows.push(['7','Adjustments to goods imported into the UAE',0,0,0]);
- rows.push(['8','Totals',sales.base,sales.vat,0,'total-row']);
- rows.push(['9','Standard rated expenses',inputs.base,inputs.vat,0]);
- rows.push(['10','Supplies subject to reverse charge provisions',0,0,0]);
- rows.push(['11','Totals',inputs.base,inputs.vat,0,'total-row']);
- rows.push(['12','Total value of due tax for the period',0,sales.vat,0,'total-row']);
- rows.push(['13','Total value of recoverable tax for the period',0,inputs.vat,0,'total-row']);
- rows.push(['14','Payable tax for the period',0,net,0,'total-row']);
- document.querySelector('#vatTable tbody').innerHTML=rows.map(r=>`<tr class="${r[5]||''}"><td class="box">${r[0]}</td><td>${r[1]}</td><td>${money(r[2])}</td><td>${money(r[3])}</td><td>${money(r[4])}</td></tr>`).join('');
- preparePrint();
-}
-function resetBlank(){document.querySelectorAll('input[type=number]').forEach(i=>i.value='0');recalc()}
-function downloadCSV(){
- let csv='Box,Description,Amount AED,VAT Amount AED,Adjustment AED\n';
- document.querySelectorAll('#vatTable tbody tr').forEach(tr=>{csv += [...tr.children].map(td=>'"'+td.textContent.replaceAll('"','""')+'"').join(',')+'\n'});
- const blob=new Blob([csv],{type:'text/csv'}), a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='uae-vat201-boxes.csv'; a.click(); URL.revokeObjectURL(a.href);
-}
-document.addEventListener('input',recalc);document.addEventListener('change',recalc);recalc();
+const RATE=0.05;let mode='inclusive';
+const emirates={"1a":"Abu Dhabi - Box 1a","1b":"Dubai - Box 1b","1c":"Sharjah - Box 1c","1d":"Ajman - Box 1d","1e":"Umm Al Quwain - Box 1e","1f":"Ras Al Khaimah - Box 1f","1g":"Fujairah - Box 1g"};
+function money(n){return (Number(n)||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}
+function num(id){return Number(document.getElementById(id)?.value)||0}
+function calcVat(total){return mode==='inclusive'? total*5/105 : total*RATE}
+function calcBase(total){return mode==='inclusive'? total-calcVat(total) : total}
+function initMonths(){const box=document.getElementById('months');box.innerHTML='';['Month 1','Month 2','Month 3'].forEach((m,i)=>{box.insertAdjacentHTML('beforeend',`<div class="card month"><h3>${m}</h3><div class="grid"><div class="field"><label>Month Name</label><input id="m${i}name" value="${i===0?'February 2026':i===1?'March 2026':'April 2026'}"></div><div class="field"><label>Sales</label><input id="m${i}sales" type="number" step="0.01" value="0"></div><div class="field"><label>Purchases</label><input id="m${i}purchases" type="number" step="0.01" value="0"></div><div class="field"><label>Expenses</label><input id="m${i}expenses" type="number" step="0.01" value="0"></div></div></div>`)});}
+function calculate(){let sales=0,purchases=0,expenses=0;for(let i=0;i<3;i++){sales+=num(`m${i}sales`);purchases+=num(`m${i}purchases`);expenses+=num(`m${i}expenses`)}const inputGross=purchases+expenses;const outputVat=calcVat(sales)+num('reverseVat');const taxableSales=calcBase(sales);const inputVatBefore=calcVat(inputGross);const recoverableVat=Math.max(0,inputVatBefore-num('nonRecoverable'));const taxableInputs=calcBase(inputGross);const net=outputVat-recoverableVat;renderKpis({sales,taxableSales,outputVat,inputGross,taxableInputs,recoverableVat,net});renderTable({taxableSales,outputVat,taxableInputs,recoverableVat,net});syncPrint();}
+function renderKpis(d){document.getElementById('kpis').innerHTML=`<div class="kpi"><span>Taxable Sales</span><strong>AED ${money(d.taxableSales)}</strong></div><div class="kpi"><span>Output VAT</span><strong>AED ${money(d.outputVat)}</strong></div><div class="kpi ok"><span>Recoverable VAT</span><strong>AED ${money(d.recoverableVat)}</strong></div><div class="kpi ${d.net>=0?'danger':'ok'}"><span>${d.net>=0?'VAT Payable':'VAT Refundable'}</span><strong>AED ${money(Math.abs(d.net))}</strong></div>`}
+function renderTable(d){const selected=document.getElementById('emirate').value;let rows=[];['1a','1b','1c','1d','1e','1f','1g'].forEach(k=>rows.push([k,emirates[k],k===selected?d.taxableSales:0,k===selected?d.outputVat-num('reverseVat'):0,'Standard rated sales by emirate']));rows.push(['2','Tax refunds provided to tourists',0,0,'Usually zero unless applicable']);rows.push(['3','Supplies subject to reverse charge',0,num('reverseVat'),'Use only if applicable']);rows.push(['4','Zero rated supplies',num('zeroRated'),0,'Enter zero-rated taxable value']);rows.push(['5','Exempt supplies',num('exempt'),0,'Enter exempt value']);rows.push(['6','Goods imported into UAE',0,0,'If applicable']);rows.push(['7','Adjustments to imported goods',0,0,'If applicable']);rows.push(['8','Total tax due',d.taxableSales+num('zeroRated')+num('exempt'),d.outputVat,'Auto total']);rows.push(['9','Standard rated expenses',d.taxableInputs,d.recoverableVat,'Purchases + expenses input VAT']);rows.push(['10','Reverse charge recoverable tax',0,0,'If applicable']);rows.push(['11','Total recoverable tax',d.taxableInputs,d.recoverableVat,'Auto total']);rows.push(['12','Total tax due for the period',0,d.outputVat,'From Box 8 VAT']);rows.push(['13','Total recoverable tax for the period',0,d.recoverableVat,'From Box 11 VAT']);rows.push(['14',d.net>=0?'Payable tax for the period':'Refundable tax for the period',0,Math.abs(d.net),d.net>=0?'Pay this amount':'Refund/credit amount']);
+let html='<thead><tr><th>Box</th><th>Description</th><th>Amount AED</th><th>VAT AED</th><th>Note</th></tr></thead><tbody>';rows.forEach(r=>{const hi=['8','11','12','13','14'].includes(r[0])?' class="rowHi"':'';html+=`<tr${hi}><td>${r[0]}</td><td>${r[1]}</td><td>${money(r[2])}</td><td>${money(r[3])}</td><td style="text-align:left">${r[4]}</td></tr>`});html+='</tbody>';document.getElementById('vatTable').innerHTML=html;}
+function syncPrint(){document.getElementById('printCompany').innerHTML=`${val('company')||'Company Name'}<br>TRN: ${val('trn')||'-'}<br>Period: ${val('period')||'-'}<br>Mode: VAT ${mode}`;document.getElementById('printDate').textContent=new Date().toLocaleString();['Prepared','Reviewed','SalesNotes','ExpenseNotes','GeneralNotes'].forEach(x=>{const id=x.charAt(0).toLowerCase()+x.slice(1);const el=document.getElementById('p'+x);if(el)el.textContent=val(id)||'-';});}
+function val(id){return document.getElementById(id)?.value||''}
+function allIds(){return ['company','trn','period','emirate','zeroRated','exempt','reverseVat','nonRecoverable','preparedBy','reviewedBy','salesNotes','expenseNotes','generalNotes',...Array.from({length:3},(_,i)=>[`m${i}name`,`m${i}sales`,`m${i}purchases`,`m${i}expenses`]).flat()]}
+function saveDraft(){const data={mode};allIds().forEach(id=>data[id]=val(id));localStorage.setItem('uaeVatProDraft',JSON.stringify(data));alert('Draft saved in this browser.');}
+function loadDraft(){const raw=localStorage.getItem('uaeVatProDraft');if(!raw)return alert('No saved draft found.');const data=JSON.parse(raw);mode=data.mode||'inclusive';setMode(mode);allIds().forEach(id=>{if(data[id]!==undefined&&document.getElementById(id))document.getElementById(id).value=data[id]});calculate();}
+function resetForm(){if(confirm('Clear all entered values?')){allIds().forEach(id=>{const el=document.getElementById(id);if(el)el.value=['zeroRated','exempt','reverseVat','nonRecoverable'].includes(id)?0:''});calculate();}}
+function setMode(m){mode=m;document.querySelectorAll('#vatModeSwitch button').forEach(b=>b.classList.toggle('active',b.dataset.mode===m));calculate();}
+document.addEventListener('input',e=>calculate());document.addEventListener('change',e=>calculate());document.getElementById('vatModeSwitch').addEventListener('click',e=>{if(e.target.dataset.mode)setMode(e.target.dataset.mode)});initMonths();document.getElementById('m0sales').value='153280';document.getElementById('m0purchases').value='112671.67';document.getElementById('m0expenses').value='13975.19';document.getElementById('m1sales').value='169973.87';document.getElementById('m1purchases').value='137318.25';document.getElementById('m1expenses').value='14365';document.getElementById('m2sales').value='150821.21';document.getElementById('m2purchases').value='122288.10';document.getElementById('m2expenses').value='14611.50';document.getElementById('company').value='NAJMAT AL FALAQ SUPERMARKET LLC';document.getElementById('period').value='Feb 2026 - Apr 2026';calculate();
 </script>
 </body>
 </html>
