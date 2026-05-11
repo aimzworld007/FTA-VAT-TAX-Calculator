@@ -4,6 +4,7 @@ import { validateDateRange, validateRequired } from './lib/taxValidation';
 import { TAX_CONFIG } from './lib/taxConfig';
 import { ExportActions, FormSection, TaxSummaryCard, WizardProgress, money } from './components/common.jsx';
 import { downloadPdfReport } from './lib/pdfGenerator';
+import { Vat201Report } from './components/Vat201Report.jsx';
 
 const steps=['Business Details','Sales','Purchases & Expenses','Adjustments','Review','Export'];
 export function VatWizard({data,setData,onSave,onReset}){const [step,setStep]=React.useState(1); const result=calculateVat(data); const dateErr=validateDateRange(data.taxPeriodStart,data.taxPeriodEnd); const reqErr=validateRequired(data.businessName,'Business name')||validateRequired(data.trn,'TRN');
@@ -13,8 +14,9 @@ return <div><WizardProgress step={step} total={6}/><FormSection title={`VAT Wiza
 {step===2&&<div className='form-grid three'><input type='number' min='0' placeholder='Standard-rated sales' value={data.standardRatedSales} onChange={e=>setData({...data,standardRatedSales:e.target.value})}/><input type='number' min='0' placeholder='Zero-rated sales' value={data.zeroRatedSales} onChange={e=>setData({...data,zeroRatedSales:e.target.value})}/><input type='number' min='0' placeholder='Exempt sales' value={data.exemptSales} onChange={e=>setData({...data,exemptSales:e.target.value})}/><TaxSummaryCard label='Output VAT' value={money(result.outputVat)}/></div>}
 {step===3&&<div className='form-grid three'><input type='number' min='0' placeholder='Standard-rated purchases' value={data.standardRatedPurchases} onChange={e=>setData({...data,standardRatedPurchases:e.target.value})}/><input type='number' min='0' placeholder='Recoverable input VAT' value={data.recoverableInputVat} onChange={e=>setData({...data,recoverableInputVat:e.target.value})}/><input type='number' min='0' placeholder='Non-recoverable VAT' value={data.nonRecoverableVat} onChange={e=>setData({...data,nonRecoverableVat:e.target.value})}/></div>}
 {step===4&&<div className='form-grid three'><input type='number' placeholder='Previous period adjustment' value={data.previousAdjustment} onChange={e=>setData({...data,previousAdjustment:e.target.value})}/><input type='number' placeholder='Bad debt relief' value={data.badDebtRelief} onChange={e=>setData({...data,badDebtRelief:e.target.value})}/><textarea placeholder='Other adjustment notes' value={data.adjustmentNotes} onChange={e=>setData({...data,adjustmentNotes:e.target.value})}/></div>}
-{step>=5&&<div className='grid-section'><TaxSummaryCard label='Total output VAT' value={money(result.outputVat)}/><TaxSummaryCard label='Total input VAT' value={money(result.inputVat)}/><TaxSummaryCard label='Adjustments' value={money(result.adjustments)}/><TaxSummaryCard label={result.label} value={money(result.netVat)}/><p>For preparation only. Please verify before official FTA submission.</p></div>}
+{step===5&&<div className='grid-section'><TaxSummaryCard label='Total output VAT' value={money(result.outputVat)}/><TaxSummaryCard label='Total input VAT' value={money(result.inputVat)}/><TaxSummaryCard label='Adjustments' value={money(result.adjustments)}/><TaxSummaryCard label={result.label} value={money(result.netVat)}/><p>For preparation only. Please verify before official FTA submission.</p></div>}
+{step===6&&<Vat201Report data={data} result={result}/>}
 </FormSection>
 <div className='wizard-nav no-print'><button onClick={back} disabled={step===1}>Back</button><button onClick={next} disabled={step===6}>Continue</button></div>
-{step===6&&<ExportActions onSave={onSave} onReset={onReset} onPrint={()=>window.print()} onPdf={()=>downloadPdfReport('vat-report')}/>}
+{step===6&&<ExportActions onSave={onSave} onReset={onReset} onPrint={()=>window.print()} onPdf={()=>downloadPdfReport(data)}/>}
 </div>}

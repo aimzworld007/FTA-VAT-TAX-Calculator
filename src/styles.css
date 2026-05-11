@@ -91,3 +91,31 @@
   .vat201-kpis{grid-template-columns:repeat(4,minmax(0,1fr))!important}
   .vat201-sheet table th,.vat201-sheet table td{padding:7px;font-size:11px}
 }
+
+.vat201-report{background:#fff;border:1px solid #d1d5db;border-radius:8px;padding:14px;max-width:210mm;margin:0 auto;color:#111827}
+.vat201-header{display:grid;grid-template-columns:54px 1fr auto;gap:10px;align-items:center;border-bottom:1px solid #d1d5db;padding-bottom:8px}
+.vat201-logo{width:46px;height:46px;border:1px solid #d1d5db;border-radius:50%;display:grid;place-items:center;font-weight:800;color:#374151;font-size:11px}
+.vat201-header h1{margin:0;font-size:20px}.vat201-header p{margin:2px 0 0;color:#6b7280;font-size:12px}
+.vat201-header aside{display:grid;gap:2px;text-align:right}.vat201-header aside small{font-size:11px;color:#374151}
+.vat201-section-title{font-size:13px;text-transform:uppercase;letter-spacing:.04em;color:#374151;margin:12px 0 6px}
+.vat201-box{border:1px solid #d1d5db;border-radius:6px;padding:10px;background:#fff}
+.vat201-company{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 12px}
+.vat201-company label,.vat201-card label,.sig-box span{font-size:10px;text-transform:uppercase;color:#6b7280}.vat201-company strong,.vat201-card strong,.sig-box strong{font-size:12px}
+.vat201-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.vat201-card{border:1px solid #d1d5db;border-radius:10px;padding:10px;background:#fff;display:grid;gap:5px}
+.vat201-table{width:100%;border-collapse:collapse;border:1px solid #d1d5db;border-radius:6px;overflow:hidden}
+.vat201-table th,.vat201-table td{font-size:10.5px;padding:6px;border:1px solid #d1d5db}.vat201-table th{background:#f3f4f6}
+.vat201-table .num{text-align:right}.vat201-table .row-total td{font-weight:700}
+.vat201-signatures{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.sig-box{border:1px solid #d1d5db;border-radius:6px;padding:8px;min-height:62px;display:grid;align-content:space-between}
+.vat201-note{font-size:11px;color:#4b5563;margin:10px 0 0}.vat201-footer{font-size:10px;color:#6b7280;margin-top:8px;padding-top:8px;border-top:1px solid #d1d5db}
+
+@media(max-width:900px){.vat201-report{overflow:auto}.vat201-cards,.vat201-signatures{grid-template-columns:1fr}.vat201-header{grid-template-columns:46px 1fr}.vat201-header aside{grid-column:1/-1;text-align:left}}
+
+@media print{
+  body *{visibility:hidden}
+  #vat201-report,#vat201-report *{visibility:visible}
+  #vat201-report{position:absolute;left:0;top:0;width:100%;margin:0;border:0;border-radius:0;box-shadow:none}
+  .no-print,.wizard-nav,.selector-grid,.sticky-export{display:none!important}
+  @page{size:A4 portrait;margin:8mm}
+  .vat201-table thead{display:table-header-group}
+  .vat201-table tr,.vat201-card,.sig-box,.vat201-box{break-inside:avoid;page-break-inside:avoid}
+}
