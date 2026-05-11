@@ -1,30 +1,11 @@
 import { TAX_CONFIG } from './taxConfig';
+import { buildMonthlyEntriesFromPeriod } from './vatPeriod';
 
 const n = (v) => Number(v) || 0;
 const clamp = (v) => Math.max(0, n(v));
-const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-
-export function getVatMonthsForFrequency(filingFrequency, taxPeriodStart) {
-  const count = filingFrequency === 'Monthly' ? 1 : filingFrequency === 'Yearly' ? 12 : 3;
-  const startMonthIndex = taxPeriodStart ? new Date(taxPeriodStart).getMonth() : 0;
-  const normalizedStart = Number.isFinite(startMonthIndex) && startMonthIndex >= 0 ? startMonthIndex : 0;
-  return Array.from({ length: count }, (_, i) => MONTHS[(normalizedStart + i) % 12]);
-}
 
 export function buildMonthlyEntries(form) {
-  const months = getVatMonthsForFrequency(form.filingFrequency, form.taxPeriodStart);
-  const existing = Array.isArray(form.monthlyEntries) ? form.monthlyEntries : [];
-  const byMonth = new Map(existing.map((entry) => [entry?.month, entry]));
-
-  return months.map((month) => {
-    const prev = byMonth.get(month) || {};
-    return {
-      month,
-      sales: clamp(prev.sales),
-      purchases: clamp(prev.purchases),
-      expenses: clamp(prev.expenses)
-    };
-  });
+  return buildMonthlyEntriesFromPeriod(form, form.monthlyEntries);
 }
 
 export function calculateVat(form) {
