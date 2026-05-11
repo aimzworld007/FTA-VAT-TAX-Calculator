@@ -10,6 +10,8 @@ export const QUARTERS = [
   { value: 'Q4', label: 'Q4 (Oct - Dec)', months: [9, 10, 11], range: 'October - December' }
 ];
 
+export const QUARTER_START_MONTHS = MONTHS;
+
 const pad = (m) => String(m).padStart(2, '0');
 const parseYear = (value) => Number(value) || new Date().getFullYear();
 
@@ -23,11 +25,12 @@ export function inferSelectionFromDates(data) {
   const filingYear = Number(data?.filingYear) || startYear;
   const filingMonth = data?.filingMonth || MONTHS[startMonth] || 'January';
   const filingQuarter = data?.filingQuarter || `Q${Math.floor(startMonth / 3) + 1}`;
+  const filingStartMonth = data?.filingStartMonth || MONTHS[startMonth] || 'January';
 
-  return { filingFrequency, filingYear, filingMonth, filingQuarter };
+  return { filingFrequency, filingYear, filingMonth, filingQuarter, filingStartMonth };
 }
 
-export function getPeriodFromSelection({ filingFrequency, filingYear, filingMonth, filingQuarter }) {
+export function getPeriodFromSelection({ filingFrequency, filingYear, filingMonth, filingQuarter, filingStartMonth }) {
   const year = parseYear(filingYear);
 
   if (filingFrequency === 'Monthly') {
@@ -48,14 +51,20 @@ export function getPeriodFromSelection({ filingFrequency, filingYear, filingMont
     };
   }
 
-  const quarter = QUARTERS.find((q) => q.value === filingQuarter) || QUARTERS[0];
-  const [startMonthIndex, , endMonthIndex] = quarter.months;
-  const lastDay = new Date(year, endMonthIndex + 1, 0).getDate();
+  const startMonthIndex = Math.max(0, MONTHS.indexOf(filingStartMonth || 'January'));
+  const endMonthIndex = (startMonthIndex + 2) % 12;
+  const endYear = year + (startMonthIndex + 2 >= 12 ? 1 : 0);
+  const lastDay = new Date(endYear, endMonthIndex + 1, 0).getDate();
+  const monthLabels = [
+    MONTHS[startMonthIndex],
+    MONTHS[(startMonthIndex + 1) % 12],
+    MONTHS[endMonthIndex]
+  ];
 
   return {
     taxPeriodStart: `${year}-${pad(startMonthIndex + 1)}-01`,
-    taxPeriodEnd: `${year}-${pad(endMonthIndex + 1)}-${pad(lastDay)}`,
-    monthLabels: quarter.months.map((monthIndex) => MONTHS[monthIndex])
+    taxPeriodEnd: `${endYear}-${pad(endMonthIndex + 1)}-${pad(lastDay)}`,
+    monthLabels
   };
 }
 
@@ -80,6 +89,8 @@ export function formatVatPeriodLabel(data) {
   const year = Number(data?.filingYear) || new Date().getFullYear();
   if (data?.filingFrequency === 'Monthly') return `${data.filingMonth || 'January'} ${year}`;
   if (data?.filingFrequency === 'Yearly') return `Year ${year}`;
-  const q = QUARTERS.find((item) => item.value === data?.filingQuarter) || QUARTERS[0];
-  return `${q.value} ${year} (${q.range})`;
+  const period = getPeriodFromSelection(data);
+  const start = data?.filingStartMonth || 'January';
+  const end = period.monthLabels?.[2] || 'March';
+  return `${start} - ${end} ${year} (Quarterly)`;
 }
