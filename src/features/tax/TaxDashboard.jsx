@@ -8,7 +8,7 @@ import { calculateCorporateTax } from './lib/corporateTaxCalculator';
 import { money, TaxModeCard, TaxSummaryCard } from './components/common.jsx';
 import { TAX_CONFIG } from './lib/taxConfig';
 import { formatVatPeriodLabel, inferSelectionFromDates, getPeriodFromSelection } from './lib/vatPeriod';
-import { VAT_PRICING_MODES, VAT_PRICING_OPTIONS, normalizeVatPricingMode } from './lib/vatPricing';
+import { VAT_PRICING_MODES, normalizeVatPricingMode } from './lib/vatPricing';
 
 const currentYear = new Date().getFullYear();
 const workspaceSettingsDefault = { vatPricingMode: VAT_PRICING_MODES.EXCLUSIVE };
@@ -42,31 +42,7 @@ export function TaxDashboard() {
   const v = calculateVat(vat);
   const c = calculateCorporateTax(ct);
 
-  const updateVatPricingMode = (selectedMode) => {
-    const nextMode = normalizeVatPricingMode(selectedMode);
-    const nextSettings = { ...workspaceSettings, vatPricingMode: nextMode };
-    setWorkspaceSettings(nextSettings);
-    draftStorage.save('workspaceSettings', nextSettings);
-    setVat((prev) => ({ ...prev, vatPricingMode: nextMode }));
-  };
-
   return <main className='content'><header className='hero'><div><p className='eyebrow'>UAE Tax Calculator</p><h1>UAE VAT & Corporate Tax Calculator</h1><p>Prepare VAT returns and corporate tax estimates with guided calculations.</p></div><div className='hero-card'><span className='badge'>{TAX_CONFIG.badge}</span><nav className='resource-nav no-print' aria-label='Resources'><div className='resource-desktop'>{resourceLinks.map((link) => link.external ? <a key={link.label} className='resource-pill' href={link.href} target='_blank' rel='noreferrer'>{link.label}</a> : <RouteLink key={link.label} className='resource-pill' to={link.href}>{link.label}</RouteLink>)}</div><details className='resource-mobile'><summary>Resources</summary><div className='resource-menu'>{resourceLinks.map((link) => link.external ? <a key={link.label} href={link.href} target='_blank' rel='noreferrer'>{link.label}</a> : <RouteLink key={link.label} to={link.href}>{link.label}</RouteLink>)}</div></details></nav></div></header>
-    <section className='card'>
-      <h2>Workspace Settings</h2>
-      <div className='setting-card'>
-        <div className='setting-header'>
-          <h3>VAT Pricing Mode</h3>
-          <span className='setting-hint' title='Changing this affects future pricing calculations only.'>ⓘ</span>
-        </div>
-        <label className='field'>
-          <span>VAT Return Pricing Mode</span>
-          <select value={workspaceSettings.vatPricingMode} onChange={(e) => updateVatPricingMode(e.target.value)}>
-            {VAT_PRICING_OPTIONS.map((option) => <option key={option.value} value={option.value}>{option.label} — {option.description}</option>)}
-          </select>
-          <small className='field-help'>This default is applied inside the VAT Return wizard and can be changed there.</small>
-        </label>
-      </div>
-    </section>
     <section className='card'><h2>Live Summary</h2><div className='grid-section'><TaxSummaryCard label='VAT Payable / Refundable' value={money(v.netVat)} /><TaxSummaryCard label='VAT Taxable Sales (Auto)' value={money(v.salesBreakdown.net)} /><TaxSummaryCard label='Corporate Tax Estimate' value={money(c.taxPayable)} /><TaxSummaryCard label='Selected Tax Period' value={formatVatPeriodLabel(vat)} /></div><div className='selector-grid no-print'><TaxModeCard title='VAT Return' desc='Open VAT return wizard' onClick={() => setMode('vat')} active={mode === 'vat'} /><TaxModeCard title='Corporate Tax' desc='Open corporate tax wizard' onClick={() => setMode('ct')} active={mode === 'ct'} /></div></section>
     {mode === 'vat' && <VatWizard data={vat} setData={setVat} onSave={() => draftStorage.save('vatDraft', vat)} onReset={() => { if (confirm('Reset VAT draft?')) { const next = normalizeVatDraft(vatDefault, workspaceSettings); setVat(next); draftStorage.clear('vatDraft'); } }} />}
     {mode === 'ct' && <CorporateTaxWizard data={ct} setData={setCt} onSave={() => draftStorage.save('ctDraft', ct)} onReset={() => { if (confirm('Reset Corporate Tax draft?')) { setCt(ctDefault); draftStorage.clear('ctDraft'); } }} />}
