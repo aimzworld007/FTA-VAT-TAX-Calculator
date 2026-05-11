@@ -49,3 +49,28 @@
   .app-shell.print-ct .kpi{background:linear-gradient(180deg,#f7fff8,#ffffff);border-color:#bbf7d0}
   .app-shell.print-ct .kpi.success{background:linear-gradient(180deg,#dcfce7,#ffffff);border-color:#86efac}
 }
+
+@media print{
+  @page{size:A4 portrait;margin:14mm}
+
+  body{font-family:"Inter", "Segoe UI", Arial, sans-serif;color:#0f172a;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .content{padding:0!important}
+  .card{border:1px solid #cbd5e1!important;border-radius:10px!important;padding:12px!important;margin-bottom:10px!important;page-break-inside:avoid}
+  .card h2{font-size:16px;margin-bottom:10px}
+  .grid-section{gap:10px!important}
+  .kpi{padding:10px!important;border-radius:10px!important}
+  .kpi span{font-size:10px;letter-spacing:.08em;text-transform:uppercase}
+  .kpi strong{font-size:20px!important;line-height:1.2}
+
+  .print-header{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;padding:12px 14px!important;border-radius:10px!important;margin-bottom:12px!important}
+  .print-header img{width:58px!important;height:58px!important}
+  .print-header h1{font-size:20px!important;letter-spacing:.01em}
+  .print-header p{margin:4px 0 2px;font-size:12px;color:#334155}
+  .print-header small{font-size:11px;color:#64748b}
+
+  .print-footer{display:flex;justify-content:space-between;align-items:center;font-size:10px;color:#475569;margin-top:12px!important;padding-top:8px!important}
+  .print-footer a{font-weight:700}
+
+  .field span{font-weight:700;font-size:11px!important;color:#475569}
+  input,select,textarea{border:1px solid #cbd5e1!important;border-radius:8px!important;padding:7px 9px!important;background:#fff}
+}
