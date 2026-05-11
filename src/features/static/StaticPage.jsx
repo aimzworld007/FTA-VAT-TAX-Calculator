@@ -1,9 +1,11 @@
 import React from 'react';
+import { RouteLink } from '../../components/Router';
 
 export function StaticPage({ title, intro, sections }) {
   return (
     <main className='content'>
       <section className='card static-page'>
+        <RouteLink className='back-home-link' to='/'>← Back to Home</RouteLink>
         <h1>{title}</h1>
         {intro && <p className='static-intro'>{intro}</p>}
         <div className='static-sections'>
