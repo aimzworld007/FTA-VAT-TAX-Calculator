@@ -13,6 +13,6 @@ export function validateVatPeriodSelection(data) {
     || validateRequired(data?.filingYear, 'Filing year');
   if (required) return required;
   if (data?.filingFrequency === 'Monthly') return validateRequired(data?.filingMonth, 'Filing month');
-  if (data?.filingFrequency === 'Quarterly') return validateRequired(data?.filingQuarter, 'Filing quarter');
+  if (data?.filingFrequency === 'Quarterly') return validateRequired(data?.filingStartMonth, 'Quarter start month');
   return '';
 }

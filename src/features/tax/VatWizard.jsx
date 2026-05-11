@@ -5,7 +5,7 @@ import { TAX_CONFIG } from './lib/taxConfig';
 import { ExportActions, FormSection, TaxSummaryCard, WizardProgress, money } from './components/common.jsx';
 import { downloadPdfReport } from './lib/pdfGenerator';
 import { Vat201Report } from './components/Vat201Report.jsx';
-import { MONTHS, QUARTERS, formatVatPeriodLabel, getPeriodFromSelection } from './lib/vatPeriod';
+import { MONTHS, formatVatPeriodLabel, getPeriodFromSelection } from './lib/vatPeriod';
 
 const steps = ['Business Details', 'VAT Input', 'Adjustments', 'Review', 'Export'];
 const n = (v) => Number(v) || 0;
@@ -24,7 +24,7 @@ export function VatWizard({ data, setData, onSave, onReset }) {
     if (JSON.stringify(nextEntries) !== JSON.stringify(data.monthlyEntries || []) || period.taxPeriodStart !== data.taxPeriodStart || period.taxPeriodEnd !== data.taxPeriodEnd) {
       setData({ ...data, ...period, monthlyEntries: nextEntries });
     }
-  }, [data.filingFrequency, data.filingYear, data.filingMonth, data.filingQuarter]);
+  }, [data.filingFrequency, data.filingYear, data.filingMonth, data.filingQuarter, data.filingStartMonth]);
 
   const next = () => setStep((s) => Math.min(5, s + 1));
   const back = () => setStep((s) => Math.max(1, s - 1));
@@ -65,7 +65,7 @@ export function VatWizard({ data, setData, onSave, onReset }) {
       <select value={data.filingFrequency} onChange={e => setData({ ...data, filingFrequency: e.target.value })}>{TAX_CONFIG.filingFrequencies.map(f => <option key={f}>{f}</option>)}</select>
       <select value={data.filingYear} onChange={e => setData({ ...data, filingYear: Number(e.target.value) })}>{years.map(y => <option key={y} value={y}>{y}</option>)}</select>
       {data.filingFrequency === 'Monthly' && <select value={data.filingMonth} onChange={e => setData({ ...data, filingMonth: e.target.value })}>{MONTHS.map(m => <option key={m}>{m}</option>)}</select>}
-      {data.filingFrequency === 'Quarterly' && <select value={data.filingQuarter} onChange={e => setData({ ...data, filingQuarter: e.target.value })}>{QUARTERS.map(q => <option key={q.value} value={q.value}>{q.label}</option>)}</select>}
+      {data.filingFrequency === 'Quarterly' && <select value={data.filingStartMonth} onChange={e => setData({ ...data, filingStartMonth: e.target.value })}>{MONTHS.map(m => <option key={m}>{m}</option>)}</select>}
       {data.filingFrequency === 'Yearly' && <p className='field-help'>Full year selected</p>}
       <p className='field-help'>Selected Tax Period: {formatVatPeriodLabel(data)}</p>
       {(reqErr) && <p className='field-help'>{reqErr}</p>}
