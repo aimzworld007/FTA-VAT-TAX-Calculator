@@ -20,9 +20,6 @@ const resourceLinks = [
   { label: 'VAT Guidelines', href: 'https://tax.gov.ae/en/taxes/Vat/vat.topics.aspx', external: true },
   { label: 'Corporate Tax Guidelines', href: 'https://tax.gov.ae/en/taxes/corporate.tax/corporate.tax.topics.aspx', external: true },
   { label: 'FTA YouTube', href: 'https://www.youtube.com/@uaetax', external: true },
-  { label: 'Privacy Policy', href: '/privacy-policy' },
-  { label: 'Terms & Conditions', href: '/terms' },
-  { label: 'Documentation', href: '/documentation' },
 ];
 
 function normalizeVatDraft(input, workspaceSettings) {
@@ -50,7 +47,7 @@ export function TaxDashboard() {
     setVat((prev) => ({ ...prev, vatPricingMode: nextMode }));
   };
 
-  return <main className='content'><header className='hero'><div><p className='eyebrow'>UAE Tax Calculator</p><h1>UAE VAT & Corporate Tax Calculator</h1><p>Prepare VAT returns and corporate tax estimates with guided calculations.</p></div><div className='hero-card'><span className='badge'>{TAX_CONFIG.badge}</span><nav className='resource-nav no-print' aria-label='Resources'><div className='resource-desktop'>{resourceLinks.map((link) => link.external ? <a key={link.label} className='resource-pill' href={link.href} target='_blank' rel='noreferrer'>{link.label}</a> : <RouteLink key={link.label} className='resource-pill' to={link.href}>{link.label}</RouteLink>)}</div><details className='resource-mobile'><summary>Resources</summary><div className='resource-menu'>{resourceLinks.map((link) => link.external ? <a key={link.label} href={link.href} target='_blank' rel='noreferrer'>{link.label}</a> : <RouteLink key={link.label} to={link.href}>{link.label}</RouteLink>)}</div></details></nav></div></header>
+  return <main className='content'><header className='hero'><div><p className='eyebrow'>UAE Tax Calculator</p><h1>UAE VAT & Corporate Tax Calculator</h1><p>Prepare VAT returns and corporate tax estimates with guided calculations.</p></div><div className='hero-card'><span className='badge'>{TAX_CONFIG.badge}</span><nav className='resource-nav no-print' aria-label='Resources'><div className='resource-desktop'>{resourceLinks.map((link) => link.external ? <a key={link.label} className='resource-pill' href={link.href} target='_blank' rel='noreferrer'>{link.label}</a> : <RouteLink key={link.label} className='resource-pill' to={link.href}>{link.label}</RouteLink>)}</div></nav></div></header>
     <section className='card'>
       <h2>Workspace Settings</h2>
       <div className='setting-card'>
