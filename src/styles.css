@@ -172,3 +172,12 @@
   .vat201-table-wrap{overflow:visible}
   .vat201-table.fta-table{min-width:0}
 }
+
+.setting-card{border:1px solid var(--line);border-radius:16px;padding:14px;background:#fff}
+.setting-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.setting-header h3{margin:0;font-size:16px}
+.setting-hint{color:#475569;cursor:help}
+.vat-mode-segment{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.vat-mode-option{border:1px solid var(--line);background:#f8fafc;border-radius:12px;padding:12px;text-align:left;display:grid;gap:5px;cursor:pointer}
+.vat-mode-option.active{border-color:#1565c0;background:#e3f2fd}
+.vat-mode-option small{color:#475569}
