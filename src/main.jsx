@@ -46,12 +46,16 @@ function App() {
 
   const completion = useMemo(() => {
     const p = profileFields.filter((f) => String(profile[f.key] || '').trim()).length;
-    const vatInputs = [vat.zeroRated, vat.exemptSales, vat.salesAdjustmentVat, vat.expenseAdjustmentVat, ...vat.months.flatMap((m) => [m.sales, m.purchases, m.expenses])].filter((v) => String(v ?? '').trim() !== '').length;
-    const ctInputs = [ct.revenue, ct.cost, ct.deductible, ct.nonDeductible, ct.exemptIncome, ct.loss].filter((v) => String(v ?? '').trim() !== '').length;
-    return { profile: Math.round((p / profileFields.length) * 100), vat: Math.round((vatInputs / 13) * 100), ct: Math.round((ctInputs / 6) * 100) };
+    const vatInputs = [vat.zeroRated, vat.exemptSales, vat.salesAdjustmentVat, vat.expenseAdjustmentVat, ...vat.months.flatMap((m) => [m.sales, m.purchases, m.expenses])].filter((v) => Number(v) !== 0).length + vat.months.filter((m) => String(m.month || '').trim()).length;
+    const ctInputs = [ct.revenue, ct.cost, ct.deductible, ct.nonDeductible, ct.exemptIncome, ct.loss].filter((v) => Number(v) !== 0).length;
+    return { profile: Math.round((p / profileFields.length) * 100), vat: Math.round((vatInputs / 16) * 100), ct: Math.round((ctInputs / 6) * 100) };
   }, [profile, vat, ct]);
 
-  const openWizard = (type) => setActiveTab(type);
+  const openWizard = (type) => {
+    const profileComplete = reqProfile.every((k) => String(profile[k] || '').trim());
+    if (profileComplete) setModuleStep(type, 1);
+    setActiveTab(type);
+  };
   const setModuleStep = (type, step) => setWizardStep((s) => ({ ...s, [type]: step }));
   const missingRequired = reqProfile.filter((k) => !String(profile[k] || '').trim()).length;
   const resetAll = () => { if (!confirm('Reset all saved values in this browser?')) return; ['uaeTaxSuiteProfile', 'uaeTaxSuiteVat', 'uaeTaxSuiteCorporateTax', 'uaeTaxSuitePriorPeriod', 'uaeTaxSuiteWizardStep'].forEach((k) => localStorage.removeItem(k)); location.reload(); };
@@ -60,6 +64,7 @@ function App() {
     <HeroHeader vatResult={vatResult} />
     <div className="content-grid">
       <div>
+      <PrintMeta activeTab={activeTab} profile={profile} />
         {activeTab === 'home' && <HomeDashboard completion={completion} meta={meta} vatResult={vatResult} ctResult={ctResult} onSelect={openWizard} profile={profile} setProfile={setProfile} />}
         {activeTab === 'vat' && <WizardShell type="vat" wizardStep={wizardStep.vat} setWizardStep={(n) => setModuleStep('vat', n)} profile={profile} setProfile={setProfile} vat={vat} setVat={setVatTracked} result={vatResult} completion={completion.vat} meta={meta} backHome={() => setActiveTab('home')} />}
         {activeTab === 'ct' && <WizardShell type="ct" wizardStep={wizardStep.ct} setWizardStep={(n) => setModuleStep('ct', n)} profile={profile} setProfile={setProfile} ct={ct} setCt={setCtTracked} result={ctResult} completion={completion.ct} meta={meta} backHome={() => setActiveTab('home')} />}
@@ -104,7 +109,7 @@ function WizardShell({ type, wizardStep, setWizardStep, profile, setProfile, vat
   return <section className="wizard-wrap">
     <section className="card wizard-topbar"><button className="ghost" onClick={backHome}><ArrowLeft size={16} /> Back to Dashboard</button><strong>{type === 'vat' ? 'VAT Return Wizard' : 'Corporate Tax Wizard'}</strong><span>Completion: {completion}%</span><span>Autosave: {type === 'vat' ? (meta.vatEditedAt ? 'Saved' : 'Waiting') : (meta.ctEditedAt ? 'Saved' : 'Waiting')}</span></section>
     <WizardStepTabs steps={steps} wizardStep={wizardStep} setWizardStep={setWizardStep} />
-    <div className="wizard-progress">{steps[wizardStep]} · {Math.round(((wizardStep + 1) / steps.length) * 100)}% · {requiredNow.length ? `${requiredNow.length} required missing` : 'Ready to continue'}</div>
+    <WizardProgressBar label={steps[wizardStep]} percent={Math.round(((wizardStep + 1) / steps.length) * 100)} statusText={requiredNow.length ? `${requiredNow.length} required missing` : 'Ready to continue'} />
     {type === 'vat' ? <VatWizard wizardStep={wizardStep} profile={profile} setProfile={setProfile} vat={vat} setVat={setVat} result={result} /> : <CorporateTaxWizard wizardStep={wizardStep} ct={ct} setCt={setCt} result={result} profile={profile} setProfile={setProfile} />}
     {atFinalStep && <ExportActions type={type} canExport />}
     <div className="wizard-nav"><button disabled={wizardStep === 0} onClick={() => setWizardStep(wizardStep - 1)}>Previous</button><button disabled={atFinalStep || !canNext} onClick={() => setWizardStep(wizardStep + 1)}>Next</button></div>
@@ -135,6 +140,15 @@ const LiveSummary = ({ activeTab, vatResult, ctResult, completion, missingRequir
   const vatView = activeTab === 'vat';
   const ctView = activeTab === 'ct';
   return <aside className="summary-rail"><section className="card"><h2>Live Summary</h2><div className="stack">{!ctView && <Kpi label="VAT Position" value={money(vatResult.netVat)} tone={vatResult.isPayable ? 'danger' : 'success'} />}{!vatView && <Kpi label="Corporate Tax Due" value={money(ctResult.taxDue)} tone="success" />}{(ctView || activeTab === 'home') && <Kpi label="Taxable Income" value={money(ctResult.taxableIncome)} />}{(vatView || activeTab === 'home') && <Kpi label="Output VAT" value={money(vatResult.outputVat)} />}<Kpi label="Overall Completion" value={`${Math.round((completion.profile + completion.vat + completion.ct) / 3)}%`} /><Kpi label="Missing Required" value={String(missingRequired)} note="Business profile fields" /></div></section></aside>;
+};
+
+
+const WizardProgressBar = ({ label, percent, statusText }) => <div className="wizard-progress-wrap"><div className="wizard-progress">{label} · {percent}% · {statusText}</div><div className="progress-track"><div className="progress-fill" style={{ width: `${percent}%` }} /></div></div>;
+
+const PrintMeta = ({ activeTab, profile }) => {
+  if (activeTab === 'home') return null;
+  const title = activeTab === 'vat' ? 'VAT Return Report' : 'Corporate Tax Report';
+  return <div className="print-only print-block"><div className="print-header"><img src={FTA_LOGO} alt="FTA UAE" /><div><h1>{title}</h1><p>{profile.businessName || 'Business Name'} {profile.trn ? `· TRN: ${profile.trn}` : ''}</p></div></div><div className="print-footer">Created with <a href="https://ftapro.vercel.app">https://ftapro.vercel.app</a></div></div>;
 };
 
 createRoot(document.getElementById('root')).render(<App />);
