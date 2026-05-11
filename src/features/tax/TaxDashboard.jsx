@@ -20,9 +20,6 @@ const resourceLinks = [
   { label: 'VAT Guidelines', href: 'https://tax.gov.ae/en/taxes/Vat/vat.topics.aspx', external: true },
   { label: 'Corporate Tax Guidelines', href: 'https://tax.gov.ae/en/taxes/corporate.tax/corporate.tax.topics.aspx', external: true },
   { label: 'FTA YouTube', href: 'https://www.youtube.com/@uaetax', external: true },
-  { label: 'Privacy Policy', href: '/privacy-policy' },
-  { label: 'Terms & Conditions', href: '/terms' },
-  { label: 'Documentation', href: '/documentation' },
 ];
 
 function normalizeVatDraft(input, workspaceSettings) {
