@@ -58,9 +58,13 @@ export function TaxDashboard() {
           <h3>VAT Pricing Mode</h3>
           <span className='setting-hint' title='Changing this affects future pricing calculations only.'>ⓘ</span>
         </div>
-        <div className='vat-mode-segment'>
-          {VAT_PRICING_OPTIONS.map((option) => <button key={option.value} className={`vat-mode-option ${workspaceSettings.vatPricingMode === option.value ? 'active' : ''}`} onClick={() => updateVatPricingMode(option.value)}><strong>{option.label}</strong><small>{option.description}</small></button>)}
-        </div>
+        <label className='field'>
+          <span>VAT Return Pricing Mode</span>
+          <select value={workspaceSettings.vatPricingMode} onChange={(e) => updateVatPricingMode(e.target.value)}>
+            {VAT_PRICING_OPTIONS.map((option) => <option key={option.value} value={option.value}>{option.label} — {option.description}</option>)}
+          </select>
+          <small className='field-help'>This default is applied inside the VAT Return wizard and can be changed there.</small>
+        </label>
       </div>
     </section>
     <section className='card'><h2>Live Summary</h2><div className='grid-section'><TaxSummaryCard label='VAT Payable / Refundable' value={money(v.netVat)} /><TaxSummaryCard label='VAT Taxable Sales (Auto)' value={money(v.salesBreakdown.net)} /><TaxSummaryCard label='Corporate Tax Estimate' value={money(c.taxPayable)} /><TaxSummaryCard label='Selected Tax Period' value={formatVatPeriodLabel(vat)} /></div><div className='selector-grid no-print'><TaxModeCard title='VAT Return' desc='Open VAT return wizard' onClick={() => setMode('vat')} active={mode === 'vat'} /><TaxModeCard title='Corporate Tax' desc='Open corporate tax wizard' onClick={() => setMode('ct')} active={mode === 'ct'} /></div></section>

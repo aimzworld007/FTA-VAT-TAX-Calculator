@@ -65,6 +65,7 @@ export function VatWizard({ data, setData, onSave, onReset }) {
       {data.filingFrequency === 'Monthly' && <select value={data.filingMonth} onChange={e => setData({ ...data, filingMonth: e.target.value })}>{MONTHS.map(m => <option key={m}>{m}</option>)}</select>}
       {data.filingFrequency === 'Quarterly' && <select value={data.filingStartMonth} onChange={e => setData({ ...data, filingStartMonth: e.target.value })}>{MONTHS.map(m => <option key={m}>{m}</option>)}</select>}
       {data.filingFrequency === 'Yearly' && <p className='field-help'>Full year selected</p>}
+      <label className='field'><span>VAT Pricing Mode</span><select value={data.vatPricingMode} onChange={e => setData({ ...data, vatPricingMode: e.target.value })}>{Object.values(VAT_PRICING_MODES).map(mode => <option key={mode} value={mode}>{mode === VAT_PRICING_MODES.INCLUSIVE ? 'Inclusive (amount entered includes VAT)' : 'Exclusive (amount entered excludes VAT)'}</option>)}</select><small className='field-help'>This controls how sales and costs are converted into the VAT return values.</small></label>
       <p className='field-help'>Selected Tax Period: {formatVatPeriodLabel(data)}</p>
       {(reqErr) && <p className='field-help'>{reqErr}</p>}
     </div>}
