@@ -1,5 +1,5 @@
-import { TAX_CONFIG } from './taxConfig';
 import { buildMonthlyEntriesFromPeriod } from './vatPeriod';
+import { VAT_PRICING_MODES, normalizeVatPricingMode, splitVatFromAmount, summarizeVatAmounts } from './vatPricing';
 
 const n = (v) => Number(v) || 0;
 const clamp = (v) => Math.max(0, n(v));
@@ -15,12 +15,10 @@ export function calculateVat(form) {
   const totalPurchases = hasMonthlyEntries ? monthlyEntries.reduce((sum, e) => sum + clamp(e.purchases), 0) : clamp(form.standardRatedPurchases);
   const totalExpenses = hasMonthlyEntries ? monthlyEntries.reduce((sum, e) => sum + clamp(e.expenses), 0) : 0;
 
-  const vatInclusive = form.vatMode === 'Inclusive';
+  const pricingMode = normalizeVatPricingMode(form.vatPricingMode || form.vatMode);
   const taxableInputTotal = totalPurchases + totalExpenses;
-  const outputVat = vatInclusive ? totalSales - (totalSales / (1 + TAX_CONFIG.vatRate)) : totalSales * TAX_CONFIG.vatRate;
-  const computedRecoverableVat = vatInclusive
-    ? taxableInputTotal - (taxableInputTotal / (1 + TAX_CONFIG.vatRate))
-    : taxableInputTotal * TAX_CONFIG.vatRate;
+  const outputVat = splitVatFromAmount(totalSales, pricingMode).vat;
+  const computedRecoverableVat = splitVatFromAmount(taxableInputTotal, pricingMode).vat;
   const inputVat = hasMonthlyEntries ? computedRecoverableVat : clamp(form.recoverableInputVat);
 
   const adjustments = n(form.previousAdjustment) - n(form.badDebtRelief);
@@ -35,6 +33,11 @@ export function calculateVat(form) {
     totalPurchases,
     totalExpenses,
     taxableInputTotal,
-    label: netVat >= 0 ? 'VAT Payable' : 'VAT Refundable'
+    label: netVat >= 0 ? 'VAT Payable' : 'VAT Refundable',
+    vatPricingMode: pricingMode,
+    salesBreakdown: splitVatFromAmount(totalSales, pricingMode),
+    inputBreakdown: splitVatFromAmount(taxableInputTotal, pricingMode),
+    monthlySummary: summarizeVatAmounts(monthlyEntries.map((entry) => clamp(entry.sales)), pricingMode),
+    isInclusive: pricingMode === VAT_PRICING_MODES.INCLUSIVE
   };
 }

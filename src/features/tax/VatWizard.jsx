@@ -6,6 +6,7 @@ import { ExportActions, FormSection, TaxSummaryCard, WizardProgress, money } fro
 import { downloadPdfReport } from './lib/pdfGenerator';
 import { Vat201Report } from './components/Vat201Report.jsx';
 import { MONTHS, formatVatPeriodLabel, getPeriodFromSelection } from './lib/vatPeriod';
+import { VAT_PRICING_MODES, splitVatFromAmount } from './lib/vatPricing';
 
 const steps = ['Business Details', 'VAT Input', 'Adjustments', 'Review', 'Export'];
 const n = (v) => Number(v) || 0;
@@ -37,14 +38,11 @@ export function VatWizard({ data, setData, onSave, onReset }) {
   const monthCount = buildMonthlyEntries(data).length;
   const entries = buildMonthlyEntries(data);
 
-  const getEntryOutputVat = (entry, vatMode) => {
-    const sales = n(entry.sales);
-    return vatMode === 'Inclusive' ? sales - (sales / 1.05) : sales * 0.05;
-  };
+  const getEntryOutputVat = (entry, vatMode) => splitVatFromAmount(n(entry.sales), vatMode).vat;
 
   const getEntryRecoverableVat = (entry, vatMode) => {
     const base = n(entry.purchases) + n(entry.expenses);
-    return vatMode === 'Inclusive' ? base - (base / 1.05) : base * 0.05;
+    return splitVatFromAmount(base, vatMode).vat;
   };
 
   const getEntryNetVat = (entry, vatMode) => getEntryOutputVat(entry, vatMode) - getEntryRecoverableVat(entry, vatMode);
@@ -53,9 +51,9 @@ export function VatWizard({ data, setData, onSave, onReset }) {
     sales: acc.sales + n(entry.sales),
     purchases: acc.purchases + n(entry.purchases),
     expenses: acc.expenses + n(entry.expenses),
-    outputVat: acc.outputVat + getEntryOutputVat(entry, data.vatMode),
-    recoverableVat: acc.recoverableVat + getEntryRecoverableVat(entry, data.vatMode),
-    netVat: acc.netVat + getEntryNetVat(entry, data.vatMode)
+    outputVat: acc.outputVat + getEntryOutputVat(entry, data.vatPricingMode),
+    recoverableVat: acc.recoverableVat + getEntryRecoverableVat(entry, data.vatPricingMode),
+    netVat: acc.netVat + getEntryNetVat(entry, data.vatPricingMode)
   }), { sales: 0, purchases: 0, expenses: 0, outputVat: 0, recoverableVat: 0, netVat: 0 });
 
   return <div><WizardProgress step={step} total={5} /><FormSection title={`VAT Wizard: ${steps[step - 1]}`}>
@@ -73,7 +71,7 @@ export function VatWizard({ data, setData, onSave, onReset }) {
     {step === 2 && <div className='vat-input-layout'>
       <p className='field-help vat-input-help'>Your selected filing frequency is {data.filingFrequency}, so enter {monthCount} {monthCount === 1 ? 'month' : 'months'} of sales, purchases, and expenses.</p>
       <div className='vat-input-main'>
-        <div className='vat-monthly-wrap'><table className='vat-input-table'><thead><tr><th>Month</th><th>Sales</th><th>Purchases</th><th>Expenses</th><th>Output VAT</th><th>Recoverable VAT</th><th>Net VAT</th></tr></thead><tbody>{entries.map((entry) => <tr key={entry.month}><td>{entry.month}</td><td><input type='number' min='0' value={entry.sales} onChange={e => updateEntry(entry.month, 'sales', e.target.value)} /></td><td><input type='number' min='0' value={entry.purchases} onChange={e => updateEntry(entry.month, 'purchases', e.target.value)} /></td><td><input type='number' min='0' value={entry.expenses} onChange={e => updateEntry(entry.month, 'expenses', e.target.value)} /></td><td className='vat-readonly'>{money(getEntryOutputVat(entry, data.vatMode))}</td><td className='vat-readonly'>{money(getEntryRecoverableVat(entry, data.vatMode))}</td><td className='vat-readonly'>{money(getEntryNetVat(entry, data.vatMode))}</td></tr>)}</tbody><tfoot><tr className='vat-total-row'><td>Total</td><td>{money(totals.sales)}</td><td>{money(totals.purchases)}</td><td>{money(totals.expenses)}</td><td>{money(totals.outputVat)}</td><td>{money(totals.recoverableVat)}</td><td>{money(totals.netVat)}</td></tr></tfoot></table></div>
+        <div className='vat-monthly-wrap'><table className='vat-input-table'><thead><tr><th>Month</th><th>Sales</th><th>Purchases</th><th>Expenses</th><th>Output VAT</th><th>Recoverable VAT</th><th>Net VAT</th></tr></thead><tbody>{entries.map((entry) => <tr key={entry.month}><td>{entry.month}</td><td><input type='number' min='0' value={entry.sales} onChange={e => updateEntry(entry.month, 'sales', e.target.value)} /></td><td><input type='number' min='0' value={entry.purchases} onChange={e => updateEntry(entry.month, 'purchases', e.target.value)} /></td><td><input type='number' min='0' value={entry.expenses} onChange={e => updateEntry(entry.month, 'expenses', e.target.value)} /></td><td className='vat-readonly'>{money(getEntryOutputVat(entry, data.vatPricingMode))}</td><td className='vat-readonly'>{money(getEntryRecoverableVat(entry, data.vatPricingMode))}</td><td className='vat-readonly'>{money(getEntryNetVat(entry, data.vatPricingMode))}</td></tr>)}</tbody><tfoot><tr className='vat-total-row'><td>Total</td><td>{money(totals.sales)}</td><td>{money(totals.purchases)}</td><td>{money(totals.expenses)}</td><td>{money(totals.outputVat)}</td><td>{money(totals.recoverableVat)}</td><td>{money(totals.netVat)}</td></tr></tfoot></table></div>
       </div>
       <div className='vat-input-summary-grid'>
         <TaxSummaryCard label='Total Sales' value={money(totals.sales)} />
@@ -90,7 +88,7 @@ export function VatWizard({ data, setData, onSave, onReset }) {
       </div>
     </div>}
     {step === 3 && <div className='form-grid three'><input type='number' placeholder='Previous period adjustment' value={data.previousAdjustment} onChange={e => setData({ ...data, previousAdjustment: e.target.value })} /><input type='number' placeholder='Bad debt relief' value={data.badDebtRelief} onChange={e => setData({ ...data, badDebtRelief: e.target.value })} /><textarea placeholder='Other adjustment notes' value={data.adjustmentNotes} onChange={e => setData({ ...data, adjustmentNotes: e.target.value })} /></div>}
-    {step === 4 && <div className='grid-section'><TaxSummaryCard label='Total output VAT' value={money(result.outputVat)} /><TaxSummaryCard label='Total input VAT' value={money(result.inputVat)} /><TaxSummaryCard label='Adjustments' value={money(result.adjustments)} /><TaxSummaryCard label={result.label} value={money(result.netVat)} /><p>For preparation only. Please verify before official FTA submission.</p></div>}
+    {step === 4 && <div className='grid-section'><TaxSummaryCard label={result.vatPricingMode === VAT_PRICING_MODES.INCLUSIVE ? 'Net Amount' : 'Subtotal'} value={money(result.salesBreakdown.net)} /><TaxSummaryCard label={result.vatPricingMode === VAT_PRICING_MODES.INCLUSIVE ? 'VAT Included' : 'VAT 5%'} value={money(result.salesBreakdown.vat)} /><TaxSummaryCard label='Grand Total' value={money(result.salesBreakdown.total)} /><TaxSummaryCard label='Total input VAT' value={money(result.inputVat)} /><TaxSummaryCard label='Adjustments' value={money(result.adjustments)} /><TaxSummaryCard label={result.label} value={money(result.netVat)} /><p>For preparation only. Please verify before official FTA submission.</p></div>}
     {step === 5 && <Vat201Report data={{ ...data, monthlyEntries: buildMonthlyEntries(data) }} result={result} />}
   </FormSection>
     <div className='wizard-nav no-print'><button onClick={back} disabled={step === 1}>Back</button><button onClick={next} disabled={step === 5}>Continue</button></div>
