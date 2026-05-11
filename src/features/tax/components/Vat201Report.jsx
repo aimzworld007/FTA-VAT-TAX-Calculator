@@ -1,4 +1,5 @@
 import React from 'react';
+import { buildMonthlyEntries } from '../lib/vatCalculator';
 import { money } from './common.jsx';
 
 const emRows = [
@@ -18,7 +19,10 @@ const sectionTitle = (title) => <h3 className='vat201-section-title'>{title}</h3
 export function Vat201Report({ data, result }) {
   const generatedAt = new Date();
   const hasEmirates = emRows.some(([, , key]) => n(data[key]) > 0);
-  const standardSales = n(data.standardRatedSales);
+  const monthlyEntries = buildMonthlyEntries(data);
+  const standardSales = monthlyEntries.reduce((sum, e) => sum + n(e.sales), 0) || n(data.standardRatedSales);
+  const totalPurchases = monthlyEntries.reduce((sum, e) => sum + n(e.purchases), 0) || n(data.standardRatedPurchases);
+  const totalExpenses = monthlyEntries.reduce((sum, e) => sum + n(e.expenses), 0);
   const row1 = emRows.map(([box, description, key]) => ({
     box,
     description,
@@ -36,16 +40,25 @@ export function Vat201Report({ data, result }) {
     { box: '6', description: 'Goods imported into UAE', amount: 0, vat: 0, adjustment: 0 },
     { box: '7', description: 'Adjustments to goods imported into UAE', amount: 0, vat: 0, adjustment: n(data.previousAdjustment) - n(data.badDebtRelief) },
     { box: '8', description: 'Total output tax due', amount: standardSales, vat: result.outputVat, adjustment: 0, total: true },
-    { box: '9', description: 'Standard rated expenses', amount: n(data.standardRatedPurchases), vat: 0, adjustment: 0 },
+    { box: '9', description: 'Standard rated expenses', amount: totalPurchases + totalExpenses, vat: 0, adjustment: 0 },
     { box: '10', description: 'Supplies subject to reverse charge provisions', amount: 0, vat: 0, adjustment: 0 },
-    { box: '11', description: 'Total recoverable tax', amount: n(data.standardRatedPurchases), vat: result.inputVat, adjustment: 0, total: true },
+    { box: '11', description: 'Total recoverable tax', amount: totalPurchases + totalExpenses, vat: result.inputVat, adjustment: 0, total: true },
     { box: '12', description: 'Total tax due', amount: standardSales, vat: result.outputVat, adjustment: result.adjustments, total: true },
-    { box: '13', description: 'Total recoverable tax', amount: n(data.standardRatedPurchases), vat: result.inputVat, adjustment: 0, total: true },
+    { box: '13', description: 'Total recoverable tax', amount: totalPurchases + totalExpenses, vat: result.inputVat, adjustment: 0, total: true },
     { box: '14', description: 'Payable tax for the period', amount: 0, vat: result.netVat, adjustment: 0, total: true }
   ];
 
   const period = data.taxPeriodStart && data.taxPeriodEnd ? `${data.taxPeriodStart} to ${data.taxPeriodEnd}` : '—';
-  const monthlyRows = (data.monthlyInputs?.length ? data.monthlyInputs : [{ month: period, sales: n(data.standardRatedSales) + n(data.zeroRatedSales) + n(data.exemptSales), purchases: n(data.standardRatedPurchases), expenses: n(data.standardRatedPurchases), outputVat: result.outputVat, recoverableVat: result.inputVat, netVat: result.netVat }]);
+  const monthlyRows = monthlyEntries.map((entry) => {
+    const sales = n(entry.sales);
+    const purchases = n(entry.purchases);
+    const expenses = n(entry.expenses);
+    const outputVat = data.vatMode === 'Inclusive' ? sales - (sales / 1.05) : sales * 0.05;
+    const recoverableVat = data.vatMode === 'Inclusive'
+      ? (purchases + expenses) - ((purchases + expenses) / 1.05)
+      : (purchases + expenses) * 0.05;
+    return { month: entry.month, sales, purchases, expenses, outputVat, recoverableVat, netVat: outputVat - recoverableVat };
+  });
 
   return <section id='vat201-report' className='vat201-report'>
     <header className='vat201-header'>
