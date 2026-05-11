@@ -191,7 +191,7 @@ function CorporateTaxModule({ ct, setCt, result }) {
   const update = (key, value) => setCt({ ...ct, [key]: value });
   const status = result.sbrApplied
     ? 'Small Business Relief selected: estimated Corporate Tax is AED 0, subject to eligibility and correct election.'
-    : result.taxableIncome <= CT_THRESHOLD
+    : result.taxableIncome <= CORPORATE_TAX_RULES_2026.threshold
       ? 'Taxable income is within the AED 375,000 0% band.'
       : 'Taxable income exceeds AED 375,000. 9% applies only on the excess amount.';
 
