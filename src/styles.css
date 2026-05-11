@@ -192,6 +192,8 @@
 .resource-menu a{color:#fff;text-decoration:none;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.35);padding:8px 10px;border-radius:8px;font-size:13px}
 
 .static-page h1{margin:0 0 12px}
+.back-home-link{display:inline-block;margin:0 0 14px;color:#1565c0;text-decoration:none;font-weight:700}
+.back-home-link:hover{text-decoration:underline}
 .static-intro{margin:0 0 16px;color:#334155}
 .static-sections{display:grid;gap:14px}
 .static-section h2{margin:0 0 8px;font-size:18px}
@@ -199,6 +201,9 @@
 .static-section ul{margin:0;padding-left:18px;display:grid;gap:6px;color:#334155}
 
 .app-footer{padding:12px 20px;text-align:center;font-size:12px;color:#334155;background:#e2e8f0;border-top:1px solid #cbd5e1}
+.footer-links{display:flex;justify-content:center;gap:14px;flex-wrap:wrap;margin-bottom:8px}
+.footer-links a{color:#0d47a1;text-decoration:none;font-weight:700}
+.footer-links a:hover{text-decoration:underline}
 
 @media(max-width:1050px){
   .resource-desktop{display:none}
