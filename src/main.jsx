@@ -60,7 +60,7 @@ function App() {
   const missingRequired = reqProfile.filter((k) => !String(profile[k] || '').trim()).length;
   const resetAll = () => { if (!confirm('Reset all saved values in this browser?')) return; ['uaeTaxSuiteProfile', 'uaeTaxSuiteVat', 'uaeTaxSuiteCorporateTax', 'uaeTaxSuitePriorPeriod', 'uaeTaxSuiteWizardStep'].forEach((k) => localStorage.removeItem(k)); location.reload(); };
 
-  return <LayoutShell sidebar={<Sidebar activeTab={activeTab} setActiveTab={setActiveTab} resetAll={resetAll} />}>
+  return <LayoutShell activeTab={activeTab} sidebar={<Sidebar activeTab={activeTab} setActiveTab={setActiveTab} resetAll={resetAll} />}>
     <HeroHeader vatResult={vatResult} />
     <div className="content-grid">
       <div>
@@ -73,7 +73,7 @@ function App() {
     </div>
   </LayoutShell>;
 }
-const LayoutShell = ({ sidebar, children }) => <div className="app-shell">{sidebar}<main className="content">{children}</main></div>;
+const LayoutShell = ({ activeTab, sidebar, children }) => <div className={`app-shell ${activeTab === 'vat' ? 'print-vat' : activeTab === 'ct' ? 'print-ct' : ''}`}>{sidebar}<main className="content">{children}</main></div>;
 const Sidebar = ({ activeTab, setActiveTab, resetAll }) => <aside className="sidebar no-print"><div className="brand"><img src={FTA_LOGO} alt="FTA UAE" /><div><strong>UAE Tax Suite</strong><span>VAT + Corporate Tax</span></div></div><button className={activeTab === 'home' ? 'active' : ''} onClick={() => setActiveTab('home')}><Landmark size={18} />Home</button><button className={activeTab === 'vat' ? 'active' : ''} onClick={() => setActiveTab('vat')}><FileText size={18} />VAT Return</button><button className={activeTab === 'ct' ? 'active' : ''} onClick={() => setActiveTab('ct')}><Calculator size={18} />Corporate Tax</button><button className="danger" onClick={resetAll}><RotateCcw size={18} />Reset</button></aside>;
 const HeroHeader = ({ vatResult }) => <header className="hero"><div><p className="eyebrow">🇦🇪 Internal UAE tax worksheet</p><h1>UAE Tax Suite Wizard</h1></div><div className="hero-card"><BadgeCheck /><span>Auto saved locally</span><strong>{money(Math.abs(vatResult.netVat))}</strong><small>{vatResult.isPayable ? 'Estimated VAT payable' : 'Estimated VAT refund / credit'}</small></div></header>;
 
