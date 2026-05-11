@@ -1,6 +1,7 @@
 import React from 'react';
 import { buildMonthlyEntries } from '../lib/vatCalculator';
 import { formatVatPeriodLabel } from '../lib/vatPeriod';
+import { normalizeVatAmounts, normalizeVatPricingMode, VAT_PRICING_MODES } from '../lib/vatPricing';
 import { money } from './common.jsx';
 
 const emirateRows = [
@@ -19,18 +20,20 @@ export function Vat201Report({ data, result }) {
   const generatedAt = new Date();
   const period = formatVatPeriodLabel(data);
   const monthlyEntries = buildMonthlyEntries(data);
+  const pricingMode = normalizeVatPricingMode(data.vatPricingMode || data.vatMode || result?.vatPricingMode);
+  const vatModeLabel = pricingMode === VAT_PRICING_MODES.INCLUSIVE ? 'Inclusive' : 'Exclusive';
 
   const standardSales = monthlyEntries.reduce((sum, e) => sum + n(e.sales), 0) || n(data.standardRatedSales);
   const totalPurchases = monthlyEntries.reduce((sum, e) => sum + n(e.purchases), 0) || n(data.standardRatedPurchases);
   const totalExpenses = monthlyEntries.reduce((sum, e) => sum + n(e.expenses), 0);
-  const inputBase = totalPurchases + totalExpenses;
+  const inputBaseGross = totalPurchases + totalExpenses;
+  const inputBreakdown = normalizeVatAmounts(inputBaseGross, pricingMode);
   const hasEmirates = emirateRows.some(([, , key]) => n(data[key]) > 0);
 
   const salesRows = emirateRows.map(([box, description, key]) => ({
+    ...normalizeVatAmounts(hasEmirates ? n(data[key]) : box === '1c' ? standardSales : 0, pricingMode),
     box,
     description,
-    amount: hasEmirates ? n(data[key]) : box === '1c' ? standardSales : 0,
-    vatAmount: hasEmirates ? n(data[key]) * 0.05 : box === '1c' ? result.outputVat : 0,
     adjustment: 0
   }));
 
@@ -38,17 +41,17 @@ export function Vat201Report({ data, result }) {
     ...salesRows,
     { box: '2', description: 'Tax Refunds provided to Tourists under the Tax Refunds for Tourists Scheme', amount: 0, vatAmount: 0, adjustment: 0 },
     { box: '3', description: 'Supplies subject to the reverse charge provisions', amount: 0, vatAmount: 0, adjustment: 0 },
-    { box: '4', description: 'Zero rated supplies', amount: n(data.zeroRatedSales), vatAmount: 0, adjustment: 0 },
-    { box: '5', description: 'Exempt supplies', amount: n(data.exemptSales), vatAmount: 0, adjustment: 0 },
+    { box: '4', description: 'Zero rated supplies', taxableAmount: n(data.zeroRatedSales), vatAmount: 0, grossAmount: n(data.zeroRatedSales), adjustment: 0 },
+    { box: '5', description: 'Exempt supplies', taxableAmount: n(data.exemptSales), vatAmount: 0, grossAmount: n(data.exemptSales), adjustment: 0 },
     { box: '6', description: 'Goods imported into the UAE', amount: 0, vatAmount: 0, adjustment: 0 },
     { box: '7', description: 'Adjustments to goods imported into the UAE', amount: 0, vatAmount: 0, adjustment: result.adjustments },
-    { box: '8', description: 'Totals', amount: standardSales, vatAmount: result.outputVat, adjustment: result.adjustments, total: true }
+    { box: '8', description: 'Totals', taxableAmount: result.salesBreakdown.net, vatAmount: result.outputVat, grossAmount: result.salesBreakdown.total, adjustment: result.adjustments, total: true }
   ];
 
   const sectionTwoRows = [
-    { box: '9', description: 'Standard rated expenses', amount: inputBase, vatAmount: result.inputVat, adjustment: 0 },
+    { box: '9', description: 'Standard rated expenses', taxableAmount: inputBreakdown.taxableAmount, vatAmount: result.inputVat, grossAmount: inputBreakdown.grossAmount, adjustment: 0 },
     { box: '10', description: 'Supplies subject to the reverse charge provisions', amount: 0, vatAmount: 0, adjustment: 0 },
-    { box: '11', description: 'Totals', amount: inputBase, vatAmount: result.inputVat, adjustment: 0, total: true }
+    { box: '11', description: 'Totals', taxableAmount: inputBreakdown.taxableAmount, vatAmount: result.inputVat, grossAmount: inputBreakdown.grossAmount, adjustment: 0, total: true }
   ];
 
   const sectionThreeRows = [
@@ -63,9 +66,11 @@ export function Vat201Report({ data, result }) {
       <div>
         <small>{data.businessName || '—'}</small>
         <small>{period}</small>
+        <small>VAT Mode: {vatModeLabel}</small>
         <small>{generatedAt.toLocaleString()}</small>
       </div>
     </header>
+    <p className='field-help'>FTA VAT Return Amount should be excluding VAT. If your sales are VAT-inclusive, the system automatically separates taxable value and VAT.</p>
 
     <div className='vat201-table-wrap'>
       <h3>1. VAT on Sales and All Other Outputs</h3>
@@ -98,7 +103,7 @@ function ReportTable({ rows }) {
     <tbody>
       {rows.map((row) => <tr key={row.box} className={row.total ? 'row-total' : ''}>
         <td>{row.box} {row.description}</td>
-        <td className='num'>{money(row.amount)}</td>
+        <td className='num'>{money(row.taxableAmount ?? row.amount ?? 0)}</td>
         <td className='num'>{money(row.vatAmount)}</td>
         <td className='num'>{money(row.adjustment)}</td>
       </tr>)}
