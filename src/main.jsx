@@ -20,8 +20,9 @@ function Kpi({ label, value, note, tone = '' }) {
 }
 
 function App() {
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const [activeTab, setActiveTab] = useState('home');
   const [wizardStep, setWizardStep] = useState(0);
+  const [wizardType, setWizardType] = useState(null);
   const [profile, setProfile] = usePersistentState('uaeTaxSuiteProfile', { businessName: '', trn: '', preparedBy: '', period: '' });
   const [vat, setVat] = usePersistentState('uaeTaxSuiteVat', {
     emirate: '1c', mode: VAT_RULES_2026.defaultMode, zeroRated: 0, exemptSales: 0, salesAdjustmentVat: 0, expenseAdjustmentVat: 0, notes: '',
@@ -48,12 +49,18 @@ function App() {
     location.reload();
   }
 
-  const wizardSteps = ['Profile', 'VAT/CT Inputs', 'Review', 'Export'];
+  const wizardSteps = ['Profile', 'Inputs', 'Review', 'Submit'];
+
+  function startWizard(type) {
+    setWizardType(type);
+    setWizardStep(0);
+    setActiveTab('wizard');
+  }
 
   return <div className="app-shell">
     <aside className="sidebar no-print">
       <div className="brand"><img src={FTA_LOGO} alt="FTA UAE" /><div><strong>UAE Tax Suite</strong><span>VAT + Corporate Tax</span></div></div>
-      <button className={activeTab === 'dashboard' ? 'active' : ''} onClick={() => setActiveTab('dashboard')}><Landmark size={18}/> Dashboard</button>
+      <button className={activeTab === 'home' ? 'active' : ''} onClick={() => setActiveTab('home')}><Landmark size={18}/> Home</button>
       <button className={activeTab === 'wizard' ? 'active' : ''} onClick={() => setActiveTab('wizard')}><WandSparkles size={18}/> Tax Wizard</button>
       <button className={activeTab === 'vat' ? 'active' : ''} onClick={() => setActiveTab('vat')}><FileText size={18}/> VAT Return</button>
       <button className={activeTab === 'ct' ? 'active' : ''} onClick={() => setActiveTab('ct')}><Calculator size={18}/> Corporate Tax</button>
@@ -64,12 +71,31 @@ function App() {
     <main className="content">
       <header className="hero"><div><p className="eyebrow">🇦🇪 Internal UAE tax worksheet</p><h1>VAT Return & Corporate Tax Calculator</h1></div><div className="hero-card"><BadgeCheck/><span>Auto saved locally</span><strong>{money(Math.max(0, vatResult.netVat))}</strong><small>{vatResult.isPayable ? 'Estimated VAT payable' : 'Estimated VAT refund / credit'}</small></div></header>
       <ProfileCard profile={profile} setProfile={setProfile} />
-      {activeTab === 'dashboard' && <Dashboard vatResult={vatResult} ctResult={ctResult} ct={ct} priorPeriod={priorPeriod} setPriorPeriod={setPriorPeriod} />}
-      {activeTab === 'wizard' && <WizardFlow wizardStep={wizardStep} setWizardStep={setWizardStep} steps={wizardSteps} profile={profile} setProfile={setProfile} vat={vat} setVat={setVat} ct={ct} setCt={setCt} vatResult={vatResult} ctResult={ctResult} impact={impact} />}
+      {activeTab === 'home' && <HomeSelector onSelect={startWizard} />}
+      {activeTab === 'wizard' && <WizardFlow wizardType={wizardType} wizardStep={wizardStep} setWizardStep={setWizardStep} steps={wizardSteps} profile={profile} setProfile={setProfile} vat={vat} setVat={setVat} ct={ct} setCt={setCt} vatResult={vatResult} ctResult={ctResult} impact={impact} />}
       {activeTab === 'vat' && <VatModule vat={vat} setVat={setVat} result={vatResult} profile={profile} />}
       {activeTab === 'ct' && <CorporateTaxModule ct={ct} setCt={setCt} result={ctResult} />}
     </main>
   </div>;
+}
+
+function HomeSelector({ onSelect }) {
+  return <section className="card">
+    <div className="card-title"><h2>Select Calculator</h2></div>
+    <p>Choose a tax option to start a setup wizard. After submit, you can print or download as PDF.</p>
+    <div className="selector-grid">
+      <button className="selector-card" onClick={() => onSelect('vat')}>
+        <FileText size={24} />
+        <strong>VAT Return</strong>
+        <span>Start guided VAT return setup</span>
+      </button>
+      <button className="selector-card" onClick={() => onSelect('ct')}>
+        <Calculator size={24} />
+        <strong>Corporate Tax Calculator</strong>
+        <span>Start guided corporate tax setup</span>
+      </button>
+    </div>
+  </section>;
 }
 
 const ProfileCard = ({ profile, setProfile }) => <section className="card no-print"><div className="card-title"><h2><Building2 size={20}/> Shared Business Profile</h2></div><div className="form-grid four">{['businessName','trn','preparedBy','period'].map(k => <Field key={k} label={k}><input value={profile[k]} onChange={e => setProfile({ ...profile, [k]: e.target.value })} /></Field>)}</div></section>;
@@ -96,12 +122,15 @@ function Dashboard({ vatResult, ctResult, ct, priorPeriod, setPriorPeriod }) {
   </section></section>;
 }
 
-function WizardFlow(props) { const { wizardStep, setWizardStep, steps, profile, setProfile, vat, setVat, ct, setCt, vatResult, ctResult, impact } = props;
+function WizardFlow(props) { const { wizardType, wizardStep, setWizardStep, steps, profile, setProfile, vat, setVat, ct, setCt, vatResult, ctResult, impact } = props;
+  if (!wizardType) return <section className="card"><p>Please go to Home and choose VAT Return or Corporate Tax Calculator first.</p></section>;
   return <section className="card"><div className="wizard-steps">{steps.map((s,i)=><button key={s} className={i===wizardStep?'active':''} onClick={()=>setWizardStep(i)}>{i+1}. {s}</button>)}</div>
   {wizardStep===0 && <ProfileCard profile={profile} setProfile={setProfile} />}
-  {wizardStep===1 && <div className="stack"><VatModule vat={vat} setVat={setVat} result={vatResult} profile={profile} compact /><CorporateTaxModule ct={ct} setCt={setCt} result={ctResult} compact /></div>}
-  {wizardStep===2 && <section className="grid-section four"><Kpi label="VAT Change Impact" value={money(impact.vatDelta)} note="vs baseline assumptions" tone={impact.vatDelta > 0 ? 'danger' : 'success'} /><Kpi label="CT Change Impact" value={money(impact.ctDelta)} note="vs baseline assumptions" tone={impact.ctDelta > 0 ? 'danger' : 'success'} /><Kpi label="Final Net VAT" value={money(vatResult.netVat)} /><Kpi label="Final CT" value={money(ctResult.taxDue)} /></section>}
-  {wizardStep===3 && <section><p>Use Print / Save PDF to export the current wizard review.</p><PrintHeader profile={profile} title="UAE Tax Wizard Summary" /></section>}
+  {wizardStep===1 && <div className="stack">{wizardType === 'vat' ? <VatModule vat={vat} setVat={setVat} result={vatResult} profile={profile} compact /> : <CorporateTaxModule ct={ct} setCt={setCt} result={ctResult} compact />}</div>}
+  {wizardStep===2 && <section className="grid-section four">{wizardType === 'vat'
+    ? <><Kpi label="VAT Change Impact" value={money(impact.vatDelta)} note="vs baseline assumptions" tone={impact.vatDelta > 0 ? 'danger' : 'success'} /><Kpi label="Final Net VAT" value={money(vatResult.netVat)} /><Kpi label="Payable / Credit" value={money(Math.abs(vatResult.netVat))} tone={vatResult.isPayable ? 'danger' : 'success'} /><Kpi label="Type" value={vatResult.isPayable ? 'Payable' : 'Refund/Credit'} /></>
+    : <><Kpi label="CT Change Impact" value={money(impact.ctDelta)} note="vs baseline assumptions" tone={impact.ctDelta > 0 ? 'danger' : 'success'} /><Kpi label="Taxable Income" value={money(ctResult.taxableIncome)} /><Kpi label="Final CT" value={money(ctResult.taxDue)} /><Kpi label="Rate Applied" value={`${CORPORATE_TAX_RULES_2026.mainRate * 100}%`} /></>}</section>}
+  {wizardStep===3 && <section><p>Information submitted successfully. Choose one option below.</p><div className="wizard-export"><button onClick={() => window.print()}><Printer size={18}/> Print</button><button onClick={() => window.print()}><FileText size={18}/> Download PDF</button></div><PrintHeader profile={profile} title={wizardType === 'vat' ? 'UAE VAT Wizard Summary' : 'UAE Corporate Tax Wizard Summary'} /></section>}
   <div className="wizard-nav"><button disabled={wizardStep===0} onClick={()=>setWizardStep(wizardStep-1)}>Back</button><button disabled={wizardStep===steps.length-1} onClick={()=>setWizardStep(wizardStep+1)}>Next</button></div>
   </section>;
 }
