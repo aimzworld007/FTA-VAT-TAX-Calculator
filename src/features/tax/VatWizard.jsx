@@ -1,27 +1,30 @@
 import React from 'react';
 import { buildMonthlyEntries, calculateVat } from './lib/vatCalculator';
-import { validateDateRange, validateRequired } from './lib/taxValidation';
+import { validateRequired, validateVatPeriodSelection } from './lib/taxValidation';
 import { TAX_CONFIG } from './lib/taxConfig';
 import { ExportActions, FormSection, TaxSummaryCard, WizardProgress, money } from './components/common.jsx';
 import { downloadPdfReport } from './lib/pdfGenerator';
 import { Vat201Report } from './components/Vat201Report.jsx';
+import { MONTHS, QUARTERS, formatVatPeriodLabel, getPeriodFromSelection } from './lib/vatPeriod';
 
 const steps = ['Business Details', 'Sales', 'Purchases & Expenses', 'Adjustments', 'Review', 'Export'];
 const n = (v) => Number(v) || 0;
 const clampInput = (v) => Math.max(0, n(v));
+const currentYear = new Date().getFullYear();
+const years = Array.from({ length: 8 }, (_, i) => currentYear - 5 + i);
 
 export function VatWizard({ data, setData, onSave, onReset }) {
   const [step, setStep] = React.useState(1);
   const result = calculateVat(data);
-  const dateErr = validateDateRange(data.taxPeriodStart, data.taxPeriodEnd);
-  const reqErr = validateRequired(data.businessName, 'Business name') || validateRequired(data.trn, 'TRN');
+  const reqErr = validateRequired(data.businessName, 'Business name') || validateRequired(data.trn, 'TRN') || validateVatPeriodSelection(data);
 
   React.useEffect(() => {
-    const nextEntries = buildMonthlyEntries(data);
-    if (JSON.stringify(nextEntries) !== JSON.stringify(data.monthlyEntries || [])) {
-      setData({ ...data, monthlyEntries: nextEntries });
+    const period = getPeriodFromSelection(data);
+    const nextEntries = buildMonthlyEntries({ ...data, ...period });
+    if (JSON.stringify(nextEntries) !== JSON.stringify(data.monthlyEntries || []) || period.taxPeriodStart !== data.taxPeriodStart || period.taxPeriodEnd !== data.taxPeriodEnd) {
+      setData({ ...data, ...period, monthlyEntries: nextEntries });
     }
-  }, [data.filingFrequency, data.taxPeriodStart]);
+  }, [data.filingFrequency, data.filingYear, data.filingMonth, data.filingQuarter]);
 
   const next = () => setStep((s) => Math.min(6, s + 1));
   const back = () => setStep((s) => Math.max(1, s - 1));
@@ -31,10 +34,20 @@ export function VatWizard({ data, setData, onSave, onReset }) {
     setData({ ...data, monthlyEntries: updated });
   };
 
-  const monthCount = data.filingFrequency === 'Monthly' ? 1 : data.filingFrequency === 'Yearly' ? 12 : 3;
+  const monthCount = buildMonthlyEntries(data).length;
 
   return <div><WizardProgress step={step} total={6} /><FormSection title={`VAT Wizard: ${steps[step - 1]}`}>
-    {step === 1 && <div className='form-grid two'><input placeholder='Business name' value={data.businessName} onChange={e => setData({ ...data, businessName: e.target.value })} /><input placeholder='TRN' value={data.trn} onChange={e => setData({ ...data, trn: e.target.value })} /><input type='date' value={data.taxPeriodStart} onChange={e => setData({ ...data, taxPeriodStart: e.target.value })} /><input type='date' value={data.taxPeriodEnd} onChange={e => setData({ ...data, taxPeriodEnd: e.target.value })} /><select value={data.filingFrequency} onChange={e => setData({ ...data, filingFrequency: e.target.value })}>{TAX_CONFIG.filingFrequencies.map(f => <option key={f}>{f}</option>)}</select>{(dateErr || reqErr) && <p className='field-help'>{reqErr || dateErr}</p>}</div>}
+    {step === 1 && <div className='form-grid two'>
+      <input placeholder='Business name' value={data.businessName} onChange={e => setData({ ...data, businessName: e.target.value })} />
+      <input placeholder='TRN' value={data.trn} onChange={e => setData({ ...data, trn: e.target.value })} />
+      <select value={data.filingFrequency} onChange={e => setData({ ...data, filingFrequency: e.target.value })}>{TAX_CONFIG.filingFrequencies.map(f => <option key={f}>{f}</option>)}</select>
+      <select value={data.filingYear} onChange={e => setData({ ...data, filingYear: Number(e.target.value) })}>{years.map(y => <option key={y} value={y}>{y}</option>)}</select>
+      {data.filingFrequency === 'Monthly' && <select value={data.filingMonth} onChange={e => setData({ ...data, filingMonth: e.target.value })}>{MONTHS.map(m => <option key={m}>{m}</option>)}</select>}
+      {data.filingFrequency === 'Quarterly' && <select value={data.filingQuarter} onChange={e => setData({ ...data, filingQuarter: e.target.value })}>{QUARTERS.map(q => <option key={q.value} value={q.value}>{q.label}</option>)}</select>}
+      {data.filingFrequency === 'Yearly' && <p className='field-help'>Full year selected</p>}
+      <p className='field-help'>Selected Tax Period: {formatVatPeriodLabel(data)}</p>
+      {(reqErr) && <p className='field-help'>{reqErr}</p>}
+    </div>}
     {step === 2 && <div className='grid-section'>
       <p className='field-help'>Your selected filing frequency is {data.filingFrequency}, so enter {monthCount} {monthCount === 1 ? 'month' : 'months'} of sales.</p>
       <div className='vat-monthly-wrap'><table className='vat-monthly-table'><thead><tr><th>Month</th><th>Sales</th><th>Output VAT</th></tr></thead><tbody>{buildMonthlyEntries(data).map((entry) => <tr key={entry.month}><td>{entry.month}</td><td><input type='number' min='0' value={entry.sales} onChange={e => updateEntry(entry.month, 'sales', e.target.value)} /></td><td className='vat-readonly'>{money(data.vatMode === 'Inclusive' ? n(entry.sales) - (n(entry.sales) / 1.05) : n(entry.sales) * 0.05)}</td></tr>)}</tbody></table></div>

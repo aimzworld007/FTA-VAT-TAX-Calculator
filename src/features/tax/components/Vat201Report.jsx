@@ -1,5 +1,6 @@
 import React from 'react';
 import { buildMonthlyEntries } from '../lib/vatCalculator';
+import { formatVatPeriodLabel } from '../lib/vatPeriod';
 import { money } from './common.jsx';
 
 const emRows = [
@@ -48,7 +49,7 @@ export function Vat201Report({ data, result }) {
     { box: '14', description: 'Payable tax for the period', amount: 0, vat: result.netVat, adjustment: 0, total: true }
   ];
 
-  const period = data.taxPeriodStart && data.taxPeriodEnd ? `${data.taxPeriodStart} to ${data.taxPeriodEnd}` : '—';
+  const period = formatVatPeriodLabel(data);
   const monthlyRows = monthlyEntries.map((entry) => {
     const sales = n(entry.sales);
     const purchases = n(entry.purchases);
