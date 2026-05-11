@@ -120,7 +120,10 @@
   .vat201-table tr,.vat201-card,.sig-box,.vat201-box{break-inside:avoid;page-break-inside:avoid}
 }
 
-.vat-monthly-wrap{overflow-x:auto;overflow-y:hidden;border:1px solid var(--line);border-radius:12px;background:#fff}
+.vat-input-layout{display:grid;gap:14px;margin-bottom:18px}
+.vat-input-help{margin:0}
+.vat-input-main{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:14px;align-items:start}
+.vat-monthly-wrap{min-width:0;width:100%;overflow-x:auto;overflow-y:hidden;border:1px solid var(--line);border-radius:12px;background:#fff}
 .vat-input-table{width:100%;min-width:980px;border-collapse:collapse;margin:0}
 .vat-input-table th,.vat-input-table td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:right;vertical-align:middle;white-space:nowrap}
 .vat-input-table th:first-child,.vat-input-table td:first-child{text-align:left}
@@ -128,7 +131,12 @@
 .vat-input-table input{width:140px;min-width:120px}
 .vat-readonly{background:#f8fafc;color:#0f766e;font-weight:700}
 .vat-total-row td{font-weight:800;background:#f1f5f9}
-.vat-input-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}
+.vat-input-summary{display:grid;grid-template-columns:1fr;gap:10px;width:280px;min-width:280px;flex-shrink:0}
+
+@media(max-width:1080px){
+  .vat-input-main{grid-template-columns:1fr}
+  .vat-input-summary{width:100%;min-width:0;grid-template-columns:repeat(auto-fit,minmax(170px,1fr))}
+}
 
 @media(max-width:900px){
   .vat-input-table{min-width:840px}
