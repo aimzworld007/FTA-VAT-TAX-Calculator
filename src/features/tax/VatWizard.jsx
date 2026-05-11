@@ -3,7 +3,7 @@ import { buildMonthlyEntries, calculateVat } from './lib/vatCalculator';
 import { validateRequired, validateVatPeriodSelection } from './lib/taxValidation';
 import { TAX_CONFIG } from './lib/taxConfig';
 import { ExportActions, FormSection, TaxSummaryCard, WizardProgress, money } from './components/common.jsx';
-import { downloadPdfReport } from './lib/pdfGenerator';
+import { downloadVatPdf } from './services/vatPdfApi.ts';
 import { Vat201Report } from './components/Vat201Report.jsx';
 import { MONTHS, formatVatPeriodLabel, getPeriodFromSelection } from './lib/vatPeriod';
 import { VAT_PRICING_MODES, splitVatFromAmount } from './lib/vatPricing';
@@ -16,6 +16,7 @@ const years = Array.from({ length: 8 }, (_, i) => currentYear - 5 + i);
 
 export function VatWizard({ data, setData, onSave, onReset }) {
   const [step, setStep] = React.useState(1);
+  const [pdfLoading, setPdfLoading] = React.useState(false);
   const result = calculateVat(data);
   const reqErr = validateRequired(data.businessName, 'Business name') || validateRequired(data.trn, 'TRN') || validateVatPeriodSelection(data);
 
@@ -56,6 +57,59 @@ export function VatWizard({ data, setData, onSave, onReset }) {
     netVat: acc.netVat + getEntryNetVat(entry, data.vatPricingMode)
   }), { sales: 0, purchases: 0, expenses: 0, outputVat: 0, recoverableVat: 0, netVat: 0 });
 
+
+
+  const downloadProfessionalPdf = async () => {
+    try {
+      setPdfLoading(true);
+      const period = formatVatPeriodLabel(data);
+      const boxes = [
+        ['1a', 'Abu Dhabi - Standard rated supplies', n(data.abuDhabiSales), 0, 0],
+        ['1b', 'Dubai - Standard rated supplies', n(data.dubaiSales), 0, 0],
+        ['1c', 'Sharjah - Standard rated supplies', entries.reduce((t, e) => t + n(e.sales), 0), result.outputVat, 0],
+        ['1d', 'Ajman - Standard rated supplies', n(data.ajmanSales), 0, 0],
+        ['1e', 'Umm Al Quwain - Standard rated supplies', n(data.uaqSales), 0, 0],
+        ['1f', 'Ras Al Khaimah - Standard rated supplies', n(data.rakSales), 0, 0],
+        ['1g', 'Fujairah - Standard rated supplies', n(data.fujairahSales), 0, 0],
+        ['2', 'Tax refunds provided to tourists', 0, 0, 0],
+        ['3', 'Supplies subject to reverse charge provisions', 0, 0, 0],
+        ['4', 'Zero rated supplies', n(data.zeroRatedSales), 0, 0],
+        ['5', 'Exempt supplies', n(data.exemptSales), 0, 0],
+        ['6', 'Goods imported into UAE', 0, 0, 0],
+        ['7', 'Adjustments to goods imported into UAE', 0, 0, result.adjustments],
+        ['8', 'Total output tax due', result.salesBreakdown.net, result.outputVat, result.adjustments],
+        ['9', 'Standard rated expenses', totals.purchases + totals.expenses, result.inputVat, 0],
+        ['10', 'Supplies subject to reverse charge provisions', 0, 0, 0],
+        ['11', 'Total recoverable tax', totals.purchases + totals.expenses, result.inputVat, 0],
+        ['12', 'Total tax due', result.outputVat + result.adjustments, 0, 0],
+        ['13', 'Total recoverable tax', result.inputVat, 0, 0],
+        ['14', 'Payable tax for the period', result.netVat, 0, 0]
+      ].map(([box, description, amount, vat, adjustment]) => ({ box, description, amount, vat, adjustment }));
+
+      await downloadVatPdf({
+        businessName: data.businessName,
+        trn: data.trn,
+        vatPeriod: period,
+        preparedBy: data.preparedBy || data.businessName || 'N/A',
+        preparedDate: new Date().toISOString().slice(0, 10),
+        vatMode: data.vatPricingMode,
+        summary: {
+          taxableSales: result.salesBreakdown.net,
+          outputVat: result.outputVat,
+          recoverableVat: result.inputVat,
+          zeroRated: n(data.zeroRatedSales),
+          exempt: n(data.exemptSales),
+          netVat: result.netVat
+        },
+        boxes,
+        monthly: entries
+      });
+    } catch (error) {
+      window.alert('Failed to generate PDF. Please try again.');
+    } finally {
+      setPdfLoading(false);
+    }
+  };
   return <div><WizardProgress step={step} total={5} /><FormSection title={`VAT Wizard: ${steps[step - 1]}`}>
     {step === 1 && <div className='form-grid two'>
       <input placeholder='Business name' value={data.businessName} onChange={e => setData({ ...data, businessName: e.target.value })} />
@@ -94,6 +148,6 @@ export function VatWizard({ data, setData, onSave, onReset }) {
     {step === 5 && <Vat201Report data={{ ...data, monthlyEntries: buildMonthlyEntries(data) }} result={result} />}
   </FormSection>
     <div className='wizard-nav no-print'><button onClick={back} disabled={step === 1}>Back</button><button onClick={next} disabled={step === 5}>Continue</button></div>
-    {step === 5 && <ExportActions onSave={onSave} onReset={onReset} onPrint={() => window.print()} onPdf={() => downloadPdfReport(data)} />}
+    {step === 5 && <ExportActions onSave={onSave} onReset={onReset} onPrint={() => window.print()} onPdf={downloadProfessionalPdf} pdfLoading={pdfLoading} />}
   </div>;
 }
