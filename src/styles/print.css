@@ -1,0 +1,7 @@
+@media print {
+  .no-print, .wizard-nav, .selector-grid { display: none !important; }
+  .sticky-export { position: static !important; }
+  .hero, .card { box-shadow: none !important; }
+  @page { size: A4; margin: 12mm; }
+}
+.sticky-export{position:sticky;bottom:0;background:#fff;padding:12px;border-top:1px solid #dbe3ef}
