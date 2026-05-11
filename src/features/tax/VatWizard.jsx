@@ -70,16 +70,18 @@ export function VatWizard({ data, setData, onSave, onReset }) {
       <p className='field-help'>Selected Tax Period: {formatVatPeriodLabel(data)}</p>
       {(reqErr) && <p className='field-help'>{reqErr}</p>}
     </div>}
-    {step === 2 && <div className='grid-section'>
-      <p className='field-help'>Your selected filing frequency is {data.filingFrequency}, so enter {monthCount} {monthCount === 1 ? 'month' : 'months'} of sales, purchases, and expenses.</p>
-      <div className='vat-monthly-wrap'><table className='vat-input-table'><thead><tr><th>Month</th><th>Sales</th><th>Purchases</th><th>Expenses</th><th>Output VAT</th><th>Recoverable VAT</th><th>Net VAT</th></tr></thead><tbody>{entries.map((entry) => <tr key={entry.month}><td>{entry.month}</td><td><input type='number' min='0' value={entry.sales} onChange={e => updateEntry(entry.month, 'sales', e.target.value)} /></td><td><input type='number' min='0' value={entry.purchases} onChange={e => updateEntry(entry.month, 'purchases', e.target.value)} /></td><td><input type='number' min='0' value={entry.expenses} onChange={e => updateEntry(entry.month, 'expenses', e.target.value)} /></td><td className='vat-readonly'>{money(getEntryOutputVat(entry, data.vatMode))}</td><td className='vat-readonly'>{money(getEntryRecoverableVat(entry, data.vatMode))}</td><td className='vat-readonly'>{money(getEntryNetVat(entry, data.vatMode))}</td></tr>)}</tbody><tfoot><tr className='vat-total-row'><td>Total</td><td>{money(totals.sales)}</td><td>{money(totals.purchases)}</td><td>{money(totals.expenses)}</td><td>{money(totals.outputVat)}</td><td>{money(totals.recoverableVat)}</td><td>{money(totals.netVat)}</td></tr></tfoot></table></div>
-      <div className='vat-input-summary'>
-        <TaxSummaryCard label='Total Sales' value={money(totals.sales)} />
-        <TaxSummaryCard label='Total Purchases' value={money(totals.purchases)} />
-        <TaxSummaryCard label='Total Expenses' value={money(totals.expenses)} />
-        <TaxSummaryCard label='Total Output VAT' value={money(totals.outputVat)} />
-        <TaxSummaryCard label='Total Recoverable VAT' value={money(totals.recoverableVat)} />
-        <TaxSummaryCard label={totals.netVat >= 0 ? 'Net VAT Payable' : 'Net VAT Refundable'} value={money(Math.abs(totals.netVat))} />
+    {step === 2 && <div className='vat-input-layout'>
+      <p className='field-help vat-input-help'>Your selected filing frequency is {data.filingFrequency}, so enter {monthCount} {monthCount === 1 ? 'month' : 'months'} of sales, purchases, and expenses.</p>
+      <div className='vat-input-main'>
+        <div className='vat-monthly-wrap'><table className='vat-input-table'><thead><tr><th>Month</th><th>Sales</th><th>Purchases</th><th>Expenses</th><th>Output VAT</th><th>Recoverable VAT</th><th>Net VAT</th></tr></thead><tbody>{entries.map((entry) => <tr key={entry.month}><td>{entry.month}</td><td><input type='number' min='0' value={entry.sales} onChange={e => updateEntry(entry.month, 'sales', e.target.value)} /></td><td><input type='number' min='0' value={entry.purchases} onChange={e => updateEntry(entry.month, 'purchases', e.target.value)} /></td><td><input type='number' min='0' value={entry.expenses} onChange={e => updateEntry(entry.month, 'expenses', e.target.value)} /></td><td className='vat-readonly'>{money(getEntryOutputVat(entry, data.vatMode))}</td><td className='vat-readonly'>{money(getEntryRecoverableVat(entry, data.vatMode))}</td><td className='vat-readonly'>{money(getEntryNetVat(entry, data.vatMode))}</td></tr>)}</tbody><tfoot><tr className='vat-total-row'><td>Total</td><td>{money(totals.sales)}</td><td>{money(totals.purchases)}</td><td>{money(totals.expenses)}</td><td>{money(totals.outputVat)}</td><td>{money(totals.recoverableVat)}</td><td>{money(totals.netVat)}</td></tr></tfoot></table></div>
+        <aside className='vat-input-summary'>
+          <TaxSummaryCard label='Total Sales' value={money(totals.sales)} />
+          <TaxSummaryCard label='Total Purchases' value={money(totals.purchases)} />
+          <TaxSummaryCard label='Total Expenses' value={money(totals.expenses)} />
+          <TaxSummaryCard label='Total Output VAT' value={money(totals.outputVat)} />
+          <TaxSummaryCard label='Total Recoverable VAT' value={money(totals.recoverableVat)} />
+          <TaxSummaryCard label={totals.netVat >= 0 ? 'Net VAT Payable' : 'Net VAT Refundable'} value={money(Math.abs(totals.netVat))} />
+        </aside>
       </div>
       <div className='form-grid three'>
         <input type='number' min='0' placeholder='Zero-rated sales' value={data.zeroRatedSales} onChange={e => setData({ ...data, zeroRatedSales: e.target.value })} />
