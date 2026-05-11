@@ -14,7 +14,13 @@ const FTA_LOGO = 'https://eservices.tax.gov.ae/sap/public/bc/ui2/zmcf_fmca_publi
 const VAT_DEFAULT = { emirate: '1c', mode: VAT_RULES_2026.defaultMode, zeroRated: 0, exemptSales: 0, salesAdjustmentVat: 0, expenseAdjustmentVat: 0, notes: '', months: [{ month: '', sales: 0, purchases: 0, expenses: 0 }, { month: '', sales: 0, purchases: 0, expenses: 0 }, { month: '', sales: 0, purchases: 0, expenses: 0 }] };
 const CT_DEFAULT = { fyStart: '2026-01-01', fyEnd: '2026-12-31', entityType: 'Mainland / Normal UAE Business', smallBusinessRelief: 'no', revenue: 0, cost: 0, deductible: 0, nonDeductible: 0, exemptIncome: 0, loss: 0, notes: '' };
 
-const reqProfile = ['businessName', 'trn', 'preparedBy', 'period'];
+const reqProfile = ['businessName'];
+const profileFields = [
+  { key: 'businessName', label: 'Business Name', required: true },
+  { key: 'trn', label: 'TRN', required: false },
+  { key: 'preparedBy', label: 'Prepared By', required: false },
+  { key: 'period', label: 'Period', required: false },
+];
 const reqVatStep1 = ['emirate', 'mode'];
 const reqCtStep2 = ['revenue', 'cost', 'deductible'];
 
@@ -39,10 +45,10 @@ function App() {
   const setCtTracked = (v) => { setCt(v); touch('ctEditedAt'); };
 
   const completion = useMemo(() => {
-    const p = reqProfile.filter((k) => String(profile[k] || '').trim()).length;
+    const p = profileFields.filter((f) => String(profile[f.key] || '').trim()).length;
     const vatInputs = [vat.zeroRated, vat.exemptSales, vat.salesAdjustmentVat, vat.expenseAdjustmentVat, ...vat.months.flatMap((m) => [m.sales, m.purchases, m.expenses])].filter((v) => String(v ?? '').trim() !== '').length;
     const ctInputs = [ct.revenue, ct.cost, ct.deductible, ct.nonDeductible, ct.exemptIncome, ct.loss].filter((v) => String(v ?? '').trim() !== '').length;
-    return { profile: Math.round((p / 4) * 100), vat: Math.round((vatInputs / 13) * 100), ct: Math.round((ctInputs / 6) * 100) };
+    return { profile: Math.round((p / profileFields.length) * 100), vat: Math.round((vatInputs / 13) * 100), ct: Math.round((ctInputs / 6) * 100) };
   }, [profile, vat, ct]);
 
   const openWizard = (type) => setActiveTab(type);
@@ -70,7 +76,7 @@ const getStatus = (pct) => (pct === 0 ? 'Not Started' : pct === 100 ? 'Ready' : 
 const TaxSelectionCards = ({ completion, meta, vatResult, ctResult, onSelect, canSelect }) => <div className="selector-grid">{[
   { key: 'vat', title: 'VAT Return', desc: 'Prepare UAE VAT return through guided steps.', pct: completion.vat, edited: meta.vatEditedAt, amount: money(vatResult.netVat), cta: completion.vat ? 'Continue VAT' : 'Start VAT' },
   { key: 'ct', title: 'Corporate Tax', desc: 'Calculate UAE corporate tax and review adjustments.', pct: completion.ct, edited: meta.ctEditedAt, amount: money(ctResult.taxDue), cta: completion.ct ? 'Continue CT' : 'Start CT' },
-].map((c) => <div key={c.key} className="selector-card material"><strong>{c.title}</strong><p>{c.desc}</p><span>Completion: {c.pct}%</span><span>Status: {getStatus(c.pct)}</span><span>Last edited: {c.edited ? new Date(c.edited).toLocaleString() : 'Never'}</span><span>Key amount: {c.amount}</span><button className="cta" disabled={!canSelect} title={!canSelect ? 'Complete Shared Business Profile first.' : ''} onClick={() => onSelect(c.key)}>{c.cta}</button></div>)}</div>;
+].map((c) => <div key={c.key} className="selector-card material"><strong>{c.title}</strong><p>{c.desc}</p><span>Completion: {c.pct}%</span><span>Status: {getStatus(c.pct)}</span><span>Last edited: {c.edited ? new Date(c.edited).toLocaleString() : 'Never'}</span><span>Key amount: {c.amount}</span><button className="cta" disabled={!canSelect} title={!canSelect ? 'Complete Business Profile first.' : ''} onClick={() => onSelect(c.key)}>{c.cta}</button></div>)}</div>;
 
 const HomeDashboard = ({ completion, meta, vatResult, ctResult, onSelect, profile, setProfile }) => {
   const missingProfile = reqProfile.filter((k) => !String(profile[k] || '').trim());
@@ -81,13 +87,13 @@ const HomeDashboard = ({ completion, meta, vatResult, ctResult, onSelect, profil
     <section className="card">
       <div className="card-title">
         <h2>Dashboard</h2>
-        {!canSelect && <small>Complete Shared Business Profile to continue.</small>}
+        {!canSelect && <small>Complete Business Profile to continue.</small>}
       </div>
       <TaxSelectionCards completion={completion} meta={meta} vatResult={vatResult} ctResult={ctResult} onSelect={onSelect} canSelect={canSelect} />
     </section>
   </>;
 };
-const SharedBusinessProfile = ({ profile, setProfile, errors = [] }) => <section className="card"><div className="card-title"><h2><Building2 size={20} />Shared Business Profile</h2></div><div className="form-grid four">{reqProfile.map((k) => <Field key={k} label={k} required error={errors.includes(k) ? 'Required field.' : ''}><input className={errors.includes(k) ? 'invalid' : ''} value={profile[k]} onChange={(e) => setProfile({ ...profile, [k]: e.target.value })} /></Field>)}</div></section>;
+const SharedBusinessProfile = ({ profile, setProfile, errors = [] }) => <section className="card"><div className="card-title"><h2><Building2 size={20} />Business Profile</h2></div><div className="form-grid four">{profileFields.map((field) => <Field key={field.key} label={field.label} required={field.required} error={field.required && errors.includes(field.key) ? 'Required field.' : ''}><input className={field.required && errors.includes(field.key) ? 'invalid' : ''} value={profile[field.key]} onChange={(e) => setProfile({ ...profile, [field.key]: e.target.value })} /></Field>)}</div></section>;
 
 function WizardShell({ type, wizardStep, setWizardStep, profile, setProfile, vat, setVat, ct, setCt, result, completion, meta, backHome }) {
   const steps = type === 'vat' ? ['Profile', 'Inputs', 'Review', 'Export'] : ['Profile', 'Revenue & Expenses', 'Adjustments / Relief', 'Review & Export'];
@@ -128,7 +134,7 @@ const ExportActions = ({ type, canExport }) => <section className="card no-print
 const LiveSummary = ({ activeTab, vatResult, ctResult, completion, missingRequired }) => {
   const vatView = activeTab === 'vat';
   const ctView = activeTab === 'ct';
-  return <aside className="summary-rail"><section className="card"><h2>Live Summary</h2><div className="stack">{!ctView && <Kpi label="VAT Position" value={money(vatResult.netVat)} tone={vatResult.isPayable ? 'danger' : 'success'} />}{!vatView && <Kpi label="Corporate Tax Due" value={money(ctResult.taxDue)} tone="success" />}{(ctView || activeTab === 'home') && <Kpi label="Taxable Income" value={money(ctResult.taxableIncome)} />}{(vatView || activeTab === 'home') && <Kpi label="Output VAT" value={money(vatResult.outputVat)} />}<Kpi label="Overall Completion" value={`${Math.round((completion.profile + completion.vat + completion.ct) / 3)}%`} /><Kpi label="Missing Required" value={String(missingRequired)} note="Shared profile fields" /></div></section></aside>;
+  return <aside className="summary-rail"><section className="card"><h2>Live Summary</h2><div className="stack">{!ctView && <Kpi label="VAT Position" value={money(vatResult.netVat)} tone={vatResult.isPayable ? 'danger' : 'success'} />}{!vatView && <Kpi label="Corporate Tax Due" value={money(ctResult.taxDue)} tone="success" />}{(ctView || activeTab === 'home') && <Kpi label="Taxable Income" value={money(ctResult.taxableIncome)} />}{(vatView || activeTab === 'home') && <Kpi label="Output VAT" value={money(vatResult.outputVat)} />}<Kpi label="Overall Completion" value={`${Math.round((completion.profile + completion.vat + completion.ct) / 3)}%`} /><Kpi label="Missing Required" value={String(missingRequired)} note="Business profile fields" /></div></section></aside>;
 };
 
 createRoot(document.getElementById('root')).render(<App />);
