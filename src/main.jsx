@@ -122,8 +122,8 @@ function VatWizard({ wizardStep, profile, setProfile, vat, setVat, result }) {
   const updateMonth = (i, key, value) => { const months = [...vat.months]; months[i] = { ...months[i], [key]: value }; setVat({ ...vat, months }); };
   if (wizardStep === 0) return <SharedBusinessProfile profile={profile} setProfile={setProfile} errors={reqProfile.filter((k) => !String(profile[k] || '').trim())} />;
   if (wizardStep === 1) return <section className="card"><div className="form-grid three"><Field label="Main Emirate" required><select value={vat.emirate} onChange={e => update('emirate', e.target.value)}>{Object.entries(VAT_RULES_2026.emirates).map(([k, v]) => <option key={k} value={k}>{v}</option>)}</select></Field><Field label="Amount Type" required><select value={vat.mode} onChange={e => update('mode', e.target.value)}><option value="inclusive">VAT Inclusive</option><option value="exclusive">VAT Exclusive</option></select></Field><Field label="Sales Adjustment VAT"><input type="number" value={vat.salesAdjustmentVat} onChange={e => update('salesAdjustmentVat', e.target.value)} /></Field><Field label="Expense Adjustment VAT"><input type="number" value={vat.expenseAdjustmentVat} onChange={e => update('expenseAdjustmentVat', e.target.value)} /></Field><Field label="Zero Rated Sales"><input type="number" value={vat.zeroRated} onChange={e => update('zeroRated', e.target.value)} /></Field><Field label="Exempt Sales"><input type="number" value={vat.exemptSales} onChange={e => update('exemptSales', e.target.value)} /></Field></div><div className="month-grid">{vat.months.map((m, i) => <div className="month-card" key={i}><Field label={`Month ${i + 1}`}><input value={m.month} onChange={e => updateMonth(i, 'month', e.target.value)} /></Field><Field label="Sales"><input type="number" value={m.sales} onChange={e => updateMonth(i, 'sales', e.target.value)} /></Field><Field label="Purchases"><input type="number" value={m.purchases} onChange={e => updateMonth(i, 'purchases', e.target.value)} /></Field><Field label="Expenses"><input type="number" value={m.expenses} onChange={e => updateMonth(i, 'expenses', e.target.value)} /></Field></div>)}</div></section>;
-  if (wizardStep === 2) return <ReviewSummary type="vat" result={result} />;
-  return <ReviewSummary type="vat" result={result} />;
+  if (wizardStep === 2) return <><VatReturnPdfLayout profile={profile} vat={vat} result={result} /><ReviewSummary type="vat" result={result} /></>;
+  return <><VatReturnPdfLayout profile={profile} vat={vat} result={result} /><ReviewSummary type="vat" result={result} /></>;
 }
 function CorporateTaxWizard({ wizardStep, ct, setCt, result, profile, setProfile }) {
   const update = (k, v) => setCt({ ...ct, [k]: v });
@@ -132,6 +132,72 @@ function CorporateTaxWizard({ wizardStep, ct, setCt, result, profile, setProfile
   if (wizardStep === 2) return <section className="card"><div className="form-grid three"><Field label="Small Business Relief"><select value={ct.smallBusinessRelief} onChange={e => update('smallBusinessRelief', e.target.value)}><option value="no">No</option><option value="yes">Yes</option></select></Field><Field label="Non-Deductible Expenses"><input type="number" value={ct.nonDeductible} onChange={e => update('nonDeductible', e.target.value)} /></Field><Field label="Exempt / Non-Taxable Income"><input type="number" value={ct.exemptIncome} onChange={e => update('exemptIncome', e.target.value)} /></Field><Field label="Tax Loss Carried Forward"><input type="number" value={ct.loss} onChange={e => update('loss', e.target.value)} /></Field></div></section>;
   return <ReviewSummary type="ct" result={result} />;
 }
+
+
+const vatBoxRows = [
+  { box: '1a', description: 'Standard rated supplies', amountKey: 'taxableSales', vatKey: 'outputVat' },
+  { box: '1b', description: 'Tax due on standard rated supplies', amountKey: null, vatKey: null },
+  { box: '2', description: 'Tax due on reverse charge supplies', amountKey: null, vatKey: null },
+  { box: '3', description: 'Zero-rated supplies', amountKey: 'zeroRated', vatKey: null },
+  { box: '4', description: 'Exempt supplies', amountKey: 'exemptSales', vatKey: null },
+  { box: '5', description: 'Total sales and all outputs', amountKey: 'grossSales', vatKey: 'outputVat' },
+  { box: '6', description: 'Standard rated expenses', amountKey: 'taxableInputs', vatKey: 'inputVat' },
+  { box: '7', description: 'Recoverable tax for expenses', amountKey: null, vatKey: null },
+  { box: '8', description: 'Reverse charge expenses', amountKey: null, vatKey: null },
+  { box: '9', description: 'Total expenses and all inputs', amountKey: 'grossPurchases', vatKey: 'inputVat' },
+  { box: '10', description: 'Payable tax for the period', amountKey: null, vatKey: 'netVat' },
+];
+
+const VatReturnPdfLayout = ({ profile, vat, result }) => {
+  const monthlyRows = vat.months.map((m, idx) => ({
+    month: m.month || `Month ${idx + 1}`,
+    sales: number(m.sales),
+    purchases: number(m.purchases),
+    expenses: number(m.expenses),
+  }));
+  const grossSales = result.sales + number(vat.zeroRated) + number(vat.exemptSales);
+  const grossPurchases = result.purchases + result.expenses;
+  const mapValue = (key) => {
+    if (!key) return 'AED 0.00';
+    if (key === 'zeroRated') return money(vat.zeroRated);
+    if (key === 'exemptSales') return money(vat.exemptSales);
+    if (key === 'grossSales') return money(grossSales);
+    if (key === 'grossPurchases') return money(grossPurchases);
+    return money(result[key]);
+  };
+
+  return <section className="card vat201-sheet">
+    <div className="vat201-topline"><strong>UAE VAT201 Return Summary</strong><span>{profile.businessName || 'Business Name'}</span></div>
+    <div className="vat201-company-grid">
+      <div><label>Company</label><p>{profile.businessName || '-'}</p></div>
+      <div><label>TRN</label><p>{profile.trn || '-'}</p></div>
+      <div><label>Tax Period</label><p>{profile.period || '-'}</p></div>
+      <div><label>Prepared By</label><p>{profile.preparedBy || '-'}</p></div>
+    </div>
+
+    <h3>VAT Summary</h3>
+    <div className="vat201-kpis">
+      <Kpi label="Total Sales" value={money(grossSales)} />
+      <Kpi label="Output VAT" value={money(result.outputVat)} />
+      <Kpi label="Recoverable VAT" value={money(result.inputVat)} />
+      <Kpi label={result.isPayable ? 'Net VAT Payable' : 'Net VAT Refundable'} value={money(result.netVat)} tone={result.isPayable ? 'danger' : 'success'} />
+    </div>
+
+    <h3>VAT201 Box Summary</h3>
+    <table>
+      <thead><tr><th>Box</th><th>Description</th><th>Amount (AED)</th><th>VAT (AED)</th></tr></thead>
+      <tbody>{vatBoxRows.map((row) => <tr key={row.box}><td>{row.box}</td><td>{row.description}</td><td>{mapValue(row.amountKey)}</td><td>{mapValue(row.vatKey)}</td></tr>)}</tbody>
+    </table>
+
+    <h3>Monthly Input Summary</h3>
+    <table>
+      <thead><tr><th>Month</th><th>Sales</th><th>Purchases</th><th>Expenses</th></tr></thead>
+      <tbody>
+        {monthlyRows.map((m) => <tr key={m.month}><td>{m.month}</td><td>{money(m.sales)}</td><td>{money(m.purchases)}</td><td>{money(m.expenses)}</td></tr>)}
+      </tbody>
+    </table>
+  </section>;
+};
 
 const ReviewSummary = ({ type, result }) => <section className="card"><h2>{type === 'vat' ? 'VAT Summary' : 'Corporate Tax Summary'}</h2><div className="grid-section">{type === 'vat' ? <><Kpi label="Output VAT" value={money(result.outputVat)} /><Kpi label="Input VAT" value={money(result.inputVat)} /><Kpi label="Adjustments" value={money(number(result.salesAdjustmentVat) + number(result.expenseAdjustmentVat))} /><Kpi label="VAT payable/refundable" value={money(result.netVat)} tone={result.isPayable ? 'danger' : 'success'} /></> : <><Kpi label="Taxable Income" value={money(result.taxableIncome)} /><Kpi label="Corporate Tax Due" value={money(result.taxDue)} tone="success" /></>}</div></section>;
 const ExportActions = ({ type, canExport }) => <section className="card no-print"><h2>Export</h2>{canExport ? <div className="wizard-export"><button onClick={() => window.print()}><FileText size={16} />Save PDF</button><button onClick={() => window.print()}><Printer size={16} />Print</button><button><Save size={16} />Save Draft</button><button onClick={() => window.location.reload()}><RotateCcw size={16} />Reset {type === 'vat' ? 'VAT' : 'Corporate Tax'} Form</button></div> : <p>Complete required fields and review step to enable export actions.</p>}</section>;
