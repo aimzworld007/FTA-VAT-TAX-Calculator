@@ -54,7 +54,7 @@ function App() {
     <HeroHeader vatResult={vatResult} />
     <div className="content-grid">
       <div>
-        {activeTab === 'home' && <HomeDashboard completion={completion} meta={meta} vatResult={vatResult} ctResult={ctResult} onSelect={openWizard} />}
+        {activeTab === 'home' && <HomeDashboard completion={completion} meta={meta} vatResult={vatResult} ctResult={ctResult} onSelect={openWizard} profile={profile} setProfile={setProfile} />}
         {activeTab === 'vat' && <WizardShell type="vat" wizardStep={wizardStep.vat} setWizardStep={(n) => setModuleStep('vat', n)} profile={profile} setProfile={setProfile} vat={vat} setVat={setVatTracked} result={vatResult} completion={completion.vat} meta={meta} backHome={() => setActiveTab('home')} />}
         {activeTab === 'ct' && <WizardShell type="ct" wizardStep={wizardStep.ct} setWizardStep={(n) => setModuleStep('ct', n)} profile={profile} setProfile={setProfile} ct={ct} setCt={setCtTracked} result={ctResult} completion={completion.ct} meta={meta} backHome={() => setActiveTab('home')} />}
       </div>
@@ -67,12 +67,26 @@ const Sidebar = ({ activeTab, setActiveTab, resetAll }) => <aside className="sid
 const HeroHeader = ({ vatResult }) => <header className="hero"><div><p className="eyebrow">🇦🇪 Internal UAE tax worksheet</p><h1>UAE Tax Suite Wizard</h1></div><div className="hero-card"><BadgeCheck /><span>Auto saved locally</span><strong>{money(Math.abs(vatResult.netVat))}</strong><small>{vatResult.isPayable ? 'Estimated VAT payable' : 'Estimated VAT refund / credit'}</small></div></header>;
 
 const getStatus = (pct) => (pct === 0 ? 'Not Started' : pct === 100 ? 'Ready' : 'Draft');
-const TaxSelectionCards = ({ completion, meta, vatResult, ctResult, onSelect }) => <div className="selector-grid">{[
+const TaxSelectionCards = ({ completion, meta, vatResult, ctResult, onSelect, canSelect }) => <div className="selector-grid">{[
   { key: 'vat', title: 'VAT Return', desc: 'Prepare UAE VAT return through guided steps.', pct: completion.vat, edited: meta.vatEditedAt, amount: money(vatResult.netVat), cta: completion.vat ? 'Continue VAT' : 'Start VAT' },
   { key: 'ct', title: 'Corporate Tax', desc: 'Calculate UAE corporate tax and review adjustments.', pct: completion.ct, edited: meta.ctEditedAt, amount: money(ctResult.taxDue), cta: completion.ct ? 'Continue CT' : 'Start CT' },
-].map((c) => <div key={c.key} className="selector-card material"><strong>{c.title}</strong><p>{c.desc}</p><span>Completion: {c.pct}%</span><span>Status: {getStatus(c.pct)}</span><span>Last edited: {c.edited ? new Date(c.edited).toLocaleString() : 'Never'}</span><span>Key amount: {c.amount}</span><button className="cta" onClick={() => onSelect(c.key)}>{c.cta}</button></div>)}</div>;
+].map((c) => <div key={c.key} className="selector-card material"><strong>{c.title}</strong><p>{c.desc}</p><span>Completion: {c.pct}%</span><span>Status: {getStatus(c.pct)}</span><span>Last edited: {c.edited ? new Date(c.edited).toLocaleString() : 'Never'}</span><span>Key amount: {c.amount}</span><button className="cta" disabled={!canSelect} title={!canSelect ? 'Complete Shared Business Profile first.' : ''} onClick={() => onSelect(c.key)}>{c.cta}</button></div>)}</div>;
 
-const HomeDashboard = ({ completion, meta, vatResult, ctResult, onSelect }) => <section className="card"><div className="card-title"><h2>Dashboard</h2></div><TaxSelectionCards completion={completion} meta={meta} vatResult={vatResult} ctResult={ctResult} onSelect={onSelect} /></section>;
+const HomeDashboard = ({ completion, meta, vatResult, ctResult, onSelect, profile, setProfile }) => {
+  const missingProfile = reqProfile.filter((k) => !String(profile[k] || '').trim());
+  const canSelect = missingProfile.length === 0;
+
+  return <>
+    <SharedBusinessProfile profile={profile} setProfile={setProfile} errors={missingProfile} />
+    <section className="card">
+      <div className="card-title">
+        <h2>Dashboard</h2>
+        {!canSelect && <small>Complete Shared Business Profile to continue.</small>}
+      </div>
+      <TaxSelectionCards completion={completion} meta={meta} vatResult={vatResult} ctResult={ctResult} onSelect={onSelect} canSelect={canSelect} />
+    </section>
+  </>;
+};
 const SharedBusinessProfile = ({ profile, setProfile, errors = [] }) => <section className="card"><div className="card-title"><h2><Building2 size={20} />Shared Business Profile</h2></div><div className="form-grid four">{reqProfile.map((k) => <Field key={k} label={k} required error={errors.includes(k) ? 'Required field.' : ''}><input className={errors.includes(k) ? 'invalid' : ''} value={profile[k]} onChange={(e) => setProfile({ ...profile, [k]: e.target.value })} /></Field>)}</div></section>;
 
 function WizardShell({ type, wizardStep, setWizardStep, profile, setProfile, vat, setVat, ct, setCt, result, completion, meta, backHome }) {
