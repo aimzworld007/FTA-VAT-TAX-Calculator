@@ -70,13 +70,14 @@ export function VatWizard({ data, setData, onSave, onReset }) {
     </div>}
     {step === 2 && <div className='vat-input-layout'>
       <p className='field-help vat-input-help'>Your selected filing frequency is {data.filingFrequency}, so enter {monthCount} {monthCount === 1 ? 'month' : 'months'} of sales, purchases, and expenses.</p>
+      <p className='field-help'>VAT Mode: {data.vatPricingMode === VAT_PRICING_MODES.INCLUSIVE ? 'Inclusive' : 'Exclusive'}. FTA VAT Return Amount should be excluding VAT. If your sales are VAT-inclusive, the system automatically separates taxable value and VAT.</p>
       <div className='vat-input-main'>
         <div className='vat-monthly-wrap'><table className='vat-input-table'><thead><tr><th>Month</th><th>Sales</th><th>Purchases</th><th>Expenses</th><th>Output VAT</th><th>Recoverable VAT</th><th>Net VAT</th></tr></thead><tbody>{entries.map((entry) => <tr key={entry.month}><td>{entry.month}</td><td><input type='number' min='0' value={entry.sales} onChange={e => updateEntry(entry.month, 'sales', e.target.value)} /></td><td><input type='number' min='0' value={entry.purchases} onChange={e => updateEntry(entry.month, 'purchases', e.target.value)} /></td><td><input type='number' min='0' value={entry.expenses} onChange={e => updateEntry(entry.month, 'expenses', e.target.value)} /></td><td className='vat-readonly'>{money(getEntryOutputVat(entry, data.vatPricingMode))}</td><td className='vat-readonly'>{money(getEntryRecoverableVat(entry, data.vatPricingMode))}</td><td className='vat-readonly'>{money(getEntryNetVat(entry, data.vatPricingMode))}</td></tr>)}</tbody><tfoot><tr className='vat-total-row'><td>Total</td><td>{money(totals.sales)}</td><td>{money(totals.purchases)}</td><td>{money(totals.expenses)}</td><td>{money(totals.outputVat)}</td><td>{money(totals.recoverableVat)}</td><td>{money(totals.netVat)}</td></tr></tfoot></table></div>
       </div>
       <div className='vat-input-summary-grid'>
-        <TaxSummaryCard label='Total Sales' value={money(totals.sales)} />
-        <TaxSummaryCard label='Total Purchases' value={money(totals.purchases)} />
-        <TaxSummaryCard label='Total Expenses' value={money(totals.expenses)} />
+        <TaxSummaryCard label='Total Sales (Input/Gross)' value={money(totals.sales)} />
+        <TaxSummaryCard label='Total Purchases (Input/Gross)' value={money(totals.purchases)} />
+        <TaxSummaryCard label='Total Expenses (Input/Gross)' value={money(totals.expenses)} />
         <TaxSummaryCard label='Total Output VAT' value={money(totals.outputVat)} />
         <TaxSummaryCard label='Total Recoverable VAT' value={money(totals.recoverableVat)} />
         <TaxSummaryCard label={totals.netVat >= 0 ? 'Net VAT Payable' : 'Net VAT Refundable'} value={money(Math.abs(totals.netVat))} />

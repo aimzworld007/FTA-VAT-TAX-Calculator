@@ -1,4 +1,4 @@
-import { TAX_CONFIG } from './taxConfig';
+import { TAX_CONFIG } from './taxConfig.js';
 
 export const VAT_PRICING_MODES = {
   INCLUSIVE: 'inclusive',
@@ -45,4 +45,13 @@ export function summarizeVatAmounts(amounts, mode) {
       total: acc.total + value.total
     };
   }, { net: 0, vat: 0, total: 0 });
+}
+
+export function normalizeVatAmounts(amount, mode) {
+  const value = splitVatFromAmount(amount, mode);
+  return {
+    taxableAmount: value.net,
+    vatAmount: value.vat,
+    grossAmount: value.total
+  };
 }
