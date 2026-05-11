@@ -148,7 +148,8 @@ const WizardProgressBar = ({ label, percent, statusText }) => <div className="wi
 const PrintMeta = ({ activeTab, profile }) => {
   if (activeTab === 'home') return null;
   const title = activeTab === 'vat' ? 'VAT Return Report' : 'Corporate Tax Report';
-  return <div className="print-only print-block"><div className="print-header"><img src={FTA_LOGO} alt="FTA UAE" /><div><h1>{title}</h1><p>{profile.businessName || 'Business Name'} {profile.trn ? `· TRN: ${profile.trn}` : ''}</p></div></div><div className="print-footer">Created with <a href="https://ftapro.vercel.app">https://ftapro.vercel.app</a></div></div>;
+  const generatedAt = new Date().toLocaleString();
+  return <div className="print-only print-block"><div className="print-header"><img src={FTA_LOGO} alt="FTA UAE" /><div><h1>{title}</h1><p>{profile.businessName || 'Business Name'} {profile.trn ? `· TRN: ${profile.trn}` : ''}</p><small>Generated: {generatedAt}</small></div></div><div className="print-footer"><span>Prepared with UAE Tax Suite</span><a href="https://ftapro.vercel.app">ftapro.vercel.app</a></div></div>;
 };
 
 createRoot(document.getElementById('root')).render(<App />);
