@@ -181,3 +181,26 @@
 .vat-mode-option{border:1px solid var(--line);background:#f8fafc;border-radius:12px;padding:12px;text-align:left;display:grid;gap:5px;cursor:pointer}
 .vat-mode-option.active{border-color:#1565c0;background:#e3f2fd}
 .vat-mode-option small{color:#475569}
+
+.resource-nav{margin-top:12px}
+.resource-desktop{display:flex;flex-wrap:wrap;gap:8px}
+.resource-pill{display:inline-flex;align-items:center;padding:6px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.35);color:#fff;text-decoration:none;font-size:12px;font-weight:700;background:rgba(255,255,255,.08)}
+.resource-pill:hover{background:rgba(255,255,255,.2)}
+.resource-mobile{display:none}
+.resource-mobile summary{cursor:pointer;font-weight:700}
+.resource-menu{margin-top:8px;display:grid;gap:6px}
+.resource-menu a{color:#fff;text-decoration:none;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.35);padding:8px 10px;border-radius:8px;font-size:13px}
+
+.static-page h1{margin:0 0 12px}
+.static-intro{margin:0 0 16px;color:#334155}
+.static-sections{display:grid;gap:14px}
+.static-section h2{margin:0 0 8px;font-size:18px}
+.static-section p{margin:0 0 8px;line-height:1.6;color:#334155}
+.static-section ul{margin:0;padding-left:18px;display:grid;gap:6px;color:#334155}
+
+.app-footer{padding:12px 20px;text-align:center;font-size:12px;color:#334155;background:#e2e8f0;border-top:1px solid #cbd5e1}
+
+@media(max-width:1050px){
+  .resource-desktop{display:none}
+  .resource-mobile{display:block}
+}
