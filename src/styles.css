@@ -119,3 +119,9 @@
   .vat201-table thead{display:table-header-group}
   .vat201-table tr,.vat201-card,.sig-box,.vat201-box{break-inside:avoid;page-break-inside:avoid}
 }
+
+.vat-monthly-wrap{overflow:auto;border:1px solid var(--line);border-radius:14px;background:#fff}
+.vat-monthly-table{margin:0;border:0;border-radius:0;min-width:560px}
+.vat-monthly-table th,.vat-monthly-table td{padding:9px}
+.vat-monthly-table td input{min-width:120px}
+.vat-readonly{background:#f8fafc;color:#0f766e;font-weight:700}
