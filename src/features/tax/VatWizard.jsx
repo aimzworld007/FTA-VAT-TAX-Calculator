@@ -22,6 +22,7 @@ import IosShareOutlinedIcon from '@mui/icons-material/IosShareOutlined';
 import DownloadOutlinedIcon from '@mui/icons-material/DownloadOutlined';
 import ArrowBackOutlinedIcon from '@mui/icons-material/ArrowBackOutlined';
 import ArrowForwardOutlinedIcon from '@mui/icons-material/ArrowForwardOutlined';
+import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined';
 import { buildMonthlyEntries, calculateVat } from './lib/vatCalculator';
 import { validateRequired, validateVatPeriodSelection } from './lib/taxValidation';
 import { TAX_CONFIG } from './lib/taxConfig';
@@ -56,7 +57,7 @@ const metricCards = [
   { key: 'recoverableVat', label: 'Total Recoverable VAT', icon: <SouthOutlinedIcon fontSize='small' /> }
 ];
 
-export function VatWizard({ data, setData, onSave, onReset, onProgressChange }) {
+export function VatWizard({ data, setData, onSave, onReset, onProgressChange, onGoHome }) {
   const fieldSx = { '& .MuiInputBase-root': { minHeight: { xs: 44, md: 48 }, height: { xs: 44, md: 48 }, borderRadius: '12px', color: '#071832', bgcolor: '#fff' }, '& .MuiOutlinedInput-notchedOutline': { borderColor: '#d7e3f0' }, '& .MuiInputBase-root:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#9cb7dc' }, '& .Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#2563eb', borderWidth: '1px' }, '& .Mui-focused': { boxShadow: '0 0 0 3px rgba(37,99,235,0.15)' }, '& .MuiInputBase-input': { padding: '0 14px', fontSize: 14, lineHeight: 1.2 }, '& .MuiSelect-select': { display: 'flex', alignItems: 'center', padding: '0 38px 0 14px !important', fontSize: 14, lineHeight: 1.2 }, '& .MuiInputLabel-root': { fontSize: 12, lineHeight: 1.1 }, '@media (max-width:768px)': { '& .MuiInputBase-input': { padding: '0 12px' }, '& .MuiSelect-select': { padding: '0 36px 0 12px !important' } } };
   const [step, setStep] = React.useState(1);
   const [downloadLoading, setDownloadLoading] = React.useState(false);
@@ -292,10 +293,17 @@ export function VatWizard({ data, setData, onSave, onReset, onProgressChange }) 
     <Card sx={{ mt: 2, borderRadius: 4, border: '1px solid #dbe6f3', boxShadow: '0 10px 24px rgba(15,23,42,.06)' }}>
       <CardContent sx={{ py: 1.5, px: { xs: 1.3, md: 2.2 }, '&:last-child': { pb: 1.5 } }}>
     <div className='wizard-action-bar'>
-      <Stack direction={{xs:'column',sm:'row'}} spacing={1.5} className='wizard-action-group wizard-action-group-left'>
-        <Button variant='outlined' startIcon={<ArrowBackOutlinedIcon />} onClick={back} disabled={step===1}>Back</Button>
-        <Button className='primary-gradient-btn' endIcon={<ArrowForwardOutlinedIcon />} onClick={next} disabled={continueDisabled}>Continue</Button>
-      </Stack>
+      <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, alignItems: 'center', justifyContent: 'space-between', gap: 1.5, width: '100%' }}>
+        <Box sx={{ width: { xs: '100%', md: '33.33%' }, display: 'flex', justifyContent: { xs: 'stretch', md: 'flex-start' } }}>
+          <Button fullWidth={step < 5} variant='outlined' startIcon={<ArrowBackOutlinedIcon />} onClick={back} disabled={step===1}>Back</Button>
+        </Box>
+        <Box sx={{ width: { xs: '100%', md: '33.33%' }, display: 'flex', justifyContent: 'center' }}>
+          <Button fullWidth={step < 5} variant='outlined' startIcon={<HomeOutlinedIcon />} onClick={onGoHome}>Home</Button>
+        </Box>
+        {step < 5 && <Box sx={{ width: { xs: '100%', md: '33.33%' }, display: 'flex', justifyContent: { xs: 'stretch', md: 'flex-end' } }}>
+          <Button fullWidth className='primary-gradient-btn' endIcon={<ArrowForwardOutlinedIcon />} onClick={next} disabled={continueDisabled}>Continue</Button>
+        </Box>}
+      </Box>
       {step === 5 && <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} className='wizard-action-group wizard-action-group-right'>
         <Button variant='outlined' startIcon={<PrintOutlinedIcon />} onClick={() => window.print()}>Print</Button>
         {onSave && <Button variant='outlined' startIcon={<IosShareOutlinedIcon />} onClick={onSave}>Save Draft</Button>}
