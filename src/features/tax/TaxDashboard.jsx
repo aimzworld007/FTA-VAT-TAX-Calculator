@@ -4,7 +4,7 @@ import { CorporateTaxWizard } from './CorporateTaxWizard';
 import { draftStorage } from './lib/localDraftStorage';
 import { buildMonthlyEntries, calculateVat } from './lib/vatCalculator';
 import { calculateCorporateTax } from './lib/corporateTaxCalculator';
-import { money, TaxModeCard, TaxSummaryCard, WorkspaceHeader } from './components/common.jsx';
+import { money, TaxSummaryCard, WorkspaceHeader } from './components/common.jsx';
 import { formatVatPeriodLabel, inferSelectionFromDates, getPeriodFromSelection } from './lib/vatPeriod';
 import { VAT_PRICING_MODES, normalizeVatPricingMode } from './lib/vatPricing';
 
@@ -47,6 +47,19 @@ function LiveSummary({ mode, vatData, vatCalc, ctCalc }) {
   return <section className='card summary-panel workspace-summary'><h2>VAT Live Summary</h2><div className='grid-section live-summary-grid summary-grid-vat'><div className={`kpi summary-card ${vatStatus.className}`}><div className='kpi-row'><span className='summary-label'>{vatStatus.label}</span><span className={`status-badge ${vatStatus.className}`}>{vatStatus.badge}</span></div><strong className='summary-value'>{vatStatus.amountLabel}</strong><small>{vatStatus.prefix ? `${vatStatus.prefix} ${vatStatus.amountLabel}` : vatStatus.amountLabel}</small></div><TaxSummaryCard label='VAT Taxable Sales' value={money(vatCalc.salesBreakdown.net)} /><TaxSummaryCard label='Selected VAT Period' value={formatVatPeriodLabel(vatData)} /></div></section>;
 }
 
+function ModuleImageCard({ title, description, imageSrc, onClick }) {
+  return (
+    <button
+      type='button'
+      className='module-image-card rounded-2xl overflow-hidden border shadow-sm hover:shadow-xl hover:scale-[1.01] transition-all duration-300 bg-white cursor-pointer w-full text-left'
+      onClick={onClick}
+      aria-label={description}
+    >
+      <img src={imageSrc} alt={title} className='w-full h-auto object-cover block' loading='eager' />
+    </button>
+  );
+}
+
 export function TaxDashboard() {
   const [activeModule, setActiveModule] = React.useState('home');
   const [navOpen, setNavOpen] = React.useState(false);
@@ -70,7 +83,7 @@ export function TaxDashboard() {
     </section>
 
     {activeModule === 'home' && <section className='screen-shell is-active'>
-      <section className='card'><h2>Tax Home</h2><p className='field-help'>Select a module to open a dedicated tax workspace.</p><div className='selector-grid no-print'><TaxModeCard title='VAT Return' desc='Open VAT return workspace' onClick={() => setActiveModule('vat')} active={false} /><TaxModeCard title='Corporate Tax' desc='Open corporate tax workspace' onClick={() => setActiveModule('corporateTax')} active={false} /></div></section>
+      <section className='card'><h2>Tax Home</h2><p className='field-help'>Select a module to open a dedicated tax workspace.</p><div className='grid grid-cols-1 lg:grid-cols-2 gap-5 no-print module-selection-grid'><ModuleImageCard title='VAT Return' description='Open VAT return workspace' imageSrc='/FTA_VAT_RETRUN.png' onClick={() => setActiveModule('vat')} /><ModuleImageCard title='Corporate Tax' description='Open corporate tax workspace' imageSrc='/FTA_CORPORATE_TAX.png' onClick={() => setActiveModule('corporateTax')} /></div></section>
     </section>}
 
     {activeModule === 'vat' && <section className='screen-shell is-active wizard-shell'><WorkspaceHeader title='VAT Return Workspace' progress={vatProgress} onBack={() => setActiveModule('home')} /><LiveSummary mode='vat' vatData={vat} vatCalc={v} ctCalc={c} /><VatWizard data={vat} setData={setVat} onProgressChange={setVatProgress} onSave={() => draftStorage.save('vatDraft', vat)} onReset={() => { if (confirm('Reset VAT draft?')) { const next = normalizeVatDraft(vatDefault, workspaceSettings); setVat(next); draftStorage.clear('vatDraft'); } }} /></section>}
