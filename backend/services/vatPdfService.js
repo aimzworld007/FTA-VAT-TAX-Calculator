@@ -3,10 +3,8 @@ import path from 'node:path';
 import PDFDocument from 'pdfkit';
 import { formatCurrency, sanitizeNumber, sanitizeText } from '../utils/formatCurrency.js';
 
-const VAT201_ROWS = [
-  ['1a', 'Abu Dhabi - Standard rated supplies'], ['1b', 'Dubai - Standard rated supplies'], ['1c', 'Sharjah - Standard rated supplies'],
-  ['1d', 'Ajman - Standard rated supplies'], ['1e', 'Umm Al Quwain - Standard rated supplies'], ['1f', 'Ras Al Khaimah - Standard rated supplies'],
-  ['1g', 'Fujairah - Standard rated supplies'], ['2', 'Tax refunds provided to tourists'], ['3', 'Supplies subject to reverse charge provisions'],
+const VAT201_NON_EMIRATE_ROWS = [
+  ['2', 'Tax refunds provided to tourists'], ['3', 'Supplies subject to reverse charge provisions'],
   ['4', 'Zero rated supplies'], ['5', 'Exempt supplies'], ['6', 'Goods imported into UAE'], ['7', 'Adjustments to goods imported into UAE'],
   ['8', 'Total output tax due'], ['9', 'Standard rated expenses'], ['10', 'Supplies subject to reverse charge provisions'],
   ['11', 'Total recoverable tax'], ['12', 'Total tax due'], ['13', 'Total recoverable tax'], ['14', 'Payable tax for the period']
@@ -27,6 +25,7 @@ export function buildVatPdfPayload(body) {
     preparedBy: sanitizeText(body.preparedBy, 'N/A'),
     preparedDate: sanitizeText(body.preparedDate, new Date().toISOString().slice(0, 10)),
     vatMode: sanitizeText(body.vatMode, 'VAT Exclusive'),
+    businessLocationEmirate: sanitizeText(body.businessLocationEmirate, 'N/A'),
     summary: {
       taxableSales: sanitizeNumber(summary.taxableSales), outputVat: sanitizeNumber(summary.outputVat), recoverableVat: sanitizeNumber(summary.recoverableVat),
       zeroRated: sanitizeNumber(summary.zeroRated), exempt: sanitizeNumber(summary.exempt), netVat: sanitizeNumber(summary.netVat)
@@ -52,7 +51,7 @@ export function generateVatPdf(payload, out) {
 
   let y = 155;
   doc.fontSize(12).fillColor('#0f172a').text('Company Information', 48, y); y += 22;
-  const rows = [['Company Name', payload.businessName], ['TRN', payload.trn], ['VAT Period', payload.vatPeriod], ['Prepared By', payload.preparedBy], ['Prepared Date', payload.preparedDate], ['VAT Mode', payload.vatMode]];
+  const rows = [['Company Name', payload.businessName], ['TRN', payload.trn], ['Business Location', payload.businessLocationEmirate], ['VAT Period', payload.vatPeriod], ['Prepared By', payload.preparedBy], ['Prepared Date', payload.preparedDate], ['VAT Mode', payload.vatMode]];
   rows.forEach(([k, v]) => { doc.fontSize(10).fillColor('#475569').text(k, 48, y); doc.fillColor('#111827').text(v, 180, y); y += 16; });
 
   y += 8;
@@ -71,7 +70,12 @@ export function generateVatPdf(payload, out) {
   doc.rect(48, y, 499, 20).fill('#e2e8f0');
   ['Box', 'Description', 'Amount AED', 'VAT AED', 'Adjustment AED'].forEach((h, i) => doc.fillColor('#0f172a').fontSize(9).text(h, cols[i] + 4, y + 6));
   y += 22;
-  VAT201_ROWS.forEach(([box, desc], idx) => {
+  const emirateRows = payload.boxes
+    .map((row) => [sanitizeText(row.box), sanitizeText(row.description, '-').replace(/\s*-\s*Standard rated supplies/i, ' - Standard rated supplies')])
+    .filter(([box]) => /^1[a-g]$/i.test(box));
+  const vatRows = [...emirateRows, ...VAT201_NON_EMIRATE_ROWS];
+
+  vatRows.forEach(([box, desc]) => {
     const client = payload.boxes.find((row) => sanitizeText(row.box) === box) || {};
     if (y > 720) { doc.addPage(); y = 48; }
     doc.rect(48, y, 499, 20).stroke('#e5e7eb');
