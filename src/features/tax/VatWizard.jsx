@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Button, FormControl, FormHelperText, Grid, InputLabel, MenuItem, Select, Stack, TextField, Typography } from '@mui/material';
+import { Box, Button, FormControl, FormHelperText, Grid, InputLabel, MenuItem, Select, Stack, TextField, Typography, Card, CardContent } from '@mui/material';
 import BusinessOutlinedIcon from '@mui/icons-material/BusinessOutlined';
 import CalendarMonthOutlinedIcon from '@mui/icons-material/CalendarMonthOutlined';
 import { buildMonthlyEntries, calculateVat } from './lib/vatCalculator';
@@ -30,6 +30,7 @@ const EMIRATE_BOX_MAP = {
 
 
 export function VatWizard({ data, setData, onSave, onReset, onProgressChange }) {
+  const fieldSx = { '& .MuiInputBase-root': { minHeight: 52, borderRadius: 3, color: '#071832', bgcolor: '#fff' }, '& .MuiOutlinedInput-notchedOutline': { borderColor: '#d7e3f0' }, '& .MuiInputBase-root:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#9cb7dc' }, '& .Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#2563eb', borderWidth: '1px' }, '& .Mui-focused': { boxShadow: '0 0 0 3px rgba(37,99,235,0.15)' } };
   const [step, setStep] = React.useState(1);
   const [pdfLoading, setPdfLoading] = React.useState(false);
   const result = calculateVat(data);
@@ -100,7 +101,7 @@ export function VatWizard({ data, setData, onSave, onReset, onProgressChange }) 
   return <div><FormSection title={`VAT Wizard: ${steps[step - 1]}`}>
     {step === 1 && <Box>
       <Stack direction='row' spacing={1.5} alignItems='center' sx={{ mb: 2.5 }}>
-        <Box sx={{ width: 48, height: 48, borderRadius: 2.5, bgcolor: '#eaf1ff', color: 'primary.main', display: 'grid', placeItems: 'center' }}>
+        <Box sx={{ width: 52, height: 52, borderRadius: '50%', bgcolor: '#eaf1ff', color: 'primary.main', display: 'grid', placeItems: 'center' }}>
           <BusinessOutlinedIcon />
         </Box>
         <Box>
@@ -108,24 +109,24 @@ export function VatWizard({ data, setData, onSave, onReset, onProgressChange }) 
           <Typography variant='body2' color='text.secondary'>Provide your business information to get started</Typography>
         </Box>
       </Stack>
-      <Grid container spacing={1.5}>
-      <Grid size={{ xs: 12, md: 6 }}><TextField fullWidth required label='Business name' value={data.businessName} onChange={e => setData({ ...data, businessName: e.target.value })} sx={{ '& .MuiInputBase-root': { minHeight: 46 } }} /></Grid>
-      <Grid size={{ xs: 12, md: 6 }}><TextField fullWidth required label='TRN' value={data.trn} onChange={e => setData({ ...data, trn: e.target.value })} sx={{ '& .MuiInputBase-root': { minHeight: 46 } }} /></Grid>
+      <Grid container spacing={{ xs: 1.5, md: 2 }}>
+      <Grid size={{ xs: 12, md: 6 }}><TextField fullWidth required label='Business name' value={data.businessName} onChange={e => setData({ ...data, businessName: e.target.value })} sx={fieldSx} /></Grid>
+      <Grid size={{ xs: 12, md: 6 }}><TextField fullWidth required label='TRN' value={data.trn} onChange={e => setData({ ...data, trn: e.target.value })} sx={fieldSx} /></Grid>
       <Grid size={{ xs: 12, md: 6 }}>
-        <FormControl fullWidth required sx={{ maxWidth: { md: 360 } }}>
+        <FormControl fullWidth required sx={fieldSx}>
           <InputLabel>Business Location Emirate *</InputLabel>
-          <Select label='Business Location Emirate *' value={data.businessLocationEmirate || ''} onChange={e => setData({ ...data, businessLocationEmirate: e.target.value })} sx={{ minHeight: 46 }}>
+          <Select label='Business Location Emirate *' value={data.businessLocationEmirate || ''} onChange={e => setData({ ...data, businessLocationEmirate: e.target.value })}>
             {EMIRATE_OPTIONS.map((emirate) => <MenuItem key={emirate} value={emirate}>{emirate}</MenuItem>)}
           </Select>
         </FormControl>
       </Grid>
-      <Grid size={{ xs: 12, md: 6 }}><FormControl fullWidth><InputLabel>Filing frequency</InputLabel><Select label='Filing frequency' value={data.filingFrequency} onChange={e => setData({ ...data, filingFrequency: e.target.value })} sx={{ minHeight: 46 }}>{TAX_CONFIG.filingFrequencies.map(f => <MenuItem key={f} value={f}>{f}</MenuItem>)}</Select></FormControl></Grid>
-      <Grid size={{ xs: 12, md: 6 }}><FormControl fullWidth><InputLabel>Filing year</InputLabel><Select label='Filing year' value={data.filingYear} onChange={e => setData({ ...data, filingYear: Number(e.target.value) })} sx={{ minHeight: 46 }}>{years.map(y => <MenuItem key={y} value={y}>{y}</MenuItem>)}</Select></FormControl></Grid>
-      {data.filingFrequency === 'Monthly' && <Grid size={{ xs: 12, md: 6 }}><FormControl fullWidth sx={{ maxWidth: { md: 360 } }}><InputLabel>Filing month</InputLabel><Select label='Filing month' value={data.filingMonth} onChange={e => setData({ ...data, filingMonth: e.target.value })} sx={{ minHeight: 46 }}>{MONTHS.map(m => <MenuItem key={m} value={m}>{m}</MenuItem>)}</Select></FormControl></Grid>}
-      {data.filingFrequency === 'Quarterly' && <Grid size={{ xs: 12, md: 6 }}><FormControl fullWidth sx={{ maxWidth: { md: 360 } }}><InputLabel>Quarter start month</InputLabel><Select label='Quarter start month' value={data.filingStartMonth} onChange={e => setData({ ...data, filingStartMonth: e.target.value })} sx={{ minHeight: 46 }}>{MONTHS.map(m => <MenuItem key={m} value={m}>{m}</MenuItem>)}</Select></FormControl></Grid>}
+      <Grid size={{ xs: 12, md: 6 }}><FormControl fullWidth sx={fieldSx}><InputLabel>Filing frequency</InputLabel><Select label='Filing frequency' value={data.filingFrequency} onChange={e => setData({ ...data, filingFrequency: e.target.value })}>{TAX_CONFIG.filingFrequencies.map(f => <MenuItem key={f} value={f}>{f}</MenuItem>)}</Select></FormControl></Grid>
+      <Grid size={{ xs: 12, md: 6 }}><FormControl fullWidth sx={fieldSx}><InputLabel>Filing year</InputLabel><Select label='Filing year' value={data.filingYear} onChange={e => setData({ ...data, filingYear: Number(e.target.value) })}>{years.map(y => <MenuItem key={y} value={y}>{y}</MenuItem>)}</Select></FormControl></Grid>
+      {data.filingFrequency === 'Monthly' && <Grid size={{ xs: 12, md: 6 }}><FormControl fullWidth sx={fieldSx}><InputLabel>Filing month</InputLabel><Select label='Filing month' value={data.filingMonth} onChange={e => setData({ ...data, filingMonth: e.target.value })}>{MONTHS.map(m => <MenuItem key={m} value={m}>{m}</MenuItem>)}</Select></FormControl></Grid>}
+      {data.filingFrequency === 'Quarterly' && <Grid size={{ xs: 12, md: 6 }}><FormControl fullWidth sx={fieldSx}><InputLabel>Quarter start month</InputLabel><Select label='Quarter start month' value={data.filingStartMonth} onChange={e => setData({ ...data, filingStartMonth: e.target.value })}>{MONTHS.map(m => <MenuItem key={m} value={m}>{m}</MenuItem>)}</Select></FormControl></Grid>}
       {data.filingFrequency === 'Yearly' && <Grid size={12}><Typography variant='body2' color='text.secondary'>Full year selected.</Typography></Grid>}
       <Grid size={{ xs: 12, md: 6 }}>
-        <FormControl fullWidth sx={{ maxWidth: { xs: '100%', md: 360 } }}>
+        <FormControl fullWidth sx={fieldSx}>
           <InputLabel>VAT Pricing Mode</InputLabel>
           <Select label='VAT Pricing Mode' value={data.vatPricingMode} onChange={e => setData({ ...data, vatPricingMode: e.target.value })} sx={{ minHeight: 46 }}>
             {Object.values(VAT_PRICING_MODES).map(mode => <MenuItem key={mode} value={mode}>{mode === VAT_PRICING_MODES.INCLUSIVE ? 'Inclusive (amount entered includes VAT)' : 'Exclusive (amount entered excludes VAT)'}</MenuItem>)}
@@ -134,7 +135,7 @@ export function VatWizard({ data, setData, onSave, onReset, onProgressChange }) 
         </FormControl>
       </Grid>
       <Grid size={12}>
-        <Box sx={{ mt: 0.5, border: '1px solid #c7d8ff', bgcolor: '#f4f7ff', borderRadius: 2, px: 2, py: 1.5, display: 'flex', alignItems: 'center', gap: 1.2 }}>
+        <Box sx={{ mt: 0.5, border: '1px solid #93c5fd', bgcolor: '#eaf1ff', borderRadius: 3, px: 2, py: 1.5, display: 'flex', alignItems: 'center', gap: 1.2, width: '100%' }}>
           <CalendarMonthOutlinedIcon color='primary' fontSize='small' />
           <Typography color='primary.main' sx={{ fontWeight: 700 }}>
             Selected Tax Period: {formatVatPeriodLabel(data)}
@@ -169,6 +170,8 @@ export function VatWizard({ data, setData, onSave, onReset, onProgressChange }) 
     {step === 4 && <div className='grid-section'><TaxSummaryCard label={result.vatPricingMode === VAT_PRICING_MODES.INCLUSIVE ? 'Net Amount' : 'Subtotal'} value={money(result.salesBreakdown.net)} /><TaxSummaryCard label={result.vatPricingMode === VAT_PRICING_MODES.INCLUSIVE ? 'VAT Included' : 'VAT 5%'} value={money(result.salesBreakdown.vat)} /><TaxSummaryCard label='Grand Total' value={money(result.salesBreakdown.total)} /><TaxSummaryCard label='Total input VAT' value={money(result.inputVat)} /><TaxSummaryCard label='Adjustments' value={money(result.adjustments)} /><TaxSummaryCard label={result.label} value={money(result.netVat)} /><p>For preparation only. Please verify before official FTA submission.</p></div>}
     {step === 5 && <Vat201Report data={{ ...data, monthlyEntries: buildMonthlyEntries(data) }} result={result} />}
   </FormSection>
+    <Card sx={{ mt: 2, borderRadius: 4, border: '1px solid #dbe6f3', boxShadow: '0 10px 24px rgba(15,23,42,.06)' }}>
+      <CardContent sx={{ py: 1.5, px: { xs: 1.3, md: 2.2 }, '&:last-child': { pb: 1.5 } }}>
     <div className='wizard-action-bar'>
       <Stack direction={{xs:'column',sm:'row'}} spacing={1.5} className='wizard-action-group wizard-action-group-left'>
         <Button variant='outlined' onClick={back} disabled={step===1}>Back</Button>
@@ -176,5 +179,7 @@ export function VatWizard({ data, setData, onSave, onReset, onProgressChange }) 
       </Stack>
       {step === 5 && <ExportActions onSave={onSave} onReset={onReset} onPrint={() => window.print()} onPdf={downloadProfessionalPdf} pdfLoading={pdfLoading} />}
     </div>
+    </CardContent>
+    </Card>
   </div>;
 }
