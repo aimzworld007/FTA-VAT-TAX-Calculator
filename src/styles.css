@@ -175,6 +175,21 @@
 .net-payable .vat-kpi-icon{background:#fef2f2;color:#dc2626}.net-payable strong{color:#dc2626}
 .net-refundable .vat-kpi-icon{background:#ecfdf5;color:#059669}.net-refundable strong{color:#059669}
 .net-neutral .vat-kpi-icon{background:#eef2ff;color:#2563eb}
+
+.vat-mobile-cards{display:grid;gap:12px}
+.vat-mobile-card{border:1px solid #dbe5f2;border-radius:14px;background:#fff;box-shadow:0 6px 16px rgba(15,23,42,.05);padding:12px;display:grid;gap:10px}
+.vat-mobile-card header{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.vat-mobile-input-grid{display:grid;gap:8px}
+.vat-mobile-input-grid label{display:grid;gap:5px}
+.vat-mobile-input-grid label span{font-size:12px;color:#475569;font-weight:600}
+.vat-mobile-input-grid input{width:100%;height:42px;border:1px solid #dbe5f2;border-radius:10px;padding:0 12px;font-size:15px;color:#07122f;background:#fff;appearance:textfield}
+.vat-mobile-input-grid input:focus{outline:none;border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,.12)}
+.vat-mobile-metrics{display:grid;gap:6px;border-top:1px dashed #dbe5f2;padding-top:8px}
+.vat-mobile-metrics p{margin:0;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.vat-mobile-metrics p span{font-size:12px;color:#64748b}
+.vat-mobile-metrics p strong{font-size:14px;color:#0f172a}
+.vat-mobile-metrics p.net-payable strong{color:#dc2626}
+.vat-mobile-metrics p.net-refundable strong{color:#059669}
 .vat-adjustments-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
 .vat-adjustments-grid .field{gap:6px}
 .vat-adjustments-grid .field span{display:flex;align-items:center;gap:6px;color:#07122f}
@@ -185,6 +200,7 @@
 
 @media(max-width:900px){
   .vat-input-premium{padding:18px}
+  .vat-input-title{font-size:28px}
   .vat-input-table{min-width:820px}
   .vat-kpi-card strong{font-size:28px}
   .vat-adjustments-grid{grid-template-columns:1fr}
@@ -444,3 +460,12 @@ tr:nth-child(even) td{background:#fbfdff}
 @media (max-width:900px){.wizard-action-bar{position:static}.tax-report{padding:20px}.vat-monthly-wrap{overflow-x:auto}}
 @media (max-width:768px){.wizard-action-group .MuiButton-root{width:100%}}
 @media print{.wizard-action-bar{display:none!important}.card,.premium-card,.tax-report{box-shadow:none!important;background:#fff!important}}
+
+@media(max-width:768px){
+  .vat-input-premium{padding:16px}
+  .vat-input-title{font-size:24px}
+  .vat-input-subtitle{font-size:13px}
+  .vat-breakdown-card{padding:12px}
+  .currency-pill{font-size:12px;padding:4px 10px}
+  .wizard-action-bar{padding:10px;width:100%;box-sizing:border-box}
+}
