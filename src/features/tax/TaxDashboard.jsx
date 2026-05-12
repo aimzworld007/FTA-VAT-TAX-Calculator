@@ -5,7 +5,6 @@ import { draftStorage } from './lib/localDraftStorage';
 import { buildMonthlyEntries, calculateVat } from './lib/vatCalculator';
 import { calculateCorporateTax } from './lib/corporateTaxCalculator';
 import { money, TaxModeCard, TaxSummaryCard } from './components/common.jsx';
-import { TAX_CONFIG } from './lib/taxConfig';
 import { formatVatPeriodLabel, inferSelectionFromDates, getPeriodFromSelection } from './lib/vatPeriod';
 import { VAT_PRICING_MODES, normalizeVatPricingMode } from './lib/vatPricing';
 
@@ -22,13 +21,9 @@ const navLinks = [
 ];
 
 function getVatStatus(netVat) {
-  if (netVat > 0) {
-    return { type: 'payable', label: 'PAYABLE', amountLabel: money(netVat), className: 'status-payable', prefix: 'Payable' };
-  }
-  if (netVat < 0) {
-    return { type: 'refundable', label: 'REFUNDABLE', amountLabel: money(Math.abs(netVat)), className: 'status-refundable', prefix: 'Refundable' };
-  }
-  return { type: 'balanced', label: 'BALANCED', amountLabel: money(0), className: 'status-balanced', prefix: '' };
+  if (netVat > 0) return { label: 'PAYABLE', amountLabel: money(netVat), className: 'status-payable', prefix: 'Payable' };
+  if (netVat < 0) return { label: 'REFUNDABLE', amountLabel: money(Math.abs(netVat)), className: 'status-refundable', prefix: 'Refundable' };
+  return { label: 'BALANCED', amountLabel: money(0), className: 'status-balanced', prefix: '' };
 }
 
 function normalizeVatDraft(input, workspaceSettings) {
@@ -40,19 +35,38 @@ function normalizeVatDraft(input, workspaceSettings) {
   return next;
 }
 
+function TaxAssistantHeader({ navOpen, setNavOpen, logoAvailable, setLogoAvailable }) {
+  return <header className='top-navbar no-print'><div className='top-navbar-inner'><div className='brand-lockup'><div className='header-logo' aria-label='FTA tax assistant logo'>{logoAvailable ? <img src='/logo.png' alt='FTA VAT & Tax Filing Assistant logo' onError={() => setLogoAvailable(false)} /> : <span>FTA</span>}</div><div><strong>FTA VAT &amp; Tax Filing Assistant</strong><div className='badge top-badge'>UAE VAT 5% | Corporate Tax 9%</div></div></div><button className='nav-toggle' type='button' aria-expanded={navOpen} aria-label='Toggle navigation menu' onClick={() => setNavOpen((prev) => !prev)}>☰</button><nav className={`top-links ${navOpen ? 'open' : ''}`} aria-label='Tax resources'>{navLinks.map((link) => <a key={link.label} href={link.href} target='_blank' rel='noopener noreferrer'>{link.label}</a>)}</nav></div></header>;
+}
+
+function LiveSummary({ mode, vatData, vatCalc, ctCalc }) {
+  if (mode === 'corporateTax') {
+    return <section className='card summary-panel workspace-summary'><h2>Corporate Tax Live Summary</h2><div className='grid-section summary-grid-ct'><TaxSummaryCard label='Corporate Tax Estimate' value={money(ctCalc.taxPayable)} /><TaxSummaryCard label='Taxable Income' value={money(ctCalc.taxableIncome)} /><TaxSummaryCard label='Profit Before Tax' value={money(ctCalc.profitBeforeTax)} /><TaxSummaryCard label='Selected Tax Period' value={formatVatPeriodLabel(vatData)} /></div></section>;
+  }
+  const vatStatus = getVatStatus(vatCalc.netVat);
+  return <section className='card summary-panel workspace-summary'><h2>VAT Live Summary</h2><div className='grid-section summary-grid-vat'><div className='kpi'><div className='kpi-row'><span>VAT Payable / Refundable</span><span className={`status-badge ${vatStatus.className}`}>{vatStatus.label}</span></div><strong>{vatStatus.amountLabel}</strong><small>{vatStatus.prefix ? `${vatStatus.prefix} ${vatStatus.amountLabel}` : vatStatus.amountLabel}</small></div><TaxSummaryCard label='VAT Taxable Sales' value={money(vatCalc.salesBreakdown.net)} /><TaxSummaryCard label='Selected VAT Period' value={formatVatPeriodLabel(vatData)} /></div></section>;
+}
+
 export function TaxDashboard() {
-  const [mode, setMode] = React.useState('vat');
+  const [activeModule, setActiveModule] = React.useState('home');
   const [navOpen, setNavOpen] = React.useState(false);
   const [logoAvailable, setLogoAvailable] = React.useState(true);
   const [workspaceSettings] = React.useState(() => ({ ...workspaceSettingsDefault, ...draftStorage.load('workspaceSettings', workspaceSettingsDefault), vatPricingMode: normalizeVatPricingMode(draftStorage.load('workspaceSettings', workspaceSettingsDefault).vatPricingMode) }));
   const [vat, setVat] = React.useState(() => normalizeVatDraft(draftStorage.load('vatDraft', vatDefault), workspaceSettings));
   const [ct, setCt] = React.useState(() => draftStorage.load('ctDraft', ctDefault));
+
   const v = calculateVat(vat);
   const c = calculateCorporateTax(ct);
 
-  return <main className='content page-fade-in'><header className='top-navbar no-print'><div className='top-navbar-inner'><div className='brand-lockup'><div className='header-logo' aria-label='FTA tax assistant logo'>{logoAvailable ? <img src='/logo.png' alt='FTA VAT & Tax Filing Assistant logo' onError={() => setLogoAvailable(false)} /> : <span>FTA</span>}</div><div><strong>FTA VAT &amp; Tax Filing Assistant</strong><div className='badge top-badge'>UAE VAT 5% | Corporate Tax 9%</div></div></div><button className='nav-toggle' type='button' aria-expanded={navOpen} aria-label='Toggle navigation menu' onClick={() => setNavOpen((prev) => !prev)}>☰</button><nav className={`top-links ${navOpen ? 'open' : ''}`} aria-label='Tax resources'>{navLinks.map((link) => <a key={link.label} href={link.href} target='_blank' rel='noopener noreferrer'>{link.label}</a>)}</nav></div></header><header className='hero'><div><p className='eyebrow'>UAE TAX ASSISTANT</p><p className='hero-lead'>Prepare VAT returns and corporate tax estimates with guided step-by-step assistance.</p><p>For calculation assistance and record preparation. Verify figures before official FTA submission.</p></div></header>
-    <section className='card summary-panel'><h2>Live Summary</h2><div className={`grid-section ${mode === 'ct' ? 'summary-grid-ct' : 'summary-grid-vat'}`}>{mode === 'ct' ? <><TaxSummaryCard label='Corporate Tax Estimate' value={money(c.taxPayable)} /><TaxSummaryCard label='Taxable Income' value={money(c.taxableIncome)} /><TaxSummaryCard label='Profit Before Tax' value={money(c.profitBeforeTax)} /><TaxSummaryCard label='Selected Tax Period' value={formatVatPeriodLabel(vat)} /></> : (() => { const vatStatus = getVatStatus(v.netVat); return <><div className='kpi'><div className='kpi-row'><span>VAT Payable / Refundable</span><span className={`status-badge ${vatStatus.className}`}>{vatStatus.label}</span></div><strong>{vatStatus.amountLabel}</strong><small>{vatStatus.prefix ? `${vatStatus.prefix} ${vatStatus.amountLabel}` : vatStatus.amountLabel}</small></div><TaxSummaryCard label='VAT Taxable Sales' value={money(v.salesBreakdown.net)} /><TaxSummaryCard label='Selected Tax Period' value={formatVatPeriodLabel(vat)} /></>; })()}</div><div className='selector-grid no-print'><TaxModeCard title='VAT Return' desc='Open VAT return wizard' onClick={() => setMode('vat')} active={mode === 'vat'} /><TaxModeCard title='Corporate Tax' desc='Open corporate tax wizard' onClick={() => setMode('ct')} active={mode === 'ct'} /></div></section>
-    {mode === 'vat' && <div className='wizard-shell'>{<VatWizard data={vat} setData={setVat} onSave={() => draftStorage.save('vatDraft', vat)} onReset={() => { if (confirm('Reset VAT draft?')) { const next = normalizeVatDraft(vatDefault, workspaceSettings); setVat(next); draftStorage.clear('vatDraft'); } }} />}</div>}
-    {mode === 'ct' && <div className='wizard-shell'>{<CorporateTaxWizard data={ct} setData={setCt} onSave={() => draftStorage.save('ctDraft', ct)} onReset={() => { if (confirm('Reset Corporate Tax draft?')) { setCt(ctDefault); draftStorage.clear('ctDraft'); } }} />}</div>}
+  return <main className='content page-fade-in tax-assistant-app'><TaxAssistantHeader navOpen={navOpen} setNavOpen={setNavOpen} logoAvailable={logoAvailable} setLogoAvailable={setLogoAvailable} />
+    <section className='info-strip card no-print'><p><strong>UAE Tax Assistant</strong></p><p>Guided VAT and Corporate Tax filing support</p><small>Calculation aid only. Verify before official FTA submission.</small></section>
+
+    <section className={`screen-shell ${activeModule === 'home' ? 'is-active' : ''}`}>
+      <section className='card'><h2>Choose a tax module</h2><div className='selector-grid no-print'><TaxModeCard title='VAT Return' desc='Open VAT return workspace' onClick={() => setActiveModule('vat')} active={false} /><TaxModeCard title='Corporate Tax' desc='Open corporate tax workspace' onClick={() => setActiveModule('corporateTax')} active={false} /></div></section>
+    </section>
+
+    {activeModule === 'vat' && <section className='screen-shell is-active wizard-shell'><LiveSummary mode='vat' vatData={vat} vatCalc={v} ctCalc={c} /><div className='workspace-toolbar no-print'><button className='ghost' type='button' onClick={() => setActiveModule('home')}>← Back to Tax Home</button></div><VatWizard data={vat} setData={setVat} onSave={() => draftStorage.save('vatDraft', vat)} onReset={() => { if (confirm('Reset VAT draft?')) { const next = normalizeVatDraft(vatDefault, workspaceSettings); setVat(next); draftStorage.clear('vatDraft'); } }} /></section>}
+
+    {activeModule === 'corporateTax' && <section className='screen-shell is-active wizard-shell'><LiveSummary mode='corporateTax' vatData={vat} vatCalc={v} ctCalc={c} /><div className='workspace-toolbar no-print'><button className='ghost' type='button' onClick={() => setActiveModule('home')}>← Back to Tax Home</button></div><CorporateTaxWizard data={ct} setData={setCt} onSave={() => draftStorage.save('ctDraft', ct)} onReset={() => { if (confirm('Reset Corporate Tax draft?')) { setCt(ctDefault); draftStorage.clear('ctDraft'); } }} /></section>}
   </main>;
 }
