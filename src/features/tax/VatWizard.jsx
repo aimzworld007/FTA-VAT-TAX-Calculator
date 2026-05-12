@@ -46,7 +46,7 @@ const metricCards = [
 ];
 
 export function VatWizard({ data, setData, onSave, onReset, onProgressChange }) {
-  const fieldSx = { '& .MuiInputBase-root': { minHeight: 52, borderRadius: 3, color: '#071832', bgcolor: '#fff' }, '& .MuiOutlinedInput-notchedOutline': { borderColor: '#d7e3f0' }, '& .MuiInputBase-root:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#9cb7dc' }, '& .Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#2563eb', borderWidth: '1px' }, '& .Mui-focused': { boxShadow: '0 0 0 3px rgba(37,99,235,0.15)' } };
+  const fieldSx = { '& .MuiInputBase-root': { minHeight: { xs: 44, md: 48 }, height: { xs: 44, md: 48 }, borderRadius: '12px', color: '#071832', bgcolor: '#fff' }, '& .MuiOutlinedInput-notchedOutline': { borderColor: '#d7e3f0' }, '& .MuiInputBase-root:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#9cb7dc' }, '& .Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#2563eb', borderWidth: '1px' }, '& .Mui-focused': { boxShadow: '0 0 0 3px rgba(37,99,235,0.15)' }, '& .MuiInputBase-input': { padding: '0 14px', fontSize: 14, lineHeight: 1.2 }, '& .MuiSelect-select': { display: 'flex', alignItems: 'center', padding: '0 38px 0 14px !important', fontSize: 14, lineHeight: 1.2 }, '& .MuiInputLabel-root': { fontSize: 12, lineHeight: 1.1 }, '@media (max-width:768px)': { '& .MuiInputBase-input': { padding: '0 12px' }, '& .MuiSelect-select': { padding: '0 36px 0 12px !important' } } };
   const [step, setStep] = React.useState(1);
   const [pdfLoading, setPdfLoading] = React.useState(false);
   const result = calculateVat(data);
@@ -114,7 +114,7 @@ export function VatWizard({ data, setData, onSave, onReset, onProgressChange }) 
     }
   };
   const continueDisabled = (step === 1 && Boolean(reqErr)) || step === 5;
-  return <div><FormSection title={`VAT Wizard: ${steps[step - 1]}`}>
+  return <div className='vat-wizard'><FormSection title={`VAT Wizard: ${steps[step - 1]}`}>
     {step === 1 && <Box>
       <Stack direction='row' spacing={1.5} alignItems='center' sx={{ mb: 2.5 }}>
         <Box sx={{ width: 52, height: 52, borderRadius: '50%', bgcolor: '#eaf1ff', color: 'primary.main', display: 'grid', placeItems: 'center' }}>
@@ -144,7 +144,7 @@ export function VatWizard({ data, setData, onSave, onReset, onProgressChange }) 
       <Grid size={{ xs: 12, md: 6 }}>
         <FormControl fullWidth sx={fieldSx}>
           <InputLabel>VAT Pricing Mode</InputLabel>
-          <Select label='VAT Pricing Mode' value={data.vatPricingMode} onChange={e => setData({ ...data, vatPricingMode: e.target.value })} sx={{ minHeight: 46 }}>
+          <Select label='VAT Pricing Mode' value={data.vatPricingMode} onChange={e => setData({ ...data, vatPricingMode: e.target.value })}>
             {Object.values(VAT_PRICING_MODES).map(mode => <MenuItem key={mode} value={mode}>{mode === VAT_PRICING_MODES.INCLUSIVE ? 'Inclusive (amount entered includes VAT)' : 'Exclusive (amount entered excludes VAT)'}</MenuItem>)}
           </Select>
           <FormHelperText>This controls how sales and costs are converted into VAT return values.</FormHelperText>
