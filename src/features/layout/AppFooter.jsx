@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Link, Typography } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 
 export function AppFooter() {
   return (
@@ -18,12 +18,7 @@ export function AppFooter() {
         <Typography sx={{ fontSize: { xs: '0.75rem', sm: '0.8rem' }, opacity: 0.84, lineHeight: 1.65 }}>
           © 2026 FTA VAT & Tax Filing Assistant
         </Typography>
-        <Typography sx={{ fontSize: { xs: '0.72rem', sm: '0.78rem' }, opacity: 0.72, lineHeight: 1.5 }}>
-          Powered by{' '}
-          <Link href='https://ecashbiz.com/landing' target='_blank' rel='noreferrer' color='inherit' underline='hover' sx={{ fontWeight: 500 }}>
-            eCashbiz ERP
-          </Link>
-        </Typography>
+        <Typography sx={{ fontSize: { xs: '0.72rem', sm: '0.78rem' }, opacity: 0.72, lineHeight: 1.5 }}>Powered by eCashbiz ERP</Typography>
       </Box>
     </Box>
   );
