@@ -69,6 +69,7 @@ export async function downloadPdfReport(data = {}) {
     window.URL.revokeObjectURL(url);
     return filename;
   } catch (error) {
+    console.error('VAT PDF generation failed, switching to print fallback.', error);
     window.print();
     return 'vat-report.pdf';
   }
