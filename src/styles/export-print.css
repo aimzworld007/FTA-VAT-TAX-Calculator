@@ -56,3 +56,14 @@
 
 .tax-report.pdf-safe-a4 .tax-report-table th,.tax-report.pdf-safe-a4 .tax-report-table td{padding:6px 7px;font-size:10.5px;line-height:1.2}
 .tax-report.pdf-safe-a4 .tax-report-table .num{text-align:right}
+
+.tax-report.pdf-safe-a4{overflow:hidden}
+.tax-report.pdf-safe-a4 .vat-report-header{padding-bottom:6px}
+.tax-report.pdf-safe-a4 .vat-report-summary-row{gap:8px}
+.tax-report.pdf-safe-a4 .vat-report-business-grid{gap:6px 8px}
+.tax-report.pdf-safe-a4 .vat-report-business-grid span{font-size:10px}
+.tax-report.pdf-safe-a4 .vat-report-business-grid strong{font-size:11px}
+.tax-report.pdf-safe-a4 .vat201-table th,.tax-report.pdf-safe-a4 .vat201-table td{padding:5px 6px;font-size:9.6px}
+.tax-report.pdf-safe-a4 .vat-report-footer{margin-top:8px;padding-top:6px;font-size:9.5px}
+.tax-report.pdf-safe-a4 .vat-report-footer p{font-size:9px;margin-top:2px}
+.tax-report.pdf-safe-a4 .vat-report-credit-left a{color:#0f4ab8;text-decoration:none;font-weight:700}
