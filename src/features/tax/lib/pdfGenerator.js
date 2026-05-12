@@ -1,5 +1,6 @@
 export async function downloadPdfReport(data = {}) {
-  const report = document.getElementById('vat201-report');
+  const reportId = data.reportId || 'vat201-report';
+  const report = document.getElementById(reportId);
   if (!report) {
     window.print();
     return 'vat-report.pdf';
@@ -34,7 +35,10 @@ export async function downloadPdfReport(data = {}) {
   }
 
   const safe = (v) => (v || 'report').toString().replace(/\s+/g, '-').replace(/[^a-zA-Z0-9-_]/g, '');
-  const filename = `UAE-VAT201-Return-${safe(data.businessName)}-${safe(data.taxPeriodStart && data.taxPeriodEnd ? `${data.taxPeriodStart}_to_${data.taxPeriodEnd}` : 'period')}.pdf`;
+  const businessName = safe(data.businessName || data.companyName || 'business');
+  const taxPeriod = safe(data.taxPeriod || (data.taxPeriodStart && data.taxPeriodEnd ? `${data.taxPeriodStart}_to_${data.taxPeriodEnd}` : (data.financialYearStart && data.financialYearEnd ? `${data.financialYearStart}_to_${data.financialYearEnd}` : 'period')));
+  const reportType = safe(data.reportType || 'tax');
+  const filename = `${businessName}-${taxPeriod}-${reportType}-report.pdf`;
   pdf.save(filename);
   return filename;
 }
