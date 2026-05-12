@@ -1,0 +1,16 @@
+.tax-report.vat201-report{background:#fff;border:1px solid #cbd5e1;border-radius:14px;padding:16px}
+.vat-report-header{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;padding-bottom:12px;border-bottom:1px solid #dbe3ef}
+.tax-report-meta.compact{min-width:280px;max-width:340px;padding:10px;border:1px solid #dbe3ef;border-radius:10px;background:#f8fafc}
+.tax-report-meta.compact p{margin:0 0 6px;font-size:11px}
+.vat201-kpi-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;margin:14px 0}
+.tax-report-kpi{border:1px solid #dbe3ef;border-radius:12px;padding:10px;background:#fff;box-shadow:0 2px 8px rgba(15,23,42,.04)}
+.tax-report-kpi.payable strong{color:#b91c1c}.tax-report-kpi.refundable strong{color:#047857}
+.vat201-table{width:100%;border-collapse:separate;border-spacing:0;border:1px solid #cbd5e1;border-radius:10px;overflow:hidden}
+.vat201-table th,.vat201-table td{padding:8px 10px;border-bottom:1px solid #e2e8f0;font-size:12px}
+.vat201-table thead th{background:#e2e8f0;position:sticky;top:0;z-index:1;font-weight:700}
+.vat201-table tbody tr:nth-child(even){background:#f8fafc}
+.vat201-table .row-total td{font-weight:700;background:#eef2ff}
+.vat-report-footer{margin-top:14px;padding-top:10px;border-top:1px solid #dbe3ef;font-size:11px;color:#334155;display:grid;grid-template-columns:1fr auto;gap:8px}
+.vat-report-footer p{grid-column:1 / -1;margin:4px 0 0;font-size:10px;color:#64748b}
+@media (max-width: 980px){.vat201-kpi-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.vat-report-header{flex-direction:column}.tax-report-meta.compact{max-width:none;width:100%}}
+@media print{.tax-report.vat201-report{border:1px solid #94a3b8;border-radius:0;padding:10px}.vat201-kpi-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.tax-report-kpi{break-inside:avoid}.vat201-table thead{display:table-header-group}}

@@ -5,6 +5,7 @@ import { AppFooter } from './features/layout/AppFooter';
 import { usePathname } from './components/Router';
 import './styles.css';
 import './styles/print.css';
+import './styles/export-print.css';
 
 const importantLinks = [
   'FTA Login: https://eservices.tax.gov.ae/#/Logon',
