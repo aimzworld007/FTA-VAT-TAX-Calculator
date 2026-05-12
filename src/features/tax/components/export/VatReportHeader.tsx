@@ -1,7 +1,7 @@
 import React from 'react';
 import { FTA_LOGO_URL, InfoLine } from '../reportShared';
 
-export function VatReportHeader({ period, generatedDate, vatModeLabel, businessName, trn, emirate, filingFrequency }: any) {
+export function VatReportHeader({ period, generatedDate, vatModeLabel, businessName, trn, emirate, filingFrequency, summaryCards }: any) {
   return <header className='tax-report-header vat-report-header'>
     <div className='vat-report-header-top'>
       <div className='tax-report-brand'>
@@ -14,18 +14,21 @@ export function VatReportHeader({ period, generatedDate, vatModeLabel, businessN
         <InfoLine label='VAT Mode' value={vatModeLabel} />
       </div>
     </div>
-    <div className='vat-report-business-panel'>
-      <h3>Business &amp; Filing Information</h3>
-      <div className='vat-report-business-grid'>
-        <InfoLine label='Business Name' value={businessName || '—'} />
-        <InfoLine label='TRN' value={trn || '—'} />
-        <InfoLine label='Business Location Emirate' value={emirate} />
-        <InfoLine label='VAT Period' value={period} />
-        <InfoLine label='Prepared By' value='UAE VAT & Tax Filing Assistant' />
-        <InfoLine label='Prepared Date' value={generatedDate} />
-        <InfoLine label='VAT Pricing Mode' value={vatModeLabel} />
-        <InfoLine label='Filing Frequency' value={filingFrequency || '—'} />
+    <div className='vat-report-summary-row'>
+      <div className='vat-report-business-panel'>
+        <h3>Business &amp; Filing Information</h3>
+        <div className='vat-report-business-grid'>
+          <InfoLine label='Business Name' value={businessName || '—'} />
+          <InfoLine label='TRN' value={trn || '—'} />
+          <InfoLine label='Business Location Emirate' value={emirate} />
+          <InfoLine label='VAT Period' value={period} />
+          <InfoLine label='Prepared By' value='UAE VAT & Tax Filing Assistant' />
+          <InfoLine label='Prepared Date' value={generatedDate} />
+          <InfoLine label='VAT Pricing Mode' value={vatModeLabel} />
+          <InfoLine label='Filing Frequency' value={filingFrequency || '—'} />
+        </div>
       </div>
+      <div className='vat-report-kpi-panel'>{summaryCards}</div>
     </div>
     <div className='tax-report-meta compact vat-report-meta-mobile'>
       <InfoLine label='Business Name' value={businessName || '—'} />
