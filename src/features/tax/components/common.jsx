@@ -1,5 +1,6 @@
 import React from 'react';
 import { Box, Button, Card, CardContent, LinearProgress, Stack, Typography } from '@mui/material';
+import HomeRoundedIcon from '@mui/icons-material/HomeRounded';
 
 export const money=(v)=>new Intl.NumberFormat('en-AE',{style:'currency',currency:'AED'}).format(Number(v)||0);
 export function TaxSummaryCard({label,value}){return <Card><CardContent><Typography variant='body2' color='text.secondary'>{label}</Typography><Typography variant='h6'>{value}</Typography></CardContent></Card>;}
@@ -7,7 +8,15 @@ export function WorkspaceHeader({ title, progress = 0, onBack }) {
   return <Card sx={{ mb: 2 }}><CardContent>
     <Stack direction={{ xs: 'column', md: 'row' }} justifyContent='space-between' spacing={2}>
       <Box>
-        <Button variant='text' onClick={onBack}>← Back to Tax Home</Button>
+        <Button
+          variant='outlined'
+          size='small'
+          startIcon={<HomeRoundedIcon fontSize='small' />}
+          onClick={onBack}
+          sx={{ alignSelf: 'flex-start', minHeight: 36, borderRadius: 2, textTransform: 'none', mb: 1 }}
+        >
+          Back to Home
+        </Button>
         <Typography variant='h5'>{title}</Typography>
       </Box>
       <Box sx={{ minWidth: { md: 280 } }}>

@@ -117,15 +117,23 @@ export function VatWizard({ data, setData, onSave, onReset, onProgressChange }) 
   };
   const continueDisabled = (step === 1 && Boolean(reqErr)) || step === 5;
   return <div><FormSection title={`VAT Wizard: ${steps[step - 1]}`}>
-    {step === 1 && <Grid container spacing={2}>
-      <Grid size={{xs:12,md:6}}><TextField required label='Business name' value={data.businessName} onChange={e => setData({ ...data, businessName: e.target.value })} /></Grid>
-      <Grid size={{xs:12,md:6}}><TextField required label='TRN' value={data.trn} onChange={e => setData({ ...data, trn: e.target.value })} /></Grid>
-      <Grid size={{xs:12,md:6}}><FormControl fullWidth><InputLabel>Filing frequency</InputLabel><Select label='Filing frequency' value={data.filingFrequency} onChange={e => setData({ ...data, filingFrequency: e.target.value })}>{TAX_CONFIG.filingFrequencies.map(f => <MenuItem key={f} value={f}>{f}</MenuItem>)}</Select></FormControl></Grid>
-      <Grid size={{xs:12,md:6}}><FormControl fullWidth><InputLabel>Filing year</InputLabel><Select label='Filing year' value={data.filingYear} onChange={e => setData({ ...data, filingYear: Number(e.target.value) })}>{years.map(y => <MenuItem key={y} value={y}>{y}</MenuItem>)}</Select></FormControl></Grid>
-      {data.filingFrequency === 'Monthly' && <select value={data.filingMonth} onChange={e => setData({ ...data, filingMonth: e.target.value })}>{MONTHS.map(m => <option key={m}>{m}</option>)}</select>}
-      {data.filingFrequency === 'Quarterly' && <select value={data.filingStartMonth} onChange={e => setData({ ...data, filingStartMonth: e.target.value })}>{MONTHS.map(m => <option key={m}>{m}</option>)}</select>}
-      {data.filingFrequency === 'Yearly' && <p className='field-help'>Full year selected</p>}
-      <label className='field'><span>VAT Pricing Mode</span><select value={data.vatPricingMode} onChange={e => setData({ ...data, vatPricingMode: e.target.value })}>{Object.values(VAT_PRICING_MODES).map(mode => <option key={mode} value={mode}>{mode === VAT_PRICING_MODES.INCLUSIVE ? 'Inclusive (amount entered includes VAT)' : 'Exclusive (amount entered excludes VAT)'}</option>)}</select><small className='field-help'>This controls how sales and costs are converted into the VAT return values.</small></label>
+    {step === 1 && <Grid container spacing={1.5}>
+      <Grid size={{ xs: 12, md: 6 }}><TextField fullWidth required label='Business name' value={data.businessName} onChange={e => setData({ ...data, businessName: e.target.value })} sx={{ '& .MuiInputBase-root': { minHeight: 46 } }} /></Grid>
+      <Grid size={{ xs: 12, md: 6 }}><TextField fullWidth required label='TRN' value={data.trn} onChange={e => setData({ ...data, trn: e.target.value })} sx={{ '& .MuiInputBase-root': { minHeight: 46 } }} /></Grid>
+      <Grid size={{ xs: 12, md: 6 }}><FormControl fullWidth><InputLabel>Filing frequency</InputLabel><Select label='Filing frequency' value={data.filingFrequency} onChange={e => setData({ ...data, filingFrequency: e.target.value })} sx={{ minHeight: 46 }}>{TAX_CONFIG.filingFrequencies.map(f => <MenuItem key={f} value={f}>{f}</MenuItem>)}</Select></FormControl></Grid>
+      <Grid size={{ xs: 12, md: 6 }}><FormControl fullWidth><InputLabel>Filing year</InputLabel><Select label='Filing year' value={data.filingYear} onChange={e => setData({ ...data, filingYear: Number(e.target.value) })} sx={{ minHeight: 46 }}>{years.map(y => <MenuItem key={y} value={y}>{y}</MenuItem>)}</Select></FormControl></Grid>
+      {data.filingFrequency === 'Monthly' && <Grid size={{ xs: 12, md: 6 }}><FormControl fullWidth sx={{ maxWidth: { md: 360 } }}><InputLabel>Filing month</InputLabel><Select label='Filing month' value={data.filingMonth} onChange={e => setData({ ...data, filingMonth: e.target.value })} sx={{ minHeight: 46 }}>{MONTHS.map(m => <MenuItem key={m} value={m}>{m}</MenuItem>)}</Select></FormControl></Grid>}
+      {data.filingFrequency === 'Quarterly' && <Grid size={{ xs: 12, md: 6 }}><FormControl fullWidth sx={{ maxWidth: { md: 360 } }}><InputLabel>Quarter start month</InputLabel><Select label='Quarter start month' value={data.filingStartMonth} onChange={e => setData({ ...data, filingStartMonth: e.target.value })} sx={{ minHeight: 46 }}>{MONTHS.map(m => <MenuItem key={m} value={m}>{m}</MenuItem>)}</Select></FormControl></Grid>}
+      {data.filingFrequency === 'Yearly' && <Grid size={12}><Typography variant='body2' color='text.secondary'>Full year selected.</Typography></Grid>}
+      <Grid size={12}>
+        <FormControl fullWidth sx={{ maxWidth: { xs: '100%', md: 420 } }}>
+          <InputLabel>VAT Pricing Mode</InputLabel>
+          <Select label='VAT Pricing Mode' value={data.vatPricingMode} onChange={e => setData({ ...data, vatPricingMode: e.target.value })} sx={{ minHeight: 46 }}>
+            {Object.values(VAT_PRICING_MODES).map(mode => <MenuItem key={mode} value={mode}>{mode === VAT_PRICING_MODES.INCLUSIVE ? 'Inclusive (amount entered includes VAT)' : 'Exclusive (amount entered excludes VAT)'}</MenuItem>)}
+          </Select>
+          <FormHelperText>This controls how sales and costs are converted into VAT return values.</FormHelperText>
+        </FormControl>
+      </Grid>
       <Grid size={12}><Chip color='primary' label={`Selected Tax Period: ${formatVatPeriodLabel(data)}`} /></Grid>
       {(reqErr) && <Grid size={12}><FormHelperText error>{reqErr}</FormHelperText></Grid>}
     </Grid>}
