@@ -56,9 +56,9 @@ const metricCards = [
   { key: 'recoverableVat', label: 'Total Recoverable VAT', icon: <SouthOutlinedIcon fontSize='small' /> }
 ];
 
-export function VatWizard({ data, setData, onSave, onReset, onProgressChange }) {
+export function VatWizard({ data, setData, onSave, onReset, onProgressChange, forcedStep }) {
   const fieldSx = { '& .MuiInputBase-root': { minHeight: { xs: 44, md: 48 }, height: { xs: 44, md: 48 }, borderRadius: '12px', color: '#071832', bgcolor: '#fff' }, '& .MuiOutlinedInput-notchedOutline': { borderColor: '#d7e3f0' }, '& .MuiInputBase-root:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#9cb7dc' }, '& .Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#2563eb', borderWidth: '1px' }, '& .Mui-focused': { boxShadow: '0 0 0 3px rgba(37,99,235,0.15)' }, '& .MuiInputBase-input': { padding: '0 14px', fontSize: 14, lineHeight: 1.2 }, '& .MuiSelect-select': { display: 'flex', alignItems: 'center', padding: '0 38px 0 14px !important', fontSize: 14, lineHeight: 1.2 }, '& .MuiInputLabel-root': { fontSize: 12, lineHeight: 1.1 }, '@media (max-width:768px)': { '& .MuiInputBase-input': { padding: '0 12px' }, '& .MuiSelect-select': { padding: '0 36px 0 12px !important' } } };
-  const [step, setStep] = React.useState(1);
+  const [step, setStep] = React.useState(forcedStep || 1);
   const [downloadLoading, setDownloadLoading] = React.useState(false);
   const result = calculateVat(data);
   const reqErr = validateRequired(data.businessName, 'Business name') || validateRequired(data.trn, 'TRN') || validateRequired(data.businessLocationEmirate, 'Business location emirate') || validateVatPeriodSelection(data);
@@ -77,6 +77,8 @@ export function VatWizard({ data, setData, onSave, onReset, onProgressChange }) 
   React.useEffect(() => {
     onProgressChange?.(Math.round((step / 5) * 100));
   }, [step, onProgressChange]);
+
+  React.useEffect(() => { if (forcedStep) setStep(forcedStep); }, [forcedStep]);
 
   const updateEntry = (month, key, value) => {
     const updated = buildMonthlyEntries(data).map((entry) => (entry.month === month ? { ...entry, [key]: clampInput(value) } : entry));
