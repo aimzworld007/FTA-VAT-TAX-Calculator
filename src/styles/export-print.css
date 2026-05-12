@@ -1,69 +1,63 @@
-.tax-report.vat201-report{background:#fff;border:1px solid #cbd5e1;border-radius:14px;padding:16px}
-.vat-report-header{display:grid;gap:12px;padding-bottom:12px;border-bottom:1px solid #dbe3ef}
-.vat-report-header-top{display:flex;justify-content:space-between;align-items:flex-start;gap:16px}
-.tax-report-meta.compact{min-width:280px;max-width:340px;padding:10px;border:1px solid #dbe3ef;border-radius:10px;background:#f8fafc}
-.tax-report-meta.compact p{margin:0 0 6px;font-size:11px}
-.vat-report-business-panel{border:1px solid #dbe3ef;border-radius:10px;background:#f8fafc;padding:10px 12px}
-.vat-report-summary-row{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(0,1fr);gap:12px;align-items:stretch}
-.vat-report-kpi-panel{border:1px solid #dbe3ef;border-radius:10px;background:#f8fafc;padding:10px}
-.vat-report-kpi-panel .vat201-kpi-grid{margin:0;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
-.vat-report-business-panel h3{margin:0 0 8px;font-size:12px;letter-spacing:.01em;text-transform:uppercase;color:#334155}
-.vat-report-business-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px 12px}
-.vat-report-business-grid p{margin:0;display:grid;gap:2px}
-.vat-report-business-grid span{font-size:11px;color:#64748b}
-.vat-report-business-grid strong{font-size:12px;color:#0f172a}
+.tax-report.vat201-report{background:#fff;border:1px solid #cbd5e1;border-radius:10px;padding:10mm 9mm;color:#0f172a;box-sizing:border-box}
+.tax-report.vat201-report.pdf-safe-a4{width:100%;max-width:none;min-height:auto;margin:0 auto;font-size:11px;overflow:hidden}
+
+.vat-report-header{display:grid;gap:8px;padding-bottom:8px;border-bottom:1px solid #dbe3ef;page-break-inside:avoid;break-inside:avoid}
+.vat-report-header-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.vat-report-summary-row{display:block}
+.vat-report-business-panel{border:1px solid #dbe3ef;border-radius:8px;background:#f8fafc;padding:8px 10px}
+.vat-report-business-panel h3{margin:0 0 6px;font-size:11px;letter-spacing:.01em;text-transform:uppercase;color:#334155}
+.vat-report-business-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 12px}
+.vat-report-business-grid p{margin:0;display:grid;gap:1px}
+.vat-report-business-grid span{font-size:10px;color:#64748b}
+.vat-report-business-grid strong{font-size:11px;color:#0f172a}
+.tax-report-meta.compact{margin-top:8px;padding:7px 9px;border:1px solid #dbe3ef;border-radius:8px;background:#f8fafc;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.tax-report-meta.compact p{margin:0;display:grid;gap:1px}
+.tax-report-meta.compact span{font-size:10px;color:#64748b}
+.tax-report-meta.compact strong{font-size:11px;color:#0f172a}
 .vat-report-meta-mobile{display:none}
-.vat201-kpi-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;margin:14px 0}
-.tax-report-kpi{border:1px solid #dbe3ef;border-radius:12px;padding:10px;background:#fff;box-shadow:0 2px 8px rgba(15,23,42,.04)}
-.tax-report-kpi.payable strong{color:#b91c1c}.tax-report-kpi.refundable strong{color:#047857}
-.vat201-table{width:100%;border-collapse:separate;border-spacing:0;border:1px solid #cbd5e1;border-radius:10px;overflow:hidden}
-.vat201-table th,.vat201-table td{padding:8px 10px;border-bottom:1px solid #e2e8f0;font-size:12px}
-.vat201-table thead th{background:#e2e8f0;position:sticky;top:0;z-index:1;font-weight:700}
+
+.vat-report-layout.report-grid{display:grid;grid-template-columns:minmax(0,1fr) 260px;gap:12px;margin-top:10px;align-items:start}
+.report-main{min-width:0}
+.report-sidebar{display:flex;flex-direction:column;gap:8px;min-width:0}
+.report-card{border:1px solid #dbe3ef;border-radius:8px;background:#f8fafc;padding:8px;page-break-inside:avoid;break-inside:avoid}
+.report-card h4{margin:0 0 5px;font-size:11px;color:#334155;text-transform:uppercase}
+.report-card p{margin:0;font-size:10px;line-height:1.35;color:#334155}
+.report-card ul{margin:0;padding-left:16px;font-size:10px;line-height:1.35;color:#334155}
+
+.vat201-kpi-grid{display:grid;grid-template-columns:1fr;gap:6px;margin:0}
+.tax-report-kpi{border:1px solid #dbe3ef;border-radius:8px;padding:7px;background:#fff;box-shadow:none;page-break-inside:avoid;break-inside:avoid}
+.tax-report-kpi span{display:block;font-size:10px;color:#64748b}
+.tax-report-kpi strong{display:block;font-size:11px;color:#0f172a}
+.tax-report-kpi.payable{border-color:#fecaca;background:#fef2f2}
+.tax-report-kpi.payable strong{color:#b91c1c;font-size:12px}
+.tax-report-kpi.refundable{border-color:#bbf7d0;background:#f0fdf4}
+.tax-report-kpi.refundable strong{color:#047857;font-size:12px}
+
+.vat201-table-wrap h3{margin:0 0 6px;font-size:12px;color:#0f172a}
+.vat201-table{width:100%;table-layout:fixed;border-collapse:separate;border-spacing:0;border:1px solid #cbd5e1;border-radius:8px;overflow:hidden}
+.vat201-table th,.vat201-table td{padding:5px 6px;border-bottom:1px solid #e2e8f0;font-size:9.8px;vertical-align:top;word-break:break-word}
+.vat201-table th:nth-child(1),.vat201-table td:nth-child(1){width:42px}
+.vat201-table th:nth-child(3),.vat201-table td:nth-child(3),.vat201-table th:nth-child(4),.vat201-table td:nth-child(4),.vat201-table th:nth-child(5),.vat201-table td:nth-child(5){width:88px}
+.vat201-table thead th{background:#eef2f7;font-weight:700;position:sticky;top:0;z-index:1}
+.vat201-table .num{text-align:right}
 .vat201-table tbody tr:nth-child(even){background:#f8fafc}
 .vat201-table .row-total td{font-weight:700;background:#eef2ff}
-.vat-report-footer{margin-top:14px;padding-top:10px;border-top:1px solid #dbe3ef;font-size:11px;color:#334155;display:grid;grid-template-columns:1fr auto;gap:8px}
-.vat-report-footer p{grid-column:1 / -1;margin:4px 0 0;font-size:10px;color:#64748b}
-@media (max-width: 980px){.vat201-kpi-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.vat-report-header-top{flex-direction:column}.tax-report-meta.compact{max-width:none;width:100%}.vat-report-summary-row{grid-template-columns:1fr}.vat-report-business-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media (max-width: 680px){.vat-report-business-grid{grid-template-columns:1fr}}
-@media print{.tax-report.vat201-report{border:1px solid #94a3b8;border-radius:0;padding:10px}.vat-report-summary-row{grid-template-columns:minmax(0,1.45fr) minmax(0,1fr)}.vat-report-kpi-panel .vat201-kpi-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.vat201-kpi-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.tax-report-kpi{break-inside:avoid}.vat201-table thead{display:table-header-group}}
+.vat201-table tr{page-break-inside:avoid;break-inside:avoid}
 
-.tax-report.pdf-safe-a4{
-  width: 194mm;
-  max-width: 194mm;
-  min-height: 281mm;
-  margin: 0 auto;
-  border-radius: 0;
-  padding: 8mm;
-  box-sizing: border-box;
-  font-size: 11px;
+.vat-report-footer{margin-top:8px;padding-top:6px;border-top:1px solid #dbe3ef;font-size:10px;color:#334155;display:grid;grid-template-columns:1fr auto;gap:6px;page-break-inside:avoid;break-inside:avoid}
+.vat-report-footer p{grid-column:1 / -1;margin:2px 0 0;font-size:9px;color:#64748b}
+.vat-report-credit-left a{color:#0f4ab8;text-decoration:none;font-weight:700}
+
+@media screen and (max-width: 768px){
+  .vat-report-layout.report-grid{grid-template-columns:1fr}
+  .tax-report-meta.compact{grid-template-columns:1fr}
+  .vat-report-business-grid{grid-template-columns:1fr}
 }
-.tax-report.pdf-safe-a4 .vat-report-header{gap:8px;padding-bottom:8px}
-.tax-report.pdf-safe-a4 .vat-report-business-panel,
-.tax-report.pdf-safe-a4 .vat-report-kpi-panel,
-.tax-report.pdf-safe-a4 .tax-report-meta.compact{padding:8px}
-.tax-report.pdf-safe-a4 .vat201-kpi-grid{gap:6px;margin:8px 0}
-.tax-report.pdf-safe-a4 .tax-report-kpi{padding:8px;border-radius:8px}
-.tax-report.pdf-safe-a4 .vat201-table th,
-.tax-report.pdf-safe-a4 .vat201-table td{padding:6px 8px;font-size:10.5px;line-height:1.2}
-.tax-report.pdf-safe-a4 .vat201-table td.num,
-.tax-report.pdf-safe-a4 .vat201-table th.num{text-align:right}
-.tax-report.pdf-safe-a4 .vat201-table tr,
-.tax-report.pdf-safe-a4 .tax-report-kpi,
-.tax-report.pdf-safe-a4 .vat-report-footer{break-inside:avoid;page-break-inside:avoid}
-.tax-report.pdf-safe-a4 .vat201-table thead{display:table-header-group}
 
-@page { size: A4 portrait; margin: 8mm; }
-
-.tax-report.pdf-safe-a4 .tax-report-table th,.tax-report.pdf-safe-a4 .tax-report-table td{padding:6px 7px;font-size:10.5px;line-height:1.2}
-.tax-report.pdf-safe-a4 .tax-report-table .num{text-align:right}
-
-.tax-report.pdf-safe-a4{overflow:hidden}
-.tax-report.pdf-safe-a4 .vat-report-header{padding-bottom:6px}
-.tax-report.pdf-safe-a4 .vat-report-summary-row{gap:8px}
-.tax-report.pdf-safe-a4 .vat-report-business-grid{gap:6px 8px}
-.tax-report.pdf-safe-a4 .vat-report-business-grid span{font-size:10px}
-.tax-report.pdf-safe-a4 .vat-report-business-grid strong{font-size:11px}
-.tax-report.pdf-safe-a4 .vat201-table th,.tax-report.pdf-safe-a4 .vat201-table td{padding:5px 6px;font-size:9.6px}
-.tax-report.pdf-safe-a4 .vat-report-footer{margin-top:8px;padding-top:6px;font-size:9.5px}
-.tax-report.pdf-safe-a4 .vat-report-footer p{font-size:9px;margin-top:2px}
-.tax-report.pdf-safe-a4 .vat-report-credit-left a{color:#0f4ab8;text-decoration:none;font-weight:700}
+@media print{
+  @page{size:A4;margin:10mm}
+  .tax-report.vat201-report,.tax-report.vat201-report.pdf-safe-a4{width:100%!important;max-width:none!important;margin:0!important;padding:0!important;border:1px solid #94a3b8;border-radius:0;box-shadow:none}
+  .vat-report-layout.report-grid{grid-template-columns:minmax(0,1fr) 250px;gap:8px}
+  .vat-report-header,.vat-report-business-panel,.tax-report-meta.compact,.report-card,.tax-report-kpi,.vat201-table tr,.vat-report-footer{page-break-inside:avoid;break-inside:avoid}
+  .vat201-table thead{display:table-header-group}
+}

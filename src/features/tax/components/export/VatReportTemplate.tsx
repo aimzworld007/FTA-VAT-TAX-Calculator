@@ -8,8 +8,28 @@ import { VatReportFooter } from './VatReportFooter';
 export function VatReportTemplate(props: any) {
   const { period, generatedDate, vatModeLabel, data, selectedEmirate, result, zeroRatedSales, exemptSales, rows } = props;
   return <ReportShell id='vat201-report' className='vat201-report pdf-safe-a4'>
-    <VatReportHeader period={period} generatedDate={generatedDate} vatModeLabel={vatModeLabel} businessName={data.businessName} trn={data.trn} emirate={selectedEmirate} filingFrequency={data.filingFrequency} summaryCards={<VatSummaryCards result={result} zeroRatedSales={zeroRatedSales} exemptSales={exemptSales} />} />
-    <VatBoxSummaryTable rows={rows} />
+    <VatReportHeader period={period} generatedDate={generatedDate} vatModeLabel={vatModeLabel} businessName={data.businessName} trn={data.trn} emirate={selectedEmirate} filingFrequency={data.filingFrequency} />
+    <div className='report-grid vat-report-layout'>
+      <main className='report-main'>
+        <VatBoxSummaryTable rows={rows} />
+      </main>
+      <aside className='report-sidebar'>
+        <VatSummaryCards result={result} zeroRatedSales={zeroRatedSales} exemptSales={exemptSales} />
+        <section className='report-card'>
+          <h4>Filing Checklist</h4>
+          <ul>
+            <li>Reconcile taxable sales with books.</li>
+            <li>Validate input VAT eligibility.</li>
+            <li>Check adjustments and imports.</li>
+            <li>Review before FTA submission.</li>
+          </ul>
+        </section>
+        <section className='report-card'>
+          <h4>Report Note</h4>
+          <p>This summary supports VAT201 filing preparation and review. Validate all figures against source records before filing.</p>
+        </section>
+      </aside>
+    </div>
     <VatReportFooter />
   </ReportShell>;
 }
