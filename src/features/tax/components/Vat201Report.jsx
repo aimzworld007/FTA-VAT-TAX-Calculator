@@ -2,19 +2,106 @@ import React from 'react';
 import { buildMonthlyEntries } from '../lib/vatCalculator';
 import { formatVatPeriodLabel } from '../lib/vatPeriod';
 import { normalizeVatAmounts, normalizeVatPricingMode, VAT_PRICING_MODES } from '../lib/vatPricing';
-import { money } from './common.jsx';
+
+const FTA_LOGO_URL = 'https://tax.gov.ae/datafolder//Images/TAX/FTA.jpg';
 
 const emirateRows = [
-  ['1a', 'Abu Dhabi', 'Standard rated supplies in Abu Dhabi', 'abuDhabiSales'],
-  ['1b', 'Dubai', 'Standard rated supplies in Dubai', 'dubaiSales'],
-  ['1c', 'Sharjah', 'Standard rated supplies in Sharjah', 'sharjahSales'],
-  ['1d', 'Ajman', 'Standard rated supplies in Ajman', 'ajmanSales'],
-  ['1e', 'Umm Al Quwain', 'Standard rated supplies in Umm Al Quwain', 'uaqSales'],
-  ['1f', 'Ras Al Khaimah', 'Standard rated supplies in Ras Al Khaimah', 'rakSales'],
-  ['1g', 'Fujairah', 'Standard rated supplies in Fujairah', 'fujairahSales']
+  ['1a', 'Abu Dhabi', 'Standard rated supplies in Abu Dhabi'],
+  ['1b', 'Dubai', 'Standard rated supplies in Dubai'],
+  ['1c', 'Sharjah', 'Standard rated supplies in Sharjah'],
+  ['1d', 'Ajman', 'Standard rated supplies in Ajman'],
+  ['1e', 'Umm Al Quwain', 'Standard rated supplies in Umm Al Quwain'],
+  ['1f', 'Ras Al Khaimah', 'Standard rated supplies in Ras Al Khaimah'],
+  ['1g', 'Fujairah', 'Standard rated supplies in Fujairah']
 ];
 
 const n = (v) => Number(v) || 0;
+const formatAED = (value) => new Intl.NumberFormat('en-AE', { style: 'currency', currency: 'AED', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n(value));
+
+const getSelectedEmirateVatRow = (selectedEmirate, standardSales, pricingMode) => {
+  const emirate = emirateRows.find(([, emirateName]) => emirateName === selectedEmirate) || emirateRows[2];
+  const [box, , description] = emirate;
+  return {
+    ...normalizeVatAmounts(standardSales, pricingMode),
+    box,
+    description,
+    adjustment: 0
+  };
+};
+
+const renderReportHeader = ({ data, period, generatedAt, vatModeLabel, selectedEmirate }) => (
+  <header className='vat201-doc-header'>
+    <div className='vat201-header-left'>
+      <img src={FTA_LOGO_URL} alt='Federal Tax Authority logo' className='vat201-fta-logo' crossOrigin='anonymous' referrerPolicy='no-referrer' />
+      <div>
+        <h1>UAE VAT201 Return Summary</h1>
+        <p>Prepared from FTA VAT &amp; Tax Filing Assistant</p>
+      </div>
+    </div>
+    <div className='vat201-header-right'>
+      <InfoLine label='Business Name' value={data.businessName || '—'} />
+      <InfoLine label='TRN' value={data.trn || '—'} />
+      <InfoLine label='Business Location Emirate' value={selectedEmirate} />
+      <InfoLine label='VAT Period' value={period} />
+      <InfoLine label='Prepared Date' value={generatedAt.toLocaleDateString()} />
+      <InfoLine label='VAT Mode' value={vatModeLabel} />
+    </div>
+  </header>
+);
+
+const renderCompanyInfo = ({ data, period, generatedAt, vatModeLabel, selectedEmirate }) => (
+  <section className='vat201-company-info'>
+    <h3>Company Information</h3>
+    <div className='vat201-info-grid'>
+      <InfoLine label='Company Name' value={data.businessName || '—'} />
+      <InfoLine label='TRN' value={data.trn || '—'} />
+      <InfoLine label='Business Location Emirate' value={selectedEmirate} />
+      <InfoLine label='VAT Period' value={period} />
+      <InfoLine label='Prepared By' value='FTA VAT & Tax Filing Assistant' />
+      <InfoLine label='Prepared Date' value={generatedAt.toLocaleString()} />
+      <InfoLine label='VAT Pricing Mode' value={vatModeLabel} />
+    </div>
+  </section>
+);
+
+const renderSummaryCards = ({ result, zeroRatedSales, exemptSales }) => {
+  const netClass = result.netVat > 0 ? 'payable' : result.netVat < 0 ? 'refundable' : 'neutral';
+  return <section className='vat201-kpi-grid'>
+    <KpiCard label='Taxable Sales' value={formatAED(result.salesBreakdown.net)} />
+    <KpiCard label='Output VAT' value={formatAED(result.outputVat)} />
+    <KpiCard label='Recoverable VAT' value={formatAED(result.inputVat)} />
+    <KpiCard label='Zero Rated' value={formatAED(zeroRatedSales)} />
+    <KpiCard label='Exempt' value={formatAED(exemptSales)} />
+    <KpiCard label='Net VAT Result' value={result.netVat >= 0 ? `Payable ${formatAED(result.netVat)}` : `Refundable ${formatAED(Math.abs(result.netVat))}`} tone={netClass} />
+  </section>;
+};
+
+const renderVatBoxTable = (rows) => <table className='vat201-table fta-table'>
+  <thead>
+    <tr>
+      <th>Box</th>
+      <th>Description</th>
+      <th className='num'>Amount AED</th>
+      <th className='num'>VAT AED</th>
+      <th className='num'>Adjustment AED</th>
+    </tr>
+  </thead>
+  <tbody>
+    {rows.map((row) => <tr key={row.box} className={row.total ? 'row-total' : ''}>
+      <td>{row.box}</td>
+      <td>{row.description}</td>
+      <td className='num'>{formatAED(row.taxableAmount ?? row.amount ?? 0)}</td>
+      <td className='num'>{formatAED(row.vatAmount)}</td>
+      <td className='num'>{formatAED(row.adjustment)}</td>
+    </tr>)}
+  </tbody>
+</table>;
+
+const renderDisclaimer = () => <p className='vat201-disclaimer'>This report is a calculation assistant summary only. Verify all figures, invoices, exemptions, input tax eligibility, and FTA requirements before official submission.</p>;
+const renderFooter = () => <footer className='vat201-footer'>
+  <span>Generated by <a href='https://uaevat.live' target='_blank' rel='noreferrer'>uaevat.live</a> | VAT &amp; Tax Filing Assistant</span>
+  <span>Powered by ecashbiz ERP</span>
+</footer>;
 
 export function Vat201Report({ data, result }) {
   const generatedAt = new Date();
@@ -30,103 +117,43 @@ export function Vat201Report({ data, result }) {
   const inputBreakdown = normalizeVatAmounts(inputBaseGross, pricingMode);
   const selectedEmirate = data.businessLocationEmirate || 'Sharjah';
 
-  const salesRows = emirateRows
-    .filter(([, emirate]) => emirate === selectedEmirate)
-    .map(([box, , description]) => ({
-      ...normalizeVatAmounts(standardSales, pricingMode),
-      box,
-      description,
-      adjustment: 0
-    }));
-
   const sectionOneRows = [
-    ...salesRows,
+    getSelectedEmirateVatRow(selectedEmirate, standardSales, pricingMode),
     { box: '2', description: 'Tax Refunds provided to Tourists under the Tax Refunds for Tourists Scheme', amount: 0, vatAmount: 0, adjustment: 0 },
     { box: '3', description: 'Supplies subject to the reverse charge provisions', amount: 0, vatAmount: 0, adjustment: 0 },
     { box: '4', description: 'Zero rated supplies', taxableAmount: n(data.zeroRatedSales), vatAmount: 0, grossAmount: n(data.zeroRatedSales), adjustment: 0 },
     { box: '5', description: 'Exempt supplies', taxableAmount: n(data.exemptSales), vatAmount: 0, grossAmount: n(data.exemptSales), adjustment: 0 },
     { box: '6', description: 'Goods imported into the UAE', amount: 0, vatAmount: 0, adjustment: 0 },
     { box: '7', description: 'Adjustments to goods imported into the UAE', amount: 0, vatAmount: 0, adjustment: result.adjustments },
-    { box: '8', description: 'Totals', taxableAmount: result.salesBreakdown.net, vatAmount: result.outputVat, grossAmount: result.salesBreakdown.total, adjustment: result.adjustments, total: true }
-  ];
-
-  const sectionTwoRows = [
+    { box: '8', description: 'Totals', taxableAmount: result.salesBreakdown.net, vatAmount: result.outputVat, grossAmount: result.salesBreakdown.total, adjustment: result.adjustments, total: true },
     { box: '9', description: 'Standard rated expenses', taxableAmount: inputBreakdown.taxableAmount, vatAmount: result.inputVat, grossAmount: inputBreakdown.grossAmount, adjustment: 0 },
     { box: '10', description: 'Supplies subject to the reverse charge provisions', amount: 0, vatAmount: 0, adjustment: 0 },
-    { box: '11', description: 'Totals', taxableAmount: inputBreakdown.taxableAmount, vatAmount: result.inputVat, grossAmount: inputBreakdown.grossAmount, adjustment: 0, total: true }
-  ];
-
-  const sectionThreeRows = [
-    { box: '12', description: 'Total value of due tax for the period', amount: result.outputVat + result.adjustments },
-    { box: '13', description: 'Total value of recoverable tax for the period', amount: result.inputVat },
-    { box: '14', description: 'Payable tax for the period', amount: result.netVat }
+    { box: '11', description: 'Totals', taxableAmount: inputBreakdown.taxableAmount, vatAmount: result.inputVat, grossAmount: inputBreakdown.grossAmount, adjustment: 0, total: true },
+    { box: '12', description: 'Total value of due tax for the period', amount: result.outputVat + result.adjustments, vatAmount: 0, adjustment: 0 },
+    { box: '13', description: 'Total value of recoverable tax for the period', amount: result.inputVat, vatAmount: 0, adjustment: 0 },
+    { box: '14', description: 'Payable tax for the period', amount: result.netVat, vatAmount: 0, adjustment: 0, total: true }
   ];
 
   return <section id='vat201-report' className='vat201-report'>
-    <header className='vat201-doc-header'>
-      <h1>VAT Return</h1>
-      <div>
-        <small>{data.businessName || '—'}</small>
-        <small>{period}</small>
-        <small>Business Location: {selectedEmirate}</small>
-        <small>VAT Mode: {vatModeLabel}</small>
-        <small>{generatedAt.toLocaleString()}</small>
-      </div>
-    </header>
-    <p className='field-help'>FTA VAT Return Amount should be excluding VAT. If your sales are VAT-inclusive, the system automatically separates taxable value and VAT.</p>
-
-    <div className='vat201-table-wrap'>
-      <h3>1. VAT on Sales and All Other Outputs</h3>
-      <ReportTable rows={sectionOneRows} />
-
-      <h3>2. VAT on Expenses and All Other Inputs</h3>
-      <ReportTable rows={sectionTwoRows} />
-
-      <h3>3. Net VAT Due</h3>
-      <NetTable rows={sectionThreeRows} />
-    </div>
-
-    <div className='vat201-summary'>
-      <p><strong>Net position:</strong> {result.netVat >= 0 ? `Payable ${money(result.netVat)}` : `Refundable ${money(Math.abs(result.netVat))}`}</p>
-      <p>This preview is for internal calculation and record keeping. Please verify figures before filing with the UAE FTA.</p>
-    </div>
+    {renderReportHeader({ data, period, generatedAt, vatModeLabel, selectedEmirate })}
+    {renderCompanyInfo({ data, period, generatedAt, vatModeLabel, selectedEmirate })}
+    {renderSummaryCards({ result, zeroRatedSales: n(data.zeroRatedSales), exemptSales: n(data.exemptSales) })}
+    <section className='vat201-table-wrap'>
+      <h3>VAT201 Box Summary</h3>
+      {renderVatBoxTable(sectionOneRows)}
+    </section>
+    {renderDisclaimer()}
+    {renderFooter()}
   </section>;
 }
 
-function ReportTable({ rows }) {
-  return <table className='vat201-table fta-table'>
-    <thead>
-      <tr>
-        <th>Description</th>
-        <th>Amount (AED)</th>
-        <th>VAT Amount (AED)</th>
-        <th>Adjustment (AED)</th>
-      </tr>
-    </thead>
-    <tbody>
-      {rows.map((row) => <tr key={row.box} className={row.total ? 'row-total' : ''}>
-        <td>{row.box} {row.description}</td>
-        <td className='num'>{money(row.taxableAmount ?? row.amount ?? 0)}</td>
-        <td className='num'>{money(row.vatAmount)}</td>
-        <td className='num'>{money(row.adjustment)}</td>
-      </tr>)}
-    </tbody>
-  </table>;
+function KpiCard({ label, value, tone = 'neutral' }) {
+  return <article className={`vat201-kpi-card ${tone}`}>
+    <span>{label}</span>
+    <strong>{value}</strong>
+  </article>;
 }
 
-function NetTable({ rows }) {
-  return <table className='vat201-table fta-table'>
-    <thead>
-      <tr>
-        <th>Description</th>
-        <th>Amount (AED)</th>
-      </tr>
-    </thead>
-    <tbody>
-      {rows.map((row) => <tr key={row.box} className={row.box === '14' ? 'row-total' : ''}>
-        <td>{row.box} {row.description}</td>
-        <td className='num'>{money(row.amount)}</td>
-      </tr>)}
-    </tbody>
-  </table>;
+function InfoLine({ label, value }) {
+  return <p><span>{label}</span><strong>{value}</strong></p>;
 }
