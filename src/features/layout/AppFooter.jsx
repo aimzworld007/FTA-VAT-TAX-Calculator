@@ -5,12 +5,17 @@ export function AppFooter() {
   return (
     <footer className='app-footer'>
       <nav className='footer-links' aria-label='Footer links'>
-        <RouteLink to='/'>Back to Home</RouteLink>
+        <RouteLink to='/'>Home</RouteLink>
         <RouteLink to='/privacy-policy'>Privacy Policy</RouteLink>
         <RouteLink to='/terms'>Terms & Conditions</RouteLink>
         <RouteLink to='/documentation'>Documentation</RouteLink>
       </nav>
-      <p>This tool is for calculation assistance and record preparation only. Please verify all figures with official UAE FTA guidance before filing.</p>
+     <p>
+  Built with ❤️ in UAE by 
+  <a href="https://ecashbiz.com/landing" target="_blank">
+    eCashbiz Technologies
+  </a>
+</p>
     </footer>
   );
 }
