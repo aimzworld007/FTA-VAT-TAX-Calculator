@@ -120,6 +120,7 @@
   .vat201-table tr,.vat201-card,.sig-box,.vat201-box{break-inside:avoid;page-break-inside:avoid}
 }
 
+
 .vat-input-layout{display:grid;gap:14px;margin-bottom:18px}
 .vat-input-help{margin:0}
 .vat-input-main{display:block;width:100%}
@@ -133,6 +134,7 @@
 .vat-total-row td{font-weight:800;background:#f1f5f9}
 .vat-input-summary-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
 .vat-extra-inputs{margin-top:4px}
+.vat-mobile-cards{display:none}
 
 @media(max-width:1024px){
   .vat-input-summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -144,9 +146,18 @@
 }
 
 @media(max-width:640px){
+  .card h2{font-size:15px;line-height:1.35;word-break:break-word}
+  .vat-monthly-wrap-desktop{display:none}
+  .vat-mobile-cards{display:grid;gap:10px}
+  .vat-mobile-card{border:1px solid var(--line);border-radius:12px;padding:12px;background:#fff;display:grid;gap:10px}
+  .vat-mobile-card h3{margin:0;font-size:14px;color:#0f172a}
+  .vat-mobile-card input{width:100%;min-width:0}
+  .vat-mobile-amounts{display:grid;gap:8px}
+  .vat-mobile-amounts p{margin:0;display:flex;justify-content:space-between;gap:12px;padding:8px 10px;background:#f8fafc;border-radius:10px}
+  .vat-mobile-amounts span{font-size:12px;color:#475569;font-weight:700}
+  .vat-mobile-amounts strong{font-size:13px;color:#0f766e}
   .vat-input-summary-grid{grid-template-columns:1fr}
 }
-
 .vat201-report{background:#fff;border:1px solid #cbd5e1;border-radius:6px;padding:16px;max-width:100%;margin:0 auto}
 .vat201-doc-header{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;border-bottom:1px solid #cbd5e1;padding-bottom:10px;margin-bottom:12px}
 .vat201-doc-header h1{margin:0;font-size:24px;color:#0f172a}
