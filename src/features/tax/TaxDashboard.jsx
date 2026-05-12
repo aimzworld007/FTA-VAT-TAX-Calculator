@@ -4,7 +4,7 @@ import { CorporateTaxWizard } from './CorporateTaxWizard';
 import { draftStorage } from './lib/localDraftStorage';
 import { buildMonthlyEntries, calculateVat } from './lib/vatCalculator';
 import { calculateCorporateTax } from './lib/corporateTaxCalculator';
-import { money, TaxModeCard, TaxSummaryCard } from './components/common.jsx';
+import { money, TaxModeCard, TaxSummaryCard, WorkspaceHeader } from './components/common.jsx';
 import { formatVatPeriodLabel, inferSelectionFromDates, getPeriodFromSelection } from './lib/vatPeriod';
 import { VAT_PRICING_MODES, normalizeVatPricingMode } from './lib/vatPricing';
 
@@ -53,6 +53,8 @@ export function TaxDashboard() {
   const [workspaceSettings] = React.useState(() => ({ ...workspaceSettingsDefault, ...draftStorage.load('workspaceSettings', workspaceSettingsDefault), vatPricingMode: normalizeVatPricingMode(draftStorage.load('workspaceSettings', workspaceSettingsDefault).vatPricingMode) }));
   const [vat, setVat] = React.useState(() => normalizeVatDraft(draftStorage.load('vatDraft', vatDefault), workspaceSettings));
   const [ct, setCt] = React.useState(() => draftStorage.load('ctDraft', ctDefault));
+  const [vatProgress, setVatProgress] = React.useState(20);
+  const [ctProgress, setCtProgress] = React.useState(17);
 
   const v = calculateVat(vat);
   const c = calculateCorporateTax(ct);
@@ -71,8 +73,8 @@ export function TaxDashboard() {
       <section className='card'><h2>Tax Home</h2><p className='field-help'>Select a module to open a dedicated tax workspace.</p><div className='selector-grid no-print'><TaxModeCard title='VAT Return' desc='Open VAT return workspace' onClick={() => setActiveModule('vat')} active={false} /><TaxModeCard title='Corporate Tax' desc='Open corporate tax workspace' onClick={() => setActiveModule('corporateTax')} active={false} /></div></section>
     </section>}
 
-    {activeModule === 'vat' && <section className='screen-shell is-active wizard-shell'><div className='workspace-toolbar no-print'><button className='ghost' type='button' onClick={() => setActiveModule('home')}>← Back to Tax Home</button></div><section className='card'><h2>VAT Return Workspace</h2></section><LiveSummary mode='vat' vatData={vat} vatCalc={v} ctCalc={c} /><VatWizard data={vat} setData={setVat} onSave={() => draftStorage.save('vatDraft', vat)} onReset={() => { if (confirm('Reset VAT draft?')) { const next = normalizeVatDraft(vatDefault, workspaceSettings); setVat(next); draftStorage.clear('vatDraft'); } }} /></section>}
+    {activeModule === 'vat' && <section className='screen-shell is-active wizard-shell'><WorkspaceHeader title='VAT Return Workspace' progress={vatProgress} onBack={() => setActiveModule('home')} /><LiveSummary mode='vat' vatData={vat} vatCalc={v} ctCalc={c} /><VatWizard data={vat} setData={setVat} onProgressChange={setVatProgress} onSave={() => draftStorage.save('vatDraft', vat)} onReset={() => { if (confirm('Reset VAT draft?')) { const next = normalizeVatDraft(vatDefault, workspaceSettings); setVat(next); draftStorage.clear('vatDraft'); } }} /></section>}
 
-    {activeModule === 'corporateTax' && <section className='screen-shell is-active wizard-shell'><div className='workspace-toolbar no-print'><button className='ghost' type='button' onClick={() => setActiveModule('home')}>← Back to Tax Home</button></div><section className='card'><h2>Corporate Tax Workspace</h2></section><LiveSummary mode='corporateTax' vatData={vat} vatCalc={v} ctCalc={c} /><CorporateTaxWizard data={ct} setData={setCt} onSave={() => draftStorage.save('ctDraft', ct)} onReset={() => { if (confirm('Reset Corporate Tax draft?')) { setCt(ctDefault); draftStorage.clear('ctDraft'); } }} /></section>}
+    {activeModule === 'corporateTax' && <section className='screen-shell is-active wizard-shell'><WorkspaceHeader title='Corporate Tax Workspace' progress={ctProgress} onBack={() => setActiveModule('home')} /><LiveSummary mode='corporateTax' vatData={vat} vatCalc={v} ctCalc={c} /><CorporateTaxWizard data={ct} setData={setCt} onProgressChange={setCtProgress} onSave={() => draftStorage.save('ctDraft', ct)} onReset={() => { if (confirm('Reset Corporate Tax draft?')) { setCt(ctDefault); draftStorage.clear('ctDraft'); } }} /></section>}
   </main>;
 }

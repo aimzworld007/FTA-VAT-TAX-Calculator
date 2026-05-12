@@ -2,7 +2,7 @@ import React from 'react';
 import { buildMonthlyEntries, calculateVat } from './lib/vatCalculator';
 import { validateRequired, validateVatPeriodSelection } from './lib/taxValidation';
 import { TAX_CONFIG } from './lib/taxConfig';
-import { ExportActions, FormSection, TaxSummaryCard, WizardProgress, money } from './components/common.jsx';
+import { ExportActions, FormSection, TaxSummaryCard, money } from './components/common.jsx';
 import { downloadVatPdf } from './services/vatPdfApi.ts';
 import { Vat201Report } from './components/Vat201Report.jsx';
 import { MONTHS, formatVatPeriodLabel, getPeriodFromSelection } from './lib/vatPeriod';
@@ -14,7 +14,7 @@ const clampInput = (v) => Math.max(0, n(v));
 const currentYear = new Date().getFullYear();
 const years = Array.from({ length: 8 }, (_, i) => currentYear - 5 + i);
 
-export function VatWizard({ data, setData, onSave, onReset }) {
+export function VatWizard({ data, setData, onSave, onReset, onProgressChange }) {
   const [step, setStep] = React.useState(1);
   const [pdfLoading, setPdfLoading] = React.useState(false);
   const result = calculateVat(data);
@@ -30,6 +30,10 @@ export function VatWizard({ data, setData, onSave, onReset }) {
 
   const next = () => setStep((s) => Math.min(5, s + 1));
   const back = () => setStep((s) => Math.max(1, s - 1));
+
+  React.useEffect(() => {
+    onProgressChange?.(Math.round((step / 5) * 100));
+  }, [step, onProgressChange]);
 
   const updateEntry = (month, key, value) => {
     const updated = buildMonthlyEntries(data).map((entry) => (entry.month === month ? { ...entry, [key]: clampInput(value) } : entry));
@@ -111,7 +115,7 @@ export function VatWizard({ data, setData, onSave, onReset }) {
     }
   };
   const continueDisabled = (step === 1 && Boolean(reqErr)) || step === 5;
-  return <div><WizardProgress step={step} total={5} /><FormSection title={`VAT Wizard: ${steps[step - 1]}`}>
+  return <div><FormSection title={`VAT Wizard: ${steps[step - 1]}`}>
     {step === 1 && <div className='form-grid two'>
       <input placeholder='Business name' value={data.businessName} onChange={e => setData({ ...data, businessName: e.target.value })} />
       <input placeholder='TRN' value={data.trn} onChange={e => setData({ ...data, trn: e.target.value })} />
