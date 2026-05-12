@@ -58,7 +58,14 @@ export function TaxDashboard() {
   const c = calculateCorporateTax(ct);
 
   return <main className='content page-fade-in tax-assistant-app'><TaxAssistantHeader navOpen={navOpen} setNavOpen={setNavOpen} />
-    <section className='info-strip card no-print'><p><strong>UAE Tax Assistant</strong></p><p>Guided VAT and Corporate Tax filing support</p><small>Calculation aid only. Verify before official FTA submission.</small></section>
+    <section className='info-strip card no-print' aria-label='Important filing notice'>
+      <div className='info-marquee' role='status' aria-live='polite'>
+        <div className='info-marquee-track'>
+          <span><strong>UAE Tax Assistant</strong> ⚠️ Guided VAT and Corporate Tax filing support ⚠️ Calculation aid only. Verify before official FTA submission.</span>
+          <span aria-hidden='true'><strong>UAE Tax Assistant</strong> ⚠️ Guided VAT and Corporate Tax filing support ⚠️ Calculation aid only. Verify before official FTA submission.</span>
+        </div>
+      </div>
+    </section>
 
     <section className={`screen-shell ${activeModule === 'home' ? 'is-active' : ''}`}>
       <section className='card'><h2>Choose a tax module</h2><div className='selector-grid no-print'><TaxModeCard title='VAT Return' desc='Open VAT return workspace' onClick={() => setActiveModule('vat')} active={false} /><TaxModeCard title='Corporate Tax' desc='Open corporate tax workspace' onClick={() => setActiveModule('corporateTax')} active={false} /></div></section>
