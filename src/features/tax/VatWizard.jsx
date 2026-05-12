@@ -152,7 +152,7 @@ export function VatWizard({ data, setData, onSave, onReset, onProgressChange }) 
     <div className='wizard-action-bar'>
       <Stack direction={{xs:'column',sm:'row'}} spacing={1.5} className='wizard-action-group wizard-action-group-left'>
         <Button variant='outlined' onClick={back} disabled={step===1}>Back</Button>
-        <Button onClick={next} disabled={continueDisabled}>Continue</Button>
+        <Button className='primary-gradient-btn' onClick={next} disabled={continueDisabled}>Continue</Button>
       </Stack>
       {step === 5 && <ExportActions onSave={onSave} onReset={onReset} onPrint={() => window.print()} onPdf={downloadProfessionalPdf} pdfLoading={pdfLoading} />}
     </div>
