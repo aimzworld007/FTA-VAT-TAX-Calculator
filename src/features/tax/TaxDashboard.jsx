@@ -61,8 +61,8 @@ export function TaxDashboard() {
     <section className='info-strip card no-print' aria-label='Important filing notice'>
       <div className='info-marquee' role='status' aria-live='polite'>
         <div className='info-marquee-track'>
-          <span><strong>UAE Tax Assistant</strong> ⚠️ Guided VAT and Corporate Tax filing support ⚠️ Calculation aid only. Verify before official FTA submission.</span>
-          <span aria-hidden='true'><strong>UAE Tax Assistant</strong> ⚠️ Guided VAT and Corporate Tax filing support ⚠️ Calculation aid only. Verify before official FTA submission.</span>
+          <span><strong>UAE Tax Assistant</strong> ℹ️ Guided VAT and Corporate Tax filing support ℹ️ Calculation aid only. Verify before official FTA submission.</span>
+          <span aria-hidden='true'><strong>UAE Tax Assistant</strong> ℹ️ Guided VAT and Corporate Tax filing support ℹ️ Calculation aid only. Verify before official FTA submission.</span>
         </div>
       </div>
     </section>
