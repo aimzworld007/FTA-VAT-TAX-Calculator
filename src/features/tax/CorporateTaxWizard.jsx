@@ -26,13 +26,15 @@ import { downloadPdfReport } from './lib/pdfGenerator';
 
 const steps = ['Company Details', 'Income', 'Expenses', 'Taxable Profit', 'Tax Calculation', 'Export'];
 
-export function CorporateTaxWizard({ data, setData, onSave, onReset, onProgressChange }) {
-  const [step, setStep] = React.useState(1);
+export function CorporateTaxWizard({ data, setData, onSave, onReset, onProgressChange, forcedStep }) {
+  const [step, setStep] = React.useState(forcedStep || 1);
   const result = calculateCorporateTax(data);
 
   React.useEffect(() => {
     onProgressChange?.(Math.round((step / 6) * 100));
   }, [step, onProgressChange]);
+
+  React.useEffect(() => { if (forcedStep) setStep(forcedStep); }, [forcedStep]);
 
   const fieldSx = {
     '& .MuiInputBase-root': { minHeight: { xs: 44, md: 48 }, height: { xs: 44, md: 48 }, borderRadius: '12px', color: '#071832', bgcolor: '#fff' },
