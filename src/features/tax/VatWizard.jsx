@@ -15,11 +15,23 @@ const clampInput = (v) => Math.max(0, n(v));
 const currentYear = new Date().getFullYear();
 const years = Array.from({ length: 8 }, (_, i) => currentYear - 5 + i);
 
+const EMIRATE_OPTIONS = ['Abu Dhabi', 'Dubai', 'Sharjah', 'Ajman', 'Umm Al Quwain', 'Ras Al Khaimah', 'Fujairah'];
+const EMIRATE_BOX_MAP = {
+  'Abu Dhabi': '1a',
+  Dubai: '1b',
+  Sharjah: '1c',
+  Ajman: '1d',
+  'Umm Al Quwain': '1e',
+  'Ras Al Khaimah': '1f',
+  Fujairah: '1g'
+};
+
+
 export function VatWizard({ data, setData, onSave, onReset, onProgressChange }) {
   const [step, setStep] = React.useState(1);
   const [pdfLoading, setPdfLoading] = React.useState(false);
   const result = calculateVat(data);
-  const reqErr = validateRequired(data.businessName, 'Business name') || validateRequired(data.trn, 'TRN') || validateVatPeriodSelection(data);
+  const reqErr = validateRequired(data.businessName, 'Business name') || validateRequired(data.trn, 'TRN') || validateRequired(data.businessLocationEmirate, 'Business location emirate') || validateVatPeriodSelection(data);
 
   React.useEffect(() => {
     const period = getPeriodFromSelection(data);
@@ -68,14 +80,11 @@ export function VatWizard({ data, setData, onSave, onReset, onProgressChange }) 
     try {
       setPdfLoading(true);
       const period = formatVatPeriodLabel(data);
+      const selectedEmirate = data.businessLocationEmirate || 'Sharjah';
+      const standardSales = entries.reduce((t, e) => t + n(e.sales), 0);
+      const selectedBox = EMIRATE_BOX_MAP[selectedEmirate] || '1c';
       const boxes = [
-        ['1a', 'Abu Dhabi - Standard rated supplies', n(data.abuDhabiSales), 0, 0],
-        ['1b', 'Dubai - Standard rated supplies', n(data.dubaiSales), 0, 0],
-        ['1c', 'Sharjah - Standard rated supplies', entries.reduce((t, e) => t + n(e.sales), 0), result.outputVat, 0],
-        ['1d', 'Ajman - Standard rated supplies', n(data.ajmanSales), 0, 0],
-        ['1e', 'Umm Al Quwain - Standard rated supplies', n(data.uaqSales), 0, 0],
-        ['1f', 'Ras Al Khaimah - Standard rated supplies', n(data.rakSales), 0, 0],
-        ['1g', 'Fujairah - Standard rated supplies', n(data.fujairahSales), 0, 0],
+        [selectedBox, `${selectedEmirate} - Standard rated supplies`, standardSales, result.outputVat, 0],
         ['2', 'Tax refunds provided to tourists', 0, 0, 0],
         ['3', 'Supplies subject to reverse charge provisions', 0, 0, 0],
         ['4', 'Zero rated supplies', n(data.zeroRatedSales), 0, 0],
@@ -98,6 +107,7 @@ export function VatWizard({ data, setData, onSave, onReset, onProgressChange }) 
         preparedBy: data.preparedBy || data.businessName || 'N/A',
         preparedDate: new Date().toISOString().slice(0, 10),
         vatMode: data.vatPricingMode,
+        businessLocationEmirate: data.businessLocationEmirate,
         summary: {
           taxableSales: result.salesBreakdown.net,
           outputVat: result.outputVat,
@@ -120,13 +130,21 @@ export function VatWizard({ data, setData, onSave, onReset, onProgressChange }) 
     {step === 1 && <Grid container spacing={1.5}>
       <Grid size={{ xs: 12, md: 6 }}><TextField fullWidth required label='Business name' value={data.businessName} onChange={e => setData({ ...data, businessName: e.target.value })} sx={{ '& .MuiInputBase-root': { minHeight: 46 } }} /></Grid>
       <Grid size={{ xs: 12, md: 6 }}><TextField fullWidth required label='TRN' value={data.trn} onChange={e => setData({ ...data, trn: e.target.value })} sx={{ '& .MuiInputBase-root': { minHeight: 46 } }} /></Grid>
+      <Grid size={{ xs: 12, md: 6 }}>
+        <FormControl fullWidth required sx={{ maxWidth: { md: 360 } }}>
+          <InputLabel>Business Location Emirate *</InputLabel>
+          <Select label='Business Location Emirate *' value={data.businessLocationEmirate || ''} onChange={e => setData({ ...data, businessLocationEmirate: e.target.value })} sx={{ minHeight: 46 }}>
+            {EMIRATE_OPTIONS.map((emirate) => <MenuItem key={emirate} value={emirate}>{emirate}</MenuItem>)}
+          </Select>
+        </FormControl>
+      </Grid>
       <Grid size={{ xs: 12, md: 6 }}><FormControl fullWidth><InputLabel>Filing frequency</InputLabel><Select label='Filing frequency' value={data.filingFrequency} onChange={e => setData({ ...data, filingFrequency: e.target.value })} sx={{ minHeight: 46 }}>{TAX_CONFIG.filingFrequencies.map(f => <MenuItem key={f} value={f}>{f}</MenuItem>)}</Select></FormControl></Grid>
       <Grid size={{ xs: 12, md: 6 }}><FormControl fullWidth><InputLabel>Filing year</InputLabel><Select label='Filing year' value={data.filingYear} onChange={e => setData({ ...data, filingYear: Number(e.target.value) })} sx={{ minHeight: 46 }}>{years.map(y => <MenuItem key={y} value={y}>{y}</MenuItem>)}</Select></FormControl></Grid>
       {data.filingFrequency === 'Monthly' && <Grid size={{ xs: 12, md: 6 }}><FormControl fullWidth sx={{ maxWidth: { md: 360 } }}><InputLabel>Filing month</InputLabel><Select label='Filing month' value={data.filingMonth} onChange={e => setData({ ...data, filingMonth: e.target.value })} sx={{ minHeight: 46 }}>{MONTHS.map(m => <MenuItem key={m} value={m}>{m}</MenuItem>)}</Select></FormControl></Grid>}
       {data.filingFrequency === 'Quarterly' && <Grid size={{ xs: 12, md: 6 }}><FormControl fullWidth sx={{ maxWidth: { md: 360 } }}><InputLabel>Quarter start month</InputLabel><Select label='Quarter start month' value={data.filingStartMonth} onChange={e => setData({ ...data, filingStartMonth: e.target.value })} sx={{ minHeight: 46 }}>{MONTHS.map(m => <MenuItem key={m} value={m}>{m}</MenuItem>)}</Select></FormControl></Grid>}
       {data.filingFrequency === 'Yearly' && <Grid size={12}><Typography variant='body2' color='text.secondary'>Full year selected.</Typography></Grid>}
-      <Grid size={12}>
-        <FormControl fullWidth sx={{ maxWidth: { xs: '100%', md: 420 } }}>
+      <Grid size={{ xs: 12, md: 6 }}>
+        <FormControl fullWidth sx={{ maxWidth: { xs: '100%', md: 360 } }}>
           <InputLabel>VAT Pricing Mode</InputLabel>
           <Select label='VAT Pricing Mode' value={data.vatPricingMode} onChange={e => setData({ ...data, vatPricingMode: e.target.value })} sx={{ minHeight: 46 }}>
             {Object.values(VAT_PRICING_MODES).map(mode => <MenuItem key={mode} value={mode}>{mode === VAT_PRICING_MODES.INCLUSIVE ? 'Inclusive (amount entered includes VAT)' : 'Exclusive (amount entered excludes VAT)'}</MenuItem>)}

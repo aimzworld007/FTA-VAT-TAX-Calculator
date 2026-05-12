@@ -5,13 +5,13 @@ import { normalizeVatAmounts, normalizeVatPricingMode, VAT_PRICING_MODES } from 
 import { money } from './common.jsx';
 
 const emirateRows = [
-  ['1a', 'Standard rated supplies in Abu Dhabi', 'abuDhabiSales'],
-  ['1b', 'Standard rated supplies in Dubai', 'dubaiSales'],
-  ['1c', 'Standard rated supplies in Sharjah', 'sharjahSales'],
-  ['1d', 'Standard rated supplies in Ajman', 'ajmanSales'],
-  ['1e', 'Standard rated supplies in Umm Al Quwain', 'uaqSales'],
-  ['1f', 'Standard rated supplies in Ras Al Khaimah', 'rakSales'],
-  ['1g', 'Standard rated supplies in Fujairah', 'fujairahSales']
+  ['1a', 'Abu Dhabi', 'Standard rated supplies in Abu Dhabi', 'abuDhabiSales'],
+  ['1b', 'Dubai', 'Standard rated supplies in Dubai', 'dubaiSales'],
+  ['1c', 'Sharjah', 'Standard rated supplies in Sharjah', 'sharjahSales'],
+  ['1d', 'Ajman', 'Standard rated supplies in Ajman', 'ajmanSales'],
+  ['1e', 'Umm Al Quwain', 'Standard rated supplies in Umm Al Quwain', 'uaqSales'],
+  ['1f', 'Ras Al Khaimah', 'Standard rated supplies in Ras Al Khaimah', 'rakSales'],
+  ['1g', 'Fujairah', 'Standard rated supplies in Fujairah', 'fujairahSales']
 ];
 
 const n = (v) => Number(v) || 0;
@@ -28,14 +28,16 @@ export function Vat201Report({ data, result }) {
   const totalExpenses = monthlyEntries.reduce((sum, e) => sum + n(e.expenses), 0);
   const inputBaseGross = totalPurchases + totalExpenses;
   const inputBreakdown = normalizeVatAmounts(inputBaseGross, pricingMode);
-  const hasEmirates = emirateRows.some(([, , key]) => n(data[key]) > 0);
+  const selectedEmirate = data.businessLocationEmirate || 'Sharjah';
 
-  const salesRows = emirateRows.map(([box, description, key]) => ({
-    ...normalizeVatAmounts(hasEmirates ? n(data[key]) : box === '1c' ? standardSales : 0, pricingMode),
-    box,
-    description,
-    adjustment: 0
-  }));
+  const salesRows = emirateRows
+    .filter(([, emirate]) => emirate === selectedEmirate)
+    .map(([box, , description]) => ({
+      ...normalizeVatAmounts(standardSales, pricingMode),
+      box,
+      description,
+      adjustment: 0
+    }));
 
   const sectionOneRows = [
     ...salesRows,
@@ -66,6 +68,7 @@ export function Vat201Report({ data, result }) {
       <div>
         <small>{data.businessName || '—'}</small>
         <small>{period}</small>
+        <small>Business Location: {selectedEmirate}</small>
         <small>VAT Mode: {vatModeLabel}</small>
         <small>{generatedAt.toLocaleString()}</small>
       </div>
