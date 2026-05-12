@@ -35,8 +35,8 @@ function normalizeVatDraft(input, workspaceSettings) {
   return next;
 }
 
-function TaxAssistantHeader({ navOpen, setNavOpen, logoAvailable, setLogoAvailable }) {
-  return <header className='top-navbar no-print'><div className='top-navbar-inner'><div className='brand-lockup'><div className='header-logo' aria-label='FTA tax assistant logo'>{logoAvailable ? <img src='/logo.png' alt='FTA VAT & Tax Filing Assistant logo' onError={() => setLogoAvailable(false)} /> : <span>FTA</span>}</div><div><strong>FTA VAT &amp; Tax Filing Assistant</strong><div className='badge top-badge'>UAE VAT 5% | Corporate Tax 9%</div></div></div><button className='nav-toggle' type='button' aria-expanded={navOpen} aria-label='Toggle navigation menu' onClick={() => setNavOpen((prev) => !prev)}>☰</button><nav className={`top-links ${navOpen ? 'open' : ''}`} aria-label='Tax resources'>{navLinks.map((link) => <a key={link.label} href={link.href} target='_blank' rel='noopener noreferrer'>{link.label}</a>)}</nav></div></header>;
+function TaxAssistantHeader({ navOpen, setNavOpen }) {
+  return <header className='top-navbar no-print'><div className='top-navbar-inner'><div className='brand-lockup'><div className='header-logo' aria-label='FTA tax assistant logo'><img src='/logo.png' alt='FTA VAT & Tax Filing Assistant logo' /></div><div><strong>FTA VAT &amp; Tax Filing Assistant</strong><div className='badge top-badge'>UAE VAT 5% | Corporate Tax 9%</div></div></div><button className='nav-toggle' type='button' aria-expanded={navOpen} aria-label='Toggle navigation menu' onClick={() => setNavOpen((prev) => !prev)}>☰</button><nav className={`top-links ${navOpen ? 'open' : ''}`} aria-label='Tax resources'>{navLinks.map((link) => <a key={link.label} href={link.href} target='_blank' rel='noopener noreferrer'>{link.label}</a>)}</nav></div></header>;
 }
 
 function LiveSummary({ mode, vatData, vatCalc, ctCalc }) {
@@ -50,7 +50,6 @@ function LiveSummary({ mode, vatData, vatCalc, ctCalc }) {
 export function TaxDashboard() {
   const [activeModule, setActiveModule] = React.useState('home');
   const [navOpen, setNavOpen] = React.useState(false);
-  const [logoAvailable, setLogoAvailable] = React.useState(true);
   const [workspaceSettings] = React.useState(() => ({ ...workspaceSettingsDefault, ...draftStorage.load('workspaceSettings', workspaceSettingsDefault), vatPricingMode: normalizeVatPricingMode(draftStorage.load('workspaceSettings', workspaceSettingsDefault).vatPricingMode) }));
   const [vat, setVat] = React.useState(() => normalizeVatDraft(draftStorage.load('vatDraft', vatDefault), workspaceSettings));
   const [ct, setCt] = React.useState(() => draftStorage.load('ctDraft', ctDefault));
@@ -58,7 +57,7 @@ export function TaxDashboard() {
   const v = calculateVat(vat);
   const c = calculateCorporateTax(ct);
 
-  return <main className='content page-fade-in tax-assistant-app'><TaxAssistantHeader navOpen={navOpen} setNavOpen={setNavOpen} logoAvailable={logoAvailable} setLogoAvailable={setLogoAvailable} />
+  return <main className='content page-fade-in tax-assistant-app'><TaxAssistantHeader navOpen={navOpen} setNavOpen={setNavOpen} />
     <section className='info-strip card no-print'><p><strong>UAE Tax Assistant</strong></p><p>Guided VAT and Corporate Tax filing support</p><small>Calculation aid only. Verify before official FTA submission.</small></section>
 
     <section className={`screen-shell ${activeModule === 'home' ? 'is-active' : ''}`}>
