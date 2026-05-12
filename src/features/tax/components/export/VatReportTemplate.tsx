@@ -25,8 +25,9 @@ export function VatReportTemplate(props: any) {
           </ul>
         </section>
         <section className='report-card'>
-          <h4>Report Note</h4>
-          <p>This summary supports VAT201 filing preparation and review. Validate all figures against source records before filing.</p>
+          <h4>Declaration</h4>
+          <p>This VAT201 summary has been prepared from the available accounting records and reviewed for filing readiness.</p>
+          <div className='declaration-line'>Prepared by: UAE VAT &amp; Tax Filing Assistant</div>
         </section>
       </aside>
     </div>
