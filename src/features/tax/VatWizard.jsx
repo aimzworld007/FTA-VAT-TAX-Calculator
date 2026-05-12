@@ -11,12 +11,21 @@ import SouthOutlinedIcon from '@mui/icons-material/SouthOutlined';
 import CalculateOutlinedIcon from '@mui/icons-material/CalculateOutlined';
 import PlaylistAddCheckCircleOutlinedIcon from '@mui/icons-material/PlaylistAddCheckCircleOutlined';
 import NotesOutlinedIcon from '@mui/icons-material/NotesOutlined';
+import AssessmentOutlinedIcon from '@mui/icons-material/AssessmentOutlined';
+import PercentOutlinedIcon from '@mui/icons-material/PercentOutlined';
+import SouthWestOutlinedIcon from '@mui/icons-material/SouthWestOutlined';
+import TuneOutlinedIcon from '@mui/icons-material/TuneOutlined';
+import BalanceOutlinedIcon from '@mui/icons-material/BalanceOutlined';
+import GppGoodOutlinedIcon from '@mui/icons-material/GppGoodOutlined';
+import FilePresentOutlinedIcon from '@mui/icons-material/FilePresentOutlined';
+import PrintOutlinedIcon from '@mui/icons-material/PrintOutlined';
+import IosShareOutlinedIcon from '@mui/icons-material/IosShareOutlined';
 import ArrowBackOutlinedIcon from '@mui/icons-material/ArrowBackOutlined';
 import ArrowForwardOutlinedIcon from '@mui/icons-material/ArrowForwardOutlined';
 import { buildMonthlyEntries, calculateVat } from './lib/vatCalculator';
 import { validateRequired, validateVatPeriodSelection } from './lib/taxValidation';
 import { TAX_CONFIG } from './lib/taxConfig';
-import { ExportActions, FormSection, TaxSummaryCard, money } from './components/common.jsx';
+import { FormSection, money } from './components/common.jsx';
 import { Vat201Report } from './components/Vat201Report.jsx';
 import { MONTHS, formatVatPeriodLabel, getPeriodFromSelection } from './lib/vatPeriod';
 import { VAT_PRICING_MODES, splitVatFromAmount } from './lib/vatPricing';
@@ -242,7 +251,36 @@ export function VatWizard({ data, setData, onSave, onReset, onProgressChange }) 
         </CardContent>
       </Card>
     </Box>}
-    {step === 4 && <div className='grid-section'><TaxSummaryCard label={result.vatPricingMode === VAT_PRICING_MODES.INCLUSIVE ? 'Net Amount' : 'Subtotal'} value={money(result.salesBreakdown.net)} /><TaxSummaryCard label={result.vatPricingMode === VAT_PRICING_MODES.INCLUSIVE ? 'VAT Included' : 'VAT 5%'} value={money(result.salesBreakdown.vat)} /><TaxSummaryCard label='Grand Total' value={money(result.salesBreakdown.total)} /><TaxSummaryCard label='Total input VAT' value={money(result.inputVat)} /><TaxSummaryCard label='Adjustments' value={money(result.adjustments)} /><TaxSummaryCard label={result.label} value={money(result.netVat)} /><p>For preparation only. Please verify before official FTA submission.</p></div>}
+    {step === 4 && <Box sx={{ bgcolor: '#f5f8fc', borderRadius: 5, p: { xs: 1.5, md: 2 } }}>
+      <Card sx={{ borderRadius: 5, border: '1px solid #dbe5f2', boxShadow: '0 8px 20px rgba(15,23,42,.06)' }}>
+        <CardContent sx={{ p: { xs: 2, md: 3 } }}>
+          <Typography variant='h5' sx={{ fontWeight: 800, color: '#0f2251' }}>VAT Return Review</Typography>
+          <Typography variant='body1' color='text.secondary' sx={{ mt: 0.6, mb: 2.2 }}>Review your VAT return values before generating PDF or printing.</Typography>
+          <Alert icon={<InfoOutlinedIcon fontSize='inherit' />} severity='info' sx={{ mb: 2.4, borderRadius: 3, border: '1px solid #bfdbfe', bgcolor: '#eff6ff', color: '#1e40af' }}>This summary is generated from your entered VAT sales, purchases, expenses, and adjustments.</Alert>
+          <Grid container spacing={1.6} sx={{ mb: 2.3 }}>
+            {[
+              { label: 'Taxable Sales', value: result.salesBreakdown.net, helper: 'Total taxable sales', icon: <AssessmentOutlinedIcon fontSize='small' />, color: '#2563eb', bg: '#eff6ff' },
+              { label: 'Output VAT (5%)', value: result.outputVat, helper: 'VAT on sales', icon: <TrendingUpOutlinedIcon fontSize='small' />, color: '#16a34a', bg: '#ecfdf3' },
+              { label: 'Recoverable VAT', value: result.inputVat, helper: 'Input VAT claims', icon: <SouthWestOutlinedIcon fontSize='small' />, color: '#7c3aed', bg: '#f5f3ff' },
+              { label: 'Adjustments', value: result.adjustments, helper: 'VAT adjustments', icon: <TuneOutlinedIcon fontSize='small' />, color: '#ea580c', bg: '#fff7ed' },
+              { label: 'Net VAT Result', value: Math.abs(result.netVat), helper: 'Payable / (Refundable)', icon: <BalanceOutlinedIcon fontSize='small' />, color: result.netVat > 0 ? '#dc2626' : result.netVat < 0 ? '#16a34a' : '#2563eb', bg: result.netVat > 0 ? '#fef2f2' : result.netVat < 0 ? '#f0fdf4' : '#eff6ff' },
+              { label: 'VAT Status', value: result.netVat > 0 ? 'PAYABLE' : result.netVat < 0 ? 'REFUNDABLE' : 'NEUTRAL', helper: result.netVat > 0 ? 'Payment due' : result.netVat < 0 ? 'Refund expected' : 'No payment due', icon: <GppGoodOutlinedIcon fontSize='small' />, color: '#2563eb', bg: '#eff6ff', badge: true }
+            ].map((item) => <Grid key={item.label} size={{ xs: 12, sm: 4, lg: 2 }}><Card sx={{ height: '100%', borderRadius: 4, border: '1px solid #dbe5f2', boxShadow: '0 6px 16px rgba(15,23,42,.05)' }}><CardContent sx={{ p: 2 }}><Box sx={{ width: 42, height: 42, borderRadius: 2.5, bgcolor: item.bg, color: item.color, display: 'grid', placeItems: 'center', mb: 1.8 }}>{item.icon}</Box><Typography variant='body2' sx={{ color: '#334155', mb: 0.8 }}>{item.label}</Typography>{item.badge ? <Box sx={{ display: 'inline-block', px: 1.25, py: 0.45, borderRadius: 99, bgcolor: '#dbeafe', color: '#1d4ed8', fontWeight: 800, fontSize: 12, mb: 1 }}>{item.value}</Box> : <Typography variant='h5' sx={{ fontWeight: 800, color: item.color, mb: 1 }}>{money(item.value)}</Typography>}<Typography variant='body2' color='text.secondary'>{item.helper}</Typography></CardContent></Card></Grid>)}
+          </Grid>
+          <Card sx={{ borderRadius: 4, border: '1px solid #dbe5f2', boxShadow: '0 4px 14px rgba(15,23,42,.05)', overflow: 'hidden' }}>
+            <Typography variant='h6' sx={{ fontWeight: 700, px: 2, py: 1.5 }}>VAT Breakdown</Typography>
+            <Box sx={{ overflowX: 'auto' }}><Box component='table' sx={{ width: '100%', borderCollapse: 'collapse', minWidth: 680 }}><Box component='thead' sx={{ bgcolor: '#f1f5f9' }}><Box component='tr'><Box component='th' sx={{ textAlign: 'left', p: 1.5 }}>Description</Box><Box component='th' sx={{ textAlign: 'right', p: 1.5 }}>Amount (AED)</Box><Box component='th' sx={{ textAlign: 'center', p: 1.5 }}>Status</Box></Box></Box><Box component='tbody'>{[
+              { label: 'Total Sales (Input/Gross)', helper: 'Total value of taxable sales', amount: result.salesBreakdown.total, icon: <AssessmentOutlinedIcon fontSize='small' />, status: '—' },
+              { label: 'VAT 5% (Output VAT)', helper: 'VAT calculated on taxable sales', amount: result.outputVat, icon: <PercentOutlinedIcon fontSize='small' />, status: '—' },
+              { label: 'Input VAT (Recoverable VAT)', helper: 'VAT paid on purchases & expenses', amount: result.inputVat, icon: <SouthOutlinedIcon fontSize='small' />, status: '—' },
+              { label: 'Adjustments', helper: 'Adjustments and corrections', amount: result.adjustments, icon: <TuneOutlinedIcon fontSize='small' />, status: '—' },
+              { label: 'Final VAT Payable', helper: 'Amount payable to FTA or refundable', amount: result.netVat, icon: <BalanceOutlinedIcon fontSize='small' />, status: result.netVat > 0 ? 'PAYABLE' : result.netVat < 0 ? 'REFUNDABLE' : 'NEUTRAL', final: true }
+            ].map((row) => <Box component='tr' key={row.label} sx={{ borderTop: '1px solid #e2e8f0', bgcolor: row.final ? '#eff6ff' : '#fff' }}><Box component='td' sx={{ p: 1.5 }}><Stack direction='row' spacing={1.2} alignItems='center'><Box sx={{ width: 30, height: 30, borderRadius: 2, display: 'grid', placeItems: 'center', bgcolor: '#eff6ff', color: '#2563eb' }}>{row.icon}</Box><Box><Typography sx={{ fontWeight: 700 }}>{row.label}</Typography><Typography variant='body2' color='text.secondary'>{row.helper}</Typography></Box></Stack></Box><Box component='td' sx={{ p: 1.5, textAlign: 'right', fontWeight: 700, color: row.final ? '#2563eb' : '#0f172a' }}>{money(row.amount)}</Box><Box component='td' sx={{ p: 1.5, textAlign: 'center' }}><Box sx={{ display: 'inline-block', px: 1.1, py: 0.35, borderRadius: 99, bgcolor: row.status === 'PAYABLE' ? '#fee2e2' : row.status === 'REFUNDABLE' ? '#dcfce7' : '#e2e8f0', color: row.status === 'PAYABLE' ? '#b91c1c' : row.status === 'REFUNDABLE' ? '#166534' : '#475569', fontSize: 12, fontWeight: 800 }}>{row.status}</Box></Box></Box>)}</Box></Box></Box>
+          </Card>
+          <Alert icon={<InfoOutlinedIcon fontSize='inherit' />} severity='info' sx={{ mt: 2.3, borderRadius: 3, border: '1px solid #bfdbfe', bgcolor: '#eff6ff' }}><Typography sx={{ fontWeight: 700 }}>Important Notice</Typography>For preparation assistance only. Please verify all values before official UAE FTA submission.</Alert>
+        </CardContent>
+      </Card>
+    </Box>}
     {step === 5 && <Vat201Report data={{ ...data, monthlyEntries: buildMonthlyEntries(data) }} result={result} />}
   </FormSection>
     <Card sx={{ mt: 2, borderRadius: 4, border: '1px solid #dbe6f3', boxShadow: '0 10px 24px rgba(15,23,42,.06)' }}>
@@ -252,7 +290,11 @@ export function VatWizard({ data, setData, onSave, onReset, onProgressChange }) 
         <Button variant='outlined' startIcon={<ArrowBackOutlinedIcon />} onClick={back} disabled={step===1}>Back</Button>
         <Button className='primary-gradient-btn' endIcon={<ArrowForwardOutlinedIcon />} onClick={next} disabled={continueDisabled}>Continue</Button>
       </Stack>
-      {step === 5 && <ExportActions onSave={onSave} onReset={onReset} onPrint={() => window.print()} onPdf={downloadProfessionalPdf} pdfLoading={pdfLoading} />}
+      {step >= 4 && <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} className='wizard-action-group wizard-action-group-right'>
+        <Button variant='outlined' startIcon={<FilePresentOutlinedIcon />} onClick={downloadProfessionalPdf} disabled={pdfLoading}>{pdfLoading ? 'Generating PDF…' : 'Generate PDF'}</Button>
+        <Button variant='outlined' startIcon={<PrintOutlinedIcon />} onClick={() => window.print()}>Print</Button>
+        {onSave && <Button variant='outlined' startIcon={<IosShareOutlinedIcon />} onClick={onSave}>Export</Button>}
+      </Stack>}
     </div>
     </CardContent>
     </Card>
