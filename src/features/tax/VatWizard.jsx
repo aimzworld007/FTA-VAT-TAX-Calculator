@@ -4,9 +4,9 @@ import { buildMonthlyEntries, calculateVat } from './lib/vatCalculator';
 import { validateRequired, validateVatPeriodSelection } from './lib/taxValidation';
 import { TAX_CONFIG } from './lib/taxConfig';
 import { ExportActions, FormSection, TaxSummaryCard, money } from './components/common.jsx';
-import { downloadVatPdf } from './services/vatPdfApi.ts';
 import { Vat201Report } from './components/Vat201Report.jsx';
 import { MONTHS, formatVatPeriodLabel, getPeriodFromSelection } from './lib/vatPeriod';
+import { downloadPdfReport } from './lib/pdfGenerator';
 import { VAT_PRICING_MODES, splitVatFromAmount } from './lib/vatPricing';
 
 const steps = ['Business Details', 'VAT Input', 'Adjustments', 'Review', 'Export'];
@@ -76,55 +76,7 @@ export function VatWizard({ data, setData, onSave, onReset, onProgressChange }) 
 
 
 
-  const downloadProfessionalPdf = async () => {
-    try {
-      setPdfLoading(true);
-      const period = formatVatPeriodLabel(data);
-      const selectedEmirate = data.businessLocationEmirate || 'Sharjah';
-      const standardSales = entries.reduce((t, e) => t + n(e.sales), 0);
-      const selectedBox = EMIRATE_BOX_MAP[selectedEmirate] || '1c';
-      const boxes = [
-        [selectedBox, `${selectedEmirate} - Standard rated supplies`, standardSales, result.outputVat, 0],
-        ['2', 'Tax refunds provided to tourists', 0, 0, 0],
-        ['3', 'Supplies subject to reverse charge provisions', 0, 0, 0],
-        ['4', 'Zero rated supplies', n(data.zeroRatedSales), 0, 0],
-        ['5', 'Exempt supplies', n(data.exemptSales), 0, 0],
-        ['6', 'Goods imported into UAE', 0, 0, 0],
-        ['7', 'Adjustments to goods imported into UAE', 0, 0, result.adjustments],
-        ['8', 'Total output tax due', result.salesBreakdown.net, result.outputVat, result.adjustments],
-        ['9', 'Standard rated expenses', totals.purchases + totals.expenses, result.inputVat, 0],
-        ['10', 'Supplies subject to reverse charge provisions', 0, 0, 0],
-        ['11', 'Total recoverable tax', totals.purchases + totals.expenses, result.inputVat, 0],
-        ['12', 'Total tax due', result.outputVat + result.adjustments, 0, 0],
-        ['13', 'Total recoverable tax', result.inputVat, 0, 0],
-        ['14', 'Payable tax for the period', result.netVat, 0, 0]
-      ].map(([box, description, amount, vat, adjustment]) => ({ box, description, amount, vat, adjustment }));
-
-      await downloadVatPdf({
-        businessName: data.businessName,
-        trn: data.trn,
-        vatPeriod: period,
-        preparedBy: data.preparedBy || data.businessName || 'N/A',
-        preparedDate: new Date().toISOString().slice(0, 10),
-        vatMode: data.vatPricingMode,
-        businessLocationEmirate: data.businessLocationEmirate,
-        summary: {
-          taxableSales: result.salesBreakdown.net,
-          outputVat: result.outputVat,
-          recoverableVat: result.inputVat,
-          zeroRated: n(data.zeroRatedSales),
-          exempt: n(data.exemptSales),
-          netVat: result.netVat
-        },
-        boxes,
-        monthly: entries
-      });
-    } catch (error) {
-      window.alert('Failed to generate PDF. Please try again.');
-    } finally {
-      setPdfLoading(false);
-    }
-  };
+  const downloadProfessionalPdf = async () => downloadPdfReport({ reportId: 'vat201-report', reportType: 'vat201', businessName: data.businessName, taxPeriod: formatVatPeriodLabel(data) });
   const continueDisabled = (step === 1 && Boolean(reqErr)) || step === 5;
   return <div><FormSection title={`VAT Wizard: ${steps[step - 1]}`}>
     {step === 1 && <Grid container spacing={1.5}>
