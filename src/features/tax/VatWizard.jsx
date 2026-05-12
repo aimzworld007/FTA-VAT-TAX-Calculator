@@ -1,5 +1,7 @@
 import React from 'react';
-import { Box, Button, Chip, FormControl, FormHelperText, Grid, InputLabel, MenuItem, Select, Stack, TextField, Typography } from '@mui/material';
+import { Box, Button, FormControl, FormHelperText, Grid, InputLabel, MenuItem, Select, Stack, TextField, Typography } from '@mui/material';
+import BusinessOutlinedIcon from '@mui/icons-material/BusinessOutlined';
+import CalendarMonthOutlinedIcon from '@mui/icons-material/CalendarMonthOutlined';
 import { buildMonthlyEntries, calculateVat } from './lib/vatCalculator';
 import { validateRequired, validateVatPeriodSelection } from './lib/taxValidation';
 import { TAX_CONFIG } from './lib/taxConfig';
@@ -96,7 +98,17 @@ export function VatWizard({ data, setData, onSave, onReset, onProgressChange }) 
   };
   const continueDisabled = (step === 1 && Boolean(reqErr)) || step === 5;
   return <div><FormSection title={`VAT Wizard: ${steps[step - 1]}`}>
-    {step === 1 && <Grid container spacing={1.5}>
+    {step === 1 && <Box>
+      <Stack direction='row' spacing={1.5} alignItems='center' sx={{ mb: 2.5 }}>
+        <Box sx={{ width: 48, height: 48, borderRadius: 2.5, bgcolor: '#eaf1ff', color: 'primary.main', display: 'grid', placeItems: 'center' }}>
+          <BusinessOutlinedIcon />
+        </Box>
+        <Box>
+          <Typography variant='h6' sx={{ fontWeight: 700, mb: 0.3 }}>VAT Wizard: Business Details</Typography>
+          <Typography variant='body2' color='text.secondary'>Provide your business information to get started</Typography>
+        </Box>
+      </Stack>
+      <Grid container spacing={1.5}>
       <Grid size={{ xs: 12, md: 6 }}><TextField fullWidth required label='Business name' value={data.businessName} onChange={e => setData({ ...data, businessName: e.target.value })} sx={{ '& .MuiInputBase-root': { minHeight: 46 } }} /></Grid>
       <Grid size={{ xs: 12, md: 6 }}><TextField fullWidth required label='TRN' value={data.trn} onChange={e => setData({ ...data, trn: e.target.value })} sx={{ '& .MuiInputBase-root': { minHeight: 46 } }} /></Grid>
       <Grid size={{ xs: 12, md: 6 }}>
@@ -121,9 +133,17 @@ export function VatWizard({ data, setData, onSave, onReset, onProgressChange }) 
           <FormHelperText>This controls how sales and costs are converted into VAT return values.</FormHelperText>
         </FormControl>
       </Grid>
-      <Grid size={12}><Chip color='primary' label={`Selected Tax Period: ${formatVatPeriodLabel(data)}`} /></Grid>
+      <Grid size={12}>
+        <Box sx={{ mt: 0.5, border: '1px solid #c7d8ff', bgcolor: '#f4f7ff', borderRadius: 2, px: 2, py: 1.5, display: 'flex', alignItems: 'center', gap: 1.2 }}>
+          <CalendarMonthOutlinedIcon color='primary' fontSize='small' />
+          <Typography color='primary.main' sx={{ fontWeight: 700 }}>
+            Selected Tax Period: {formatVatPeriodLabel(data)}
+          </Typography>
+        </Box>
+      </Grid>
       {(reqErr) && <Grid size={12}><FormHelperText error>{reqErr}</FormHelperText></Grid>}
-    </Grid>}
+    </Grid>
+    </Box>}
     {step === 2 && <div className='vat-input-layout'>
       <p className='field-help vat-input-help'>Your selected filing frequency is {data.filingFrequency}, so enter {monthCount} {monthCount === 1 ? 'month' : 'months'} of sales, purchases, and expenses.</p>
       <p className='field-help'>VAT Mode: {data.vatPricingMode === VAT_PRICING_MODES.INCLUSIVE ? 'Inclusive' : 'Exclusive'}. FTA VAT Return Amount should be excluding VAT. If your sales are VAT-inclusive, the system automatically separates taxable value and VAT.</p>
