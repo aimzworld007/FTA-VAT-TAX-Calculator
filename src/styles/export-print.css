@@ -26,3 +26,33 @@
 @media (max-width: 980px){.vat201-kpi-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.vat-report-header-top{flex-direction:column}.tax-report-meta.compact{max-width:none;width:100%}.vat-report-summary-row{grid-template-columns:1fr}.vat-report-business-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media (max-width: 680px){.vat-report-business-grid{grid-template-columns:1fr}}
 @media print{.tax-report.vat201-report{border:1px solid #94a3b8;border-radius:0;padding:10px}.vat-report-summary-row{grid-template-columns:minmax(0,1.45fr) minmax(0,1fr)}.vat-report-kpi-panel .vat201-kpi-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.vat201-kpi-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.tax-report-kpi{break-inside:avoid}.vat201-table thead{display:table-header-group}}
+
+.tax-report.pdf-safe-a4{
+  width: 194mm;
+  max-width: 194mm;
+  min-height: 281mm;
+  margin: 0 auto;
+  border-radius: 0;
+  padding: 8mm;
+  box-sizing: border-box;
+  font-size: 11px;
+}
+.tax-report.pdf-safe-a4 .vat-report-header{gap:8px;padding-bottom:8px}
+.tax-report.pdf-safe-a4 .vat-report-business-panel,
+.tax-report.pdf-safe-a4 .vat-report-kpi-panel,
+.tax-report.pdf-safe-a4 .tax-report-meta.compact{padding:8px}
+.tax-report.pdf-safe-a4 .vat201-kpi-grid{gap:6px;margin:8px 0}
+.tax-report.pdf-safe-a4 .tax-report-kpi{padding:8px;border-radius:8px}
+.tax-report.pdf-safe-a4 .vat201-table th,
+.tax-report.pdf-safe-a4 .vat201-table td{padding:6px 8px;font-size:10.5px;line-height:1.2}
+.tax-report.pdf-safe-a4 .vat201-table td.num,
+.tax-report.pdf-safe-a4 .vat201-table th.num{text-align:right}
+.tax-report.pdf-safe-a4 .vat201-table tr,
+.tax-report.pdf-safe-a4 .tax-report-kpi,
+.tax-report.pdf-safe-a4 .vat-report-footer{break-inside:avoid;page-break-inside:avoid}
+.tax-report.pdf-safe-a4 .vat201-table thead{display:table-header-group}
+
+@page { size: A4 portrait; margin: 8mm; }
+
+.tax-report.pdf-safe-a4 .tax-report-table th,.tax-report.pdf-safe-a4 .tax-report-table td{padding:6px 7px;font-size:10.5px;line-height:1.2}
+.tax-report.pdf-safe-a4 .tax-report-table .num{text-align:right}

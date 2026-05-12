@@ -1,21 +1,8 @@
-export async function generateVatPdfBlob(payload: any) {
-  const response = await fetch('/api/vat/pdf', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload)
-  });
+import { createPdfBlobFromReport } from '../lib/pdfGenerator';
 
-  if (!response.ok) {
-    throw new Error('Unable to generate PDF');
-  }
 
-  const contentType = response.headers.get('content-type') || '';
-
-  if (contentType.includes('application/json')) throw new Error('PDF endpoint returned JSON instead of a file');
-
-  const blob = await response.blob();
-  if (!blob?.size) throw new Error('Generated PDF is empty');
-  return blob;
+export async function generateVatPdfBlob(_payload: any) {
+  return await createPdfBlobFromReport('vat201-report');
 }
 
 export function createPdfPreview(blob: Blob) {
