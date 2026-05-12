@@ -94,10 +94,10 @@ function CompactKpiCard({ icon, label, value, extra, variant = 'neutral' }) {
       ? { border: '1px solid #bbf7d0', background: 'linear-gradient(180deg, #f0fdf4 0%, #dcfce7 100%)' }
       : { border: '1px solid #dbe3ef', background: 'linear-gradient(180deg, #fff 0%, #f8fafc 100%)' };
   const iconColor = variant === 'danger' ? 'error.main' : variant === 'success' ? 'success.main' : 'primary.main';
-  return <Card sx={{ borderRadius: 2.5, boxShadow: '0 3px 10px rgba(15, 23, 42, 0.06)', minWidth: { xs: '100%', sm: 180 }, ...variantSx }}>
+  return <Card sx={{ borderRadius: 5, boxShadow: '0 4px 20px rgba(15,23,42,.04),0 1px 3px rgba(15,23,42,.06)', minWidth: { xs: '100%', sm: 180 }, ...variantSx }}>
     <CardContent sx={{ py: 0.9, px: 1.1, '&:last-child': { pb: 0.9 } }}>
       <Stack direction='row' spacing={1} alignItems='center'>
-        <Box sx={{ color: iconColor, display: 'flex' }}>{icon}</Box>
+        <Box sx={{ color: iconColor, display: 'grid', placeItems: 'center', width: 34, height: 34, borderRadius: 999, bgcolor: 'rgba(148,163,184,.15)' }}>{icon}</Box>
         <Box sx={{ minWidth: 0 }}>
           <Typography variant='caption' color='text.secondary' sx={{ display: 'block', lineHeight: 1.15 }}>{label}</Typography>
           <Typography variant='body2' sx={{ fontWeight: 700, lineHeight: 1.25 }}>{value}</Typography>
