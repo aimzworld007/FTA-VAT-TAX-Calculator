@@ -6,8 +6,8 @@ import { TAX_CONFIG } from './lib/taxConfig';
 import { ExportActions, FormSection, TaxSummaryCard, money } from './components/common.jsx';
 import { Vat201Report } from './components/Vat201Report.jsx';
 import { MONTHS, formatVatPeriodLabel, getPeriodFromSelection } from './lib/vatPeriod';
-import { downloadPdfReport } from './lib/pdfGenerator';
 import { VAT_PRICING_MODES, splitVatFromAmount } from './lib/vatPricing';
+import { downloadVatPdf } from './services/vatPdfApi';
 
 const steps = ['Business Details', 'VAT Input', 'Adjustments', 'Review', 'Export'];
 const n = (v) => Number(v) || 0;
@@ -76,7 +76,24 @@ export function VatWizard({ data, setData, onSave, onReset, onProgressChange }) 
 
 
 
-  const downloadProfessionalPdf = async () => downloadPdfReport({ reportId: 'vat201-report', reportType: 'vat201', businessName: data.businessName, taxPeriod: formatVatPeriodLabel(data) });
+  const downloadProfessionalPdf = async () => {
+    setPdfLoading(true);
+    try {
+      await downloadVatPdf({
+        businessName: data.businessName,
+        trn: data.trn,
+        businessLocationEmirate: data.businessLocationEmirate,
+        vatPeriod: formatVatPeriodLabel(data),
+        preparedBy: 'UAE VAT & Tax Filing Assistant',
+        preparedDate: new Date().toISOString().slice(0, 10),
+        vatMode: data.vatPricingMode === VAT_PRICING_MODES.INCLUSIVE ? 'Inclusive' : 'Exclusive',
+        summary: { taxableSales: result.salesBreakdown.net, outputVat: result.outputVat, recoverableVat: result.inputVat, zeroRated: Number(data.zeroRatedSales) || 0, exempt: Number(data.exemptSales) || 0, netVat: result.netVat },
+        monthly: buildMonthlyEntries(data)
+      });
+    } finally {
+      setPdfLoading(false);
+    }
+  };
   const continueDisabled = (step === 1 && Boolean(reqErr)) || step === 5;
   return <div><FormSection title={`VAT Wizard: ${steps[step - 1]}`}>
     {step === 1 && <Grid container spacing={1.5}>
