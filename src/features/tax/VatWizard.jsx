@@ -279,7 +279,7 @@ export function VatWizard({ data, setData, onSave, onReset, onProgressChange }) 
       <Card sx={{ borderRadius: 5, border: '1px solid #dbe5f2', boxShadow: '0 8px 20px rgba(15,23,42,.06)' }}>
         <CardContent sx={{ p: { xs: 2, md: 3 } }}>
           <Typography variant='h5' sx={{ fontWeight: 800, color: '#0f2251' }}>VAT Return Review</Typography>
-          <Typography variant='body1' color='text.secondary' sx={{ mt: 0.6, mb: 2.2 }}>Review your VAT return values before generating PDF or printing.</Typography>
+          <Typography variant='body1' color='text.secondary' sx={{ mt: 0.6, mb: 2.2 }}>Review your VAT return values before moving to Export.</Typography>
           <Alert icon={<InfoOutlinedIcon fontSize='inherit' />} severity='info' sx={{ mb: 2.4, borderRadius: 3, border: '1px solid #bfdbfe', bgcolor: '#eff6ff', color: '#1e40af' }}>This summary is generated from your entered VAT sales, purchases, expenses, and adjustments.</Alert>
           <Grid container spacing={1.6} sx={{ mb: 2.3 }}>
             {[
@@ -314,7 +314,7 @@ export function VatWizard({ data, setData, onSave, onReset, onProgressChange }) 
         <Button variant='outlined' startIcon={<ArrowBackOutlinedIcon />} onClick={back} disabled={step===1}>Back</Button>
         <Button className='primary-gradient-btn' endIcon={<ArrowForwardOutlinedIcon />} onClick={next} disabled={continueDisabled}>Continue</Button>
       </Stack>
-      {step >= 4 && <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} className='wizard-action-group wizard-action-group-right'>
+      {step === 5 && <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} className='wizard-action-group wizard-action-group-right'>
         <Button variant='outlined' startIcon={<PrintOutlinedIcon />} onClick={() => window.print()}>Print</Button>
         {onSave && <Button variant='outlined' startIcon={<IosShareOutlinedIcon />} onClick={onSave}>Save Draft</Button>}
         <Button className='danger-soft-btn' variant='outlined' onClick={onReset}>Reset</Button>
