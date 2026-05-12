@@ -14,14 +14,21 @@ export function cleanupPdfPreviewUrl(url?: string | null) {
 }
 
 export function downloadPdf(blob: Blob, filename: string) {
+  const legacyNavigator = window.navigator as Navigator & { msSaveOrOpenBlob?: (fileBlob: Blob, defaultName?: string) => boolean };
+  if (legacyNavigator.msSaveOrOpenBlob) {
+    legacyNavigator.msSaveOrOpenBlob(blob, filename);
+    return;
+  }
+
   const url = window.URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
   a.download = filename;
+  a.rel = 'noopener';
   document.body.appendChild(a);
   a.click();
   a.remove();
-  window.URL.revokeObjectURL(url);
+  window.setTimeout(() => window.URL.revokeObjectURL(url), 0);
 }
 
 export async function downloadVatPdf(payload: any) {
