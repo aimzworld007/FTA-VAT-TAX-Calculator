@@ -1,4 +1,5 @@
 import React from 'react';
+import { Box, Button, Chip, FormControl, FormHelperText, Grid, InputLabel, MenuItem, Select, Stack, TextField, Typography } from '@mui/material';
 import { buildMonthlyEntries, calculateVat } from './lib/vatCalculator';
 import { validateRequired, validateVatPeriodSelection } from './lib/taxValidation';
 import { TAX_CONFIG } from './lib/taxConfig';
@@ -116,18 +117,18 @@ export function VatWizard({ data, setData, onSave, onReset, onProgressChange }) 
   };
   const continueDisabled = (step === 1 && Boolean(reqErr)) || step === 5;
   return <div><FormSection title={`VAT Wizard: ${steps[step - 1]}`}>
-    {step === 1 && <div className='form-grid two'>
-      <input placeholder='Business name' value={data.businessName} onChange={e => setData({ ...data, businessName: e.target.value })} />
-      <input placeholder='TRN' value={data.trn} onChange={e => setData({ ...data, trn: e.target.value })} />
-      <select value={data.filingFrequency} onChange={e => setData({ ...data, filingFrequency: e.target.value })}>{TAX_CONFIG.filingFrequencies.map(f => <option key={f}>{f}</option>)}</select>
-      <select value={data.filingYear} onChange={e => setData({ ...data, filingYear: Number(e.target.value) })}>{years.map(y => <option key={y} value={y}>{y}</option>)}</select>
+    {step === 1 && <Grid container spacing={2}>
+      <Grid size={{xs:12,md:6}}><TextField required label='Business name' value={data.businessName} onChange={e => setData({ ...data, businessName: e.target.value })} /></Grid>
+      <Grid size={{xs:12,md:6}}><TextField required label='TRN' value={data.trn} onChange={e => setData({ ...data, trn: e.target.value })} /></Grid>
+      <Grid size={{xs:12,md:6}}><FormControl fullWidth><InputLabel>Filing frequency</InputLabel><Select label='Filing frequency' value={data.filingFrequency} onChange={e => setData({ ...data, filingFrequency: e.target.value })}>{TAX_CONFIG.filingFrequencies.map(f => <MenuItem key={f} value={f}>{f}</MenuItem>)}</Select></FormControl></Grid>
+      <Grid size={{xs:12,md:6}}><FormControl fullWidth><InputLabel>Filing year</InputLabel><Select label='Filing year' value={data.filingYear} onChange={e => setData({ ...data, filingYear: Number(e.target.value) })}>{years.map(y => <MenuItem key={y} value={y}>{y}</MenuItem>)}</Select></FormControl></Grid>
       {data.filingFrequency === 'Monthly' && <select value={data.filingMonth} onChange={e => setData({ ...data, filingMonth: e.target.value })}>{MONTHS.map(m => <option key={m}>{m}</option>)}</select>}
       {data.filingFrequency === 'Quarterly' && <select value={data.filingStartMonth} onChange={e => setData({ ...data, filingStartMonth: e.target.value })}>{MONTHS.map(m => <option key={m}>{m}</option>)}</select>}
       {data.filingFrequency === 'Yearly' && <p className='field-help'>Full year selected</p>}
       <label className='field'><span>VAT Pricing Mode</span><select value={data.vatPricingMode} onChange={e => setData({ ...data, vatPricingMode: e.target.value })}>{Object.values(VAT_PRICING_MODES).map(mode => <option key={mode} value={mode}>{mode === VAT_PRICING_MODES.INCLUSIVE ? 'Inclusive (amount entered includes VAT)' : 'Exclusive (amount entered excludes VAT)'}</option>)}</select><small className='field-help'>This controls how sales and costs are converted into the VAT return values.</small></label>
-      <p className='field-help'>Selected Tax Period: {formatVatPeriodLabel(data)}</p>
-      {(reqErr) && <p className='field-help'>{reqErr}</p>}
-    </div>}
+      <Grid size={12}><Chip color='primary' label={`Selected Tax Period: ${formatVatPeriodLabel(data)}`} /></Grid>
+      {(reqErr) && <Grid size={12}><FormHelperText error>{reqErr}</FormHelperText></Grid>}
+    </Grid>}
     {step === 2 && <div className='vat-input-layout'>
       <p className='field-help vat-input-help'>Your selected filing frequency is {data.filingFrequency}, so enter {monthCount} {monthCount === 1 ? 'month' : 'months'} of sales, purchases, and expenses.</p>
       <p className='field-help'>VAT Mode: {data.vatPricingMode === VAT_PRICING_MODES.INCLUSIVE ? 'Inclusive' : 'Exclusive'}. FTA VAT Return Amount should be excluding VAT. If your sales are VAT-inclusive, the system automatically separates taxable value and VAT.</p>
@@ -153,7 +154,7 @@ export function VatWizard({ data, setData, onSave, onReset, onProgressChange }) 
     {step === 4 && <div className='grid-section'><TaxSummaryCard label={result.vatPricingMode === VAT_PRICING_MODES.INCLUSIVE ? 'Net Amount' : 'Subtotal'} value={money(result.salesBreakdown.net)} /><TaxSummaryCard label={result.vatPricingMode === VAT_PRICING_MODES.INCLUSIVE ? 'VAT Included' : 'VAT 5%'} value={money(result.salesBreakdown.vat)} /><TaxSummaryCard label='Grand Total' value={money(result.salesBreakdown.total)} /><TaxSummaryCard label='Total input VAT' value={money(result.inputVat)} /><TaxSummaryCard label='Adjustments' value={money(result.adjustments)} /><TaxSummaryCard label={result.label} value={money(result.netVat)} /><p>For preparation only. Please verify before official FTA submission.</p></div>}
     {step === 5 && <Vat201Report data={{ ...data, monthlyEntries: buildMonthlyEntries(data) }} result={result} />}
   </FormSection>
-    <div className='wizard-nav no-print'><button onClick={back} disabled={step === 1}>Back</button><button onClick={next} disabled={continueDisabled}>Continue</button></div>
+    <Stack direction={{xs:'column',sm:'row'}} spacing={1.5} sx={{mt:2}}><Button variant='outlined' onClick={back} disabled={step===1}>Back</Button><Button onClick={next} disabled={continueDisabled}>Continue</Button></Stack>
     {step === 5 && <ExportActions onSave={onSave} onReset={onReset} onPrint={() => window.print()} onPdf={downloadProfessionalPdf} pdfLoading={pdfLoading} />}
   </div>;
 }
