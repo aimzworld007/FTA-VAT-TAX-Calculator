@@ -11,9 +11,9 @@ export function AppFooter() {
         <RouteLink to='/documentation'>Documentation</RouteLink>
       </nav>
      <p>
-  Built with ❤️ in UAE by  
-  <a href="https://ecashbiz.com/landing" target="_blank">
-         ~ eCashbiz Technologies
+  Built with ❤️ in  🇦🇪 UAE by 
+             <a href="https://ecashbiz.com/landing" target="_blank">
+       eCashbiz ERP
   </a>
 </p>
     </footer>
