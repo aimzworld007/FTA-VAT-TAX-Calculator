@@ -36,7 +36,7 @@ function normalizeVatDraft(input, workspaceSettings) {
 }
 
 function TaxAssistantHeader({ navOpen, setNavOpen }) {
-  return <header className='top-navbar no-print'><div className='top-navbar-inner'><div className='brand-lockup'><div className='header-logo' aria-label='FTA tax assistant logo'><img src='/logo.png' alt='FTA VAT & Tax Filing Assistant logo' /></div><div><strong>FTA VAT &amp; Tax Filing Assistant</strong><div className='badge top-badge'>UAE VAT 5% | Corporate Tax 9%</div></div></div><button className='nav-toggle' type='button' aria-expanded={navOpen} aria-label='Toggle navigation menu' onClick={() => setNavOpen((prev) => !prev)}>☰</button><nav className={`top-links ${navOpen ? 'open' : ''}`} aria-label='Tax resources'>{navLinks.map((link) => <a key={link.label} href={link.href} target='_blank' rel='noopener noreferrer'>{link.label}</a>)}</nav></div></header>;
+  return <header className='top-navbar no-print'><div className='top-navbar-inner'><div className='brand-lockup'><div className='header-logo' aria-label='FTA tax assistant logo'><img src='/logo.png' alt='FTA VAT & Tax Filing Assistant logo' /></div><div><strong>FTA VAT &amp; Tax Filing Assistant</strong></div></div><button className='nav-toggle' type='button' aria-expanded={navOpen} aria-label='Toggle navigation menu' onClick={() => setNavOpen((prev) => !prev)}>☰</button><nav className={`top-links ${navOpen ? 'open' : ''}`} aria-label='Tax resources'>{navLinks.map((link) => <a key={link.label} href={link.href} target='_blank' rel='noopener noreferrer'>{link.label}</a>)}</nav></div></header>;
 }
 
 function LiveSummary({ mode, vatData, vatCalc, ctCalc }) {
@@ -68,7 +68,7 @@ export function TaxDashboard() {
     </section>
 
     <section className={`screen-shell ${activeModule === 'home' ? 'is-active' : ''}`}>
-      <section className='card'><h2>Choose a tax module</h2><div className='selector-grid no-print'><TaxModeCard title='VAT Return' desc='Open VAT return workspace' onClick={() => setActiveModule('vat')} active={false} /><TaxModeCard title='Corporate Tax' desc='Open corporate tax workspace' onClick={() => setActiveModule('corporateTax')} active={false} /></div></section>
+      <section className='card'><h2>Choose a tax module</h2><div className='selector-grid no-print'><TaxModeCard title='VAT Return Wizard' badge='UAE VAT 5%' desc='Open VAT return workspace' onClick={() => setActiveModule('vat')} active={false} /><TaxModeCard title='Corporate Tax Wizard' badge='Corporate Tax 9%' desc='Open corporate tax workspace' onClick={() => setActiveModule('corporateTax')} active={false} /></div></section>
     </section>
 
     {activeModule === 'vat' && <section className='screen-shell is-active wizard-shell'><LiveSummary mode='vat' vatData={vat} vatCalc={v} ctCalc={c} /><div className='workspace-toolbar no-print'><button className='ghost' type='button' onClick={() => setActiveModule('home')}>← Back to Tax Home</button></div><VatWizard data={vat} setData={setVat} onSave={() => draftStorage.save('vatDraft', vat)} onReset={() => { if (confirm('Reset VAT draft?')) { const next = normalizeVatDraft(vatDefault, workspaceSettings); setVat(next); draftStorage.clear('vatDraft'); } }} /></section>}
