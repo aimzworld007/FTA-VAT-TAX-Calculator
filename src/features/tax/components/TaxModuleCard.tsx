@@ -22,29 +22,30 @@ export function TaxModuleCard({
   return (
     <Card
       sx={{
-        borderRadius: 4,
-        border: '1px solid #dbe6f3',
-        boxShadow: '0 8px 24px rgba(15,23,42,.08)',
+        borderRadius: '18px',
+        border: '1px solid #E5EAF2',
+        boxShadow: '0 8px 24px rgba(15, 23, 42, 0.06)',
         overflow: 'hidden',
+        backgroundColor: '#fff',
       }}
       elevation={0}
     >
       <CardActionArea onClick={() => onSelect(route)} aria-label={`Open ${title}`}>
-        <CardContent sx={{ p: 1.8 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.25, minWidth: 0 }}>
-            <Box sx={{ width: 82, minWidth: 82, height: 60, borderRadius: 2.5, bgcolor: '#f8fafc', display: 'grid', placeItems: 'center', p: 0.7 }}>
+        <CardContent sx={{ p: 2.25 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, minWidth: 0 }}>
+            <Box sx={{ width: 72, minWidth: 72, height: 72, borderRadius: '14px', bgcolor: '#f8fafc', border: '1px solid #E5EAF2', display: 'grid', placeItems: 'center', p: 1 }}>
               <img src={image} alt={title} style={{ width: '100%', maxWidth: '100%', height: '100%', objectFit: 'contain' }} />
             </Box>
             <Box sx={{ minWidth: 0, flex: 1 }}>
-              <Typography sx={{ fontWeight: 700, color: '#0f172a', lineHeight: 1.2 }}>{title}</Typography>
-              <Typography variant='body2' sx={{ color: '#475569', mt: 0.35 }}>{subtitle}</Typography>
+              <Typography sx={{ fontWeight: 700, color: '#0f172a', lineHeight: 1.2, fontSize: { xs: '1rem', sm: '1.05rem' } }}>{title}</Typography>
+              <Typography variant='body2' sx={{ color: '#64748b', mt: 0.5, lineHeight: 1.35 }}>{subtitle}</Typography>
             </Box>
-            <IconButton sx={{ bgcolor: '#2563eb', color: '#fff', '&:hover': { bgcolor: '#1d4ed8' }, width: 36, height: 36 }}>
+            <IconButton sx={{ bgcolor: '#2563eb', color: '#fff', '&:hover': { bgcolor: '#1d4ed8' }, width: 44, height: 44, flexShrink: 0 }}>
               <ArrowForwardRoundedIcon fontSize='small' />
             </IconButton>
           </Box>
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.7, mt: 1.3 }}>
-            {chips.map((chip) => <Chip key={chip} label={chip} size='small' sx={{ bgcolor: '#eef2ff', color: '#334155', borderRadius: 2 }} />)}
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.75, mt: 1.5 }}>
+            {chips.map((chip) => <Chip key={chip} label={chip} size='small' sx={{ bgcolor: '#F1F5F9', color: '#334155', borderRadius: '10px', height: 24, '& .MuiChip-label': { px: 1, fontSize: '0.72rem', fontWeight: 600 } }} />)}
           </Box>
         </CardContent>
       </CardActionArea>
