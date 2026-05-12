@@ -17,9 +17,11 @@ import SouthWestOutlinedIcon from '@mui/icons-material/SouthWestOutlined';
 import TuneOutlinedIcon from '@mui/icons-material/TuneOutlined';
 import BalanceOutlinedIcon from '@mui/icons-material/BalanceOutlined';
 import GppGoodOutlinedIcon from '@mui/icons-material/GppGoodOutlined';
-import FilePresentOutlinedIcon from '@mui/icons-material/FilePresentOutlined';
 import PrintOutlinedIcon from '@mui/icons-material/PrintOutlined';
 import IosShareOutlinedIcon from '@mui/icons-material/IosShareOutlined';
+import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
+import DownloadOutlinedIcon from '@mui/icons-material/DownloadOutlined';
+import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
 import ArrowBackOutlinedIcon from '@mui/icons-material/ArrowBackOutlined';
 import ArrowForwardOutlinedIcon from '@mui/icons-material/ArrowForwardOutlined';
 import { buildMonthlyEntries, calculateVat } from './lib/vatCalculator';
@@ -29,7 +31,7 @@ import { FormSection, money } from './components/common.jsx';
 import { Vat201Report } from './components/Vat201Report.jsx';
 import { MONTHS, formatVatPeriodLabel, getPeriodFromSelection } from './lib/vatPeriod';
 import { VAT_PRICING_MODES, splitVatFromAmount } from './lib/vatPricing';
-import { downloadVatPdf } from './services/vatPdfApi';
+import { cleanupPdfPreviewUrl, createPdfPreview, downloadPdf, generateVatPdfBlob } from './services/vatPdfApi';
 
 const steps = ['Business Details', 'VAT Input', 'Adjustments', 'Review', 'Export'];
 const n = (v) => Number(v) || 0;
@@ -59,7 +61,9 @@ const metricCards = [
 export function VatWizard({ data, setData, onSave, onReset, onProgressChange }) {
   const fieldSx = { '& .MuiInputBase-root': { minHeight: { xs: 44, md: 48 }, height: { xs: 44, md: 48 }, borderRadius: '12px', color: '#071832', bgcolor: '#fff' }, '& .MuiOutlinedInput-notchedOutline': { borderColor: '#d7e3f0' }, '& .MuiInputBase-root:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#9cb7dc' }, '& .Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#2563eb', borderWidth: '1px' }, '& .Mui-focused': { boxShadow: '0 0 0 3px rgba(37,99,235,0.15)' }, '& .MuiInputBase-input': { padding: '0 14px', fontSize: 14, lineHeight: 1.2 }, '& .MuiSelect-select': { display: 'flex', alignItems: 'center', padding: '0 38px 0 14px !important', fontSize: 14, lineHeight: 1.2 }, '& .MuiInputLabel-root': { fontSize: 12, lineHeight: 1.1 }, '@media (max-width:768px)': { '& .MuiInputBase-input': { padding: '0 12px' }, '& .MuiSelect-select': { padding: '0 36px 0 12px !important' } } };
   const [step, setStep] = React.useState(1);
-  const [pdfLoading, setPdfLoading] = React.useState(false);
+  const [previewLoading, setPreviewLoading] = React.useState(false);
+  const [downloadLoading, setDownloadLoading] = React.useState(false);
+  const [previewUrl, setPreviewUrl] = React.useState(null);
   const result = calculateVat(data);
   const reqErr = validateRequired(data.businessName, 'Business name') || validateRequired(data.trn, 'TRN') || validateRequired(data.businessLocationEmirate, 'Business location emirate') || validateVatPeriodSelection(data);
 
@@ -106,24 +110,44 @@ export function VatWizard({ data, setData, onSave, onReset, onProgressChange }) 
 
 
 
-  const downloadProfessionalPdf = async () => {
-    setPdfLoading(true);
+  const getVatPdfPayload = () => ({
+    businessName: data.businessName,
+    trn: data.trn,
+    businessLocationEmirate: data.businessLocationEmirate,
+    vatPeriod: formatVatPeriodLabel(data),
+    preparedBy: 'UAE VAT & Tax Filing Assistant',
+    preparedDate: new Date().toISOString().slice(0, 10),
+    vatMode: data.vatPricingMode === VAT_PRICING_MODES.INCLUSIVE ? 'Inclusive' : 'Exclusive',
+    summary: { taxableSales: result.salesBreakdown.net, outputVat: result.outputVat, recoverableVat: result.inputVat, zeroRated: Number(data.zeroRatedSales) || 0, exempt: Number(data.exemptSales) || 0, netVat: result.netVat },
+    monthly: buildMonthlyEntries(data)
+  });
+  const buildVatPdfFileName = () => `UAE-VAT201-Return-Summary-${(data.businessName || 'business').replace(/\s+/g, '-')}-${formatVatPeriodLabel(data).replace(/\s+/g, '-')}.pdf`;
+  const handlePreviewPdf = async () => {
+    setPreviewLoading(true);
     try {
-      await downloadVatPdf({
-        businessName: data.businessName,
-        trn: data.trn,
-        businessLocationEmirate: data.businessLocationEmirate,
-        vatPeriod: formatVatPeriodLabel(data),
-        preparedBy: 'UAE VAT & Tax Filing Assistant',
-        preparedDate: new Date().toISOString().slice(0, 10),
-        vatMode: data.vatPricingMode === VAT_PRICING_MODES.INCLUSIVE ? 'Inclusive' : 'Exclusive',
-        summary: { taxableSales: result.salesBreakdown.net, outputVat: result.outputVat, recoverableVat: result.inputVat, zeroRated: Number(data.zeroRatedSales) || 0, exempt: Number(data.exemptSales) || 0, netVat: result.netVat },
-        monthly: buildMonthlyEntries(data)
+      const blob = await generateVatPdfBlob(getVatPdfPayload());
+      setPreviewUrl((oldUrl) => {
+        cleanupPdfPreviewUrl(oldUrl);
+        return createPdfPreview(blob);
       });
     } finally {
-      setPdfLoading(false);
+      setPreviewLoading(false);
     }
   };
+  const hidePreview = () => setPreviewUrl((oldUrl) => {
+    cleanupPdfPreviewUrl(oldUrl);
+    return null;
+  });
+  const handleDownloadPdf = async () => {
+    setDownloadLoading(true);
+    try {
+      const blob = await generateVatPdfBlob(getVatPdfPayload());
+      downloadPdf(blob, buildVatPdfFileName());
+    } finally {
+      setDownloadLoading(false);
+    }
+  };
+  React.useEffect(() => () => cleanupPdfPreviewUrl(previewUrl), [previewUrl]);
   const continueDisabled = (step === 1 && Boolean(reqErr)) || step === 5;
   return <div className='vat-wizard'><FormSection title={`VAT Wizard: ${steps[step - 1]}`}>
     {step === 1 && <Box>
@@ -291,11 +315,22 @@ export function VatWizard({ data, setData, onSave, onReset, onProgressChange }) 
         <Button className='primary-gradient-btn' endIcon={<ArrowForwardOutlinedIcon />} onClick={next} disabled={continueDisabled}>Continue</Button>
       </Stack>
       {step >= 4 && <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} className='wizard-action-group wizard-action-group-right'>
-        <Button variant='outlined' startIcon={<FilePresentOutlinedIcon />} onClick={downloadProfessionalPdf} disabled={pdfLoading}>{pdfLoading ? 'Generating PDF…' : 'Generate PDF'}</Button>
         <Button variant='outlined' startIcon={<PrintOutlinedIcon />} onClick={() => window.print()}>Print</Button>
-        {onSave && <Button variant='outlined' startIcon={<IosShareOutlinedIcon />} onClick={onSave}>Export</Button>}
+        {onSave && <Button variant='outlined' startIcon={<IosShareOutlinedIcon />} onClick={onSave}>Save Draft</Button>}
+        <Button className='danger-soft-btn' variant='outlined' onClick={onReset}>Reset</Button>
+        <Button variant='outlined' color='primary' startIcon={<VisibilityOutlinedIcon />} onClick={handlePreviewPdf} disabled={previewLoading || downloadLoading}>{previewLoading ? 'Generating Preview…' : 'Preview PDF'}</Button>
+        <Button className='primary-gradient-btn' variant='contained' startIcon={<DownloadOutlinedIcon />} onClick={handleDownloadPdf} disabled={downloadLoading || previewLoading}>{downloadLoading ? 'Downloading PDF…' : 'Download PDF'}</Button>
       </Stack>}
     </div>
+    {step === 5 && (previewLoading || previewUrl) && <Card sx={{ mt: 2, borderRadius: 4, border: '1px solid #dbe6f3' }}>
+      <CardContent>
+        <Stack direction='row' justifyContent='space-between' alignItems='center' sx={{ mb: 1.5 }}>
+          <Typography variant='h6' sx={{ fontWeight: 700 }}>PDF Preview</Typography>
+          <Button variant='text' color='inherit' startIcon={<CloseOutlinedIcon />} onClick={hidePreview} disabled={previewLoading}>Close Preview</Button>
+        </Stack>
+        {previewLoading ? <Typography color='text.secondary'>Generating PDF preview…</Typography> : <Box sx={{ border: '1px solid #dbe6f3', borderRadius: 2, overflow: 'hidden', height: { xs: 460, md: 720 } }}><iframe title='VAT PDF Preview' src={previewUrl || ''} style={{ width: '100%', height: '100%', border: 0 }} /></Box>}
+      </CardContent>
+    </Card>}
     </CardContent>
     </Card>
   </div>;

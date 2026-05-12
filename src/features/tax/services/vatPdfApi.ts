@@ -1,4 +1,4 @@
-export async function downloadVatPdf(payload: any) {
+export async function generateVatPdfBlob(payload: any) {
   const response = await fetch('/api/vat/pdf', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -11,17 +11,22 @@ export async function downloadVatPdf(payload: any) {
 
   const contentType = response.headers.get('content-type') || '';
 
-  if (contentType.includes('application/json')) {
-    const json = await response.json();
-    if (!json?.url) throw new Error('PDF generated but URL missing');
-    window.open(json.url, '_blank', 'noopener,noreferrer');
-    return;
-  }
+  if (contentType.includes('application/json')) throw new Error('PDF endpoint returned JSON instead of a file');
 
   const blob = await response.blob();
-  const disposition = response.headers.get('content-disposition') || '';
-  const fileMatch = disposition.match(/filename="?([^"]+)"?/i);
-  const filename = fileMatch?.[1] || 'vat201-return-summary.pdf';
+  if (!blob?.size) throw new Error('Generated PDF is empty');
+  return blob;
+}
+
+export function createPdfPreview(blob: Blob) {
+  return window.URL.createObjectURL(blob);
+}
+
+export function cleanupPdfPreviewUrl(url?: string | null) {
+  if (url) window.URL.revokeObjectURL(url);
+}
+
+export function downloadPdf(blob: Blob, filename: string) {
   const url = window.URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
@@ -30,4 +35,9 @@ export async function downloadVatPdf(payload: any) {
   a.click();
   a.remove();
   window.URL.revokeObjectURL(url);
+}
+
+export async function downloadVatPdf(payload: any) {
+  const blob = await generateVatPdfBlob(payload);
+  downloadPdf(blob, 'vat201-return-summary.pdf');
 }
