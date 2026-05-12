@@ -36,7 +36,7 @@ function normalizeVatDraft(input, workspaceSettings) {
 }
 
 function TaxAssistantHeader({ navOpen, setNavOpen }) {
-  return <header className='top-navbar no-print'><div className='top-navbar-inner'><div className='brand-lockup'><div className='header-logo' aria-label='FTA tax assistant logo'><img src='/logo.png' alt='FTA VAT & Tax Filing Assistant logo' /></div><div><strong>FTA VAT &amp; Tax Filing Assistant</strong><div className='badge top-badge'>UAE VAT 5% | Corporate Tax 9%</div></div></div><button className='nav-toggle' type='button' aria-expanded={navOpen} aria-label='Toggle navigation menu' onClick={() => setNavOpen((prev) => !prev)}>☰</button><nav className={`top-links ${navOpen ? 'open' : ''}`} aria-label='Tax resources'>{navLinks.map((link) => <a key={link.label} href={link.href} target='_blank' rel='noopener noreferrer'>{link.label}</a>)}</nav></div></header>;
+  return <header className='top-navbar no-print'><div className='top-navbar-inner'><div className='brand-lockup'><div className='header-logo' aria-label='FTA tax assistant logo'><img src='/logo.png' alt='FTA VAT & Tax Filing Assistant logo' /></div><div><strong>FTA VAT &amp; Tax Filing Assistant</strong></div></div><button className='nav-toggle' type='button' aria-expanded={navOpen} aria-label='Toggle navigation menu' onClick={() => setNavOpen((prev) => !prev)}>☰</button><nav className={`top-links ${navOpen ? 'open' : ''}`} aria-label='Tax resources'>{navLinks.map((link) => <a key={link.label} href={link.href} target='_blank' rel='noopener noreferrer'>{link.label}</a>)}</nav></div></header>;
 }
 
 function LiveSummary({ mode, vatData, vatCalc, ctCalc }) {
