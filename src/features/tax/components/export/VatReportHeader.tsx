@@ -1,7 +1,7 @@
 import React from 'react';
 import { FTA_LOGO_URL, InfoLine } from '../reportShared';
 
-export function VatReportHeader({ period, generatedDate, vatModeLabel, businessName, trn, emirate, filingFrequency, summaryCards }: any) {
+export function VatReportHeader({ period, generatedDate, vatModeLabel, businessName, trn, emirate, filingFrequency }: any) {
   return <header className='tax-report-header vat-report-header'>
     <div className='vat-report-header-top'>
       <div className='tax-report-brand'>
@@ -23,7 +23,11 @@ export function VatReportHeader({ period, generatedDate, vatModeLabel, businessN
           <InfoLine label='Filing Frequency' value={filingFrequency || '—'} />
         </div>
       </div>
-      <div className='vat-report-kpi-panel'>{summaryCards}</div>
+      <div className='tax-report-meta compact'>
+        <InfoLine label='Prepared Date' value={generatedDate} />
+        <InfoLine label='VAT Period' value={period} />
+        <InfoLine label='Emirate' value={emirate} />
+      </div>
     </div>
     <div className='tax-report-meta compact vat-report-meta-mobile'>
       <InfoLine label='Business Name' value={businessName || '—'} />
