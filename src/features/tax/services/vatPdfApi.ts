@@ -9,9 +9,18 @@ export async function downloadVatPdf(payload: any) {
     throw new Error('Unable to generate PDF');
   }
 
+  const contentType = response.headers.get('content-type') || '';
+
+  if (contentType.includes('application/json')) {
+    const json = await response.json();
+    if (!json?.url) throw new Error('PDF generated but URL missing');
+    window.open(json.url, '_blank', 'noopener,noreferrer');
+    return;
+  }
+
   const blob = await response.blob();
   const disposition = response.headers.get('content-disposition') || '';
-  const fileMatch = disposition.match(/filename="?([^\"]+)"?/i);
+  const fileMatch = disposition.match(/filename="?([^"]+)"?/i);
   const filename = fileMatch?.[1] || 'vat201-return-summary.pdf';
   const url = window.URL.createObjectURL(blob);
   const a = document.createElement('a');
