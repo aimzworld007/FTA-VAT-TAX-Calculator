@@ -11,16 +11,24 @@ async function renderReportCanvas(report) {
   const { html2canvas } = getPdfLibs();
   if (!html2canvas) throw new Error('html2canvas is not available');
 
-  report.classList.add('pdf-safe-a4');
+  const body = document.body;
+  report.classList.add('pdf-safe-a4', 'report-export-a4', 'vat-report-print-layout');
+  body.classList.add('pdf-exporting');
+
+  const reportHeight = Math.max(report.scrollHeight, report.offsetHeight, 1123);
+
   try {
     return await html2canvas(report, {
-      scale: Math.max(2, window.devicePixelRatio || 1),
+      scale: 2,
+      windowWidth: 1200,
+      windowHeight: reportHeight,
       backgroundColor: '#ffffff',
       useCORS: true,
       logging: false
     });
   } finally {
-    report.classList.remove('pdf-safe-a4');
+    report.classList.remove('pdf-safe-a4', 'report-export-a4', 'vat-report-print-layout');
+    body.classList.remove('pdf-exporting');
   }
 }
 
@@ -31,7 +39,7 @@ export async function createPdfBlobFromReport(reportId) {
   if (!JsPdfCtor) throw new Error('jsPDF is not available');
 
   const canvas = await renderReportCanvas(report);
-  const pdf = new JsPdfCtor({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+  const pdf = new JsPdfCtor('p', 'mm', 'a4');
 
   const usableWidth = A4_WIDTH_MM - (A4_MARGIN_MM * 2);
   const usableHeight = A4_HEIGHT_MM - (A4_MARGIN_MM * 2);
