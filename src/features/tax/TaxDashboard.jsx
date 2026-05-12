@@ -21,9 +21,9 @@ const navLinks = [
 ];
 
 function getVatStatus(netVat) {
-  if (netVat > 0) return { label: 'PAYABLE', amountLabel: money(netVat), className: 'status-payable', prefix: 'Payable' };
-  if (netVat < 0) return { label: 'REFUNDABLE', amountLabel: money(Math.abs(netVat)), className: 'status-refundable', prefix: 'Refundable' };
-  return { label: 'BALANCED', amountLabel: money(0), className: 'status-balanced', prefix: '' };
+  if (netVat > 0) return { label: 'VAT Payable', badge: 'PAYABLE', amountLabel: money(netVat), className: 'status-payable', prefix: 'Payable' };
+  if (netVat < 0) return { label: 'VAT Refundable', badge: 'REFUNDABLE', amountLabel: money(Math.abs(netVat)), className: 'status-refundable', prefix: 'Refundable' };
+  return { label: 'VAT Payable / Refundable', badge: 'BALANCED', amountLabel: money(0), className: 'status-balanced', prefix: '' };
 }
 
 function normalizeVatDraft(input, workspaceSettings) {
@@ -44,7 +44,7 @@ function LiveSummary({ mode, vatData, vatCalc, ctCalc }) {
     return <section className='card summary-panel workspace-summary'><h2>Corporate Tax Live Summary</h2><div className='grid-section summary-grid-ct'><TaxSummaryCard label='Corporate Tax Estimate' value={money(ctCalc.taxPayable)} /><TaxSummaryCard label='Taxable Income' value={money(ctCalc.taxableIncome)} /><TaxSummaryCard label='Profit Before Tax' value={money(ctCalc.profitBeforeTax)} /><TaxSummaryCard label='Selected Tax Period' value={formatVatPeriodLabel(vatData)} /></div></section>;
   }
   const vatStatus = getVatStatus(vatCalc.netVat);
-  return <section className='card summary-panel workspace-summary'><h2>VAT Live Summary</h2><div className='grid-section summary-grid-vat'><div className='kpi'><div className='kpi-row'><span>VAT Payable / Refundable</span><span className={`status-badge ${vatStatus.className}`}>{vatStatus.label}</span></div><strong>{vatStatus.amountLabel}</strong><small>{vatStatus.prefix ? `${vatStatus.prefix} ${vatStatus.amountLabel}` : vatStatus.amountLabel}</small></div><TaxSummaryCard label='VAT Taxable Sales' value={money(vatCalc.salesBreakdown.net)} /><TaxSummaryCard label='Selected VAT Period' value={formatVatPeriodLabel(vatData)} /></div></section>;
+  return <section className='card summary-panel workspace-summary'><h2>VAT Live Summary</h2><div className='grid-section summary-grid-vat'><div className={`kpi ${vatStatus.className}`}><div className='kpi-row'><span>{vatStatus.label}</span><span className={`status-badge ${vatStatus.className}`}>{vatStatus.badge}</span></div><strong>{vatStatus.amountLabel}</strong><small>{vatStatus.prefix ? `${vatStatus.prefix} ${vatStatus.amountLabel}` : vatStatus.amountLabel}</small></div><TaxSummaryCard label='VAT Taxable Sales' value={money(vatCalc.salesBreakdown.net)} /><TaxSummaryCard label='Selected VAT Period' value={formatVatPeriodLabel(vatData)} /></div></section>;
 }
 
 export function TaxDashboard() {
@@ -67,12 +67,13 @@ export function TaxDashboard() {
       </div>
     </section>
 
-    <section className={`screen-shell ${activeModule === 'home' ? 'is-active' : ''}`}>
-      <section className='card'><h2>Choose a tax module</h2><div className='selector-grid no-print'><TaxModeCard title='VAT Return' desc='Open VAT return workspace' onClick={() => setActiveModule('vat')} active={false} /><TaxModeCard title='Corporate Tax' desc='Open corporate tax workspace' onClick={() => setActiveModule('corporateTax')} active={false} /></div></section>
-    </section>
+    {activeModule === 'home' && <section className='screen-shell is-active'>
+      <section className='card'><h2>Tax Home</h2><p className='field-help'>Select a module to open a dedicated tax workspace.</p><div className='selector-grid no-print'><TaxModeCard title='VAT Return' desc='Open VAT return workspace' onClick={() => setActiveModule('vat')} active={false} /><TaxModeCard title='Corporate Tax' desc='Open corporate tax workspace' onClick={() => setActiveModule('corporateTax')} active={false} /></div></section>
+      <section className='card summary-panel workspace-summary'><h2>Live Summary</h2><div className='grid-section summary-grid-home'><TaxSummaryCard label='VAT Net Position' value={money(v.netVat)} /><TaxSummaryCard label='VAT Taxable Sales' value={money(v.salesBreakdown.net)} /><TaxSummaryCard label='Corporate Tax Estimate' value={money(c.taxPayable)} /></div></section>
+    </section>}
 
-    {activeModule === 'vat' && <section className='screen-shell is-active wizard-shell'><LiveSummary mode='vat' vatData={vat} vatCalc={v} ctCalc={c} /><div className='workspace-toolbar no-print'><button className='ghost' type='button' onClick={() => setActiveModule('home')}>← Back to Tax Home</button></div><VatWizard data={vat} setData={setVat} onSave={() => draftStorage.save('vatDraft', vat)} onReset={() => { if (confirm('Reset VAT draft?')) { const next = normalizeVatDraft(vatDefault, workspaceSettings); setVat(next); draftStorage.clear('vatDraft'); } }} /></section>}
+    {activeModule === 'vat' && <section className='screen-shell is-active wizard-shell'><div className='workspace-toolbar no-print'><button className='ghost' type='button' onClick={() => setActiveModule('home')}>← Back to Tax Home</button></div><section className='card'><h2>VAT Return Workspace</h2></section><LiveSummary mode='vat' vatData={vat} vatCalc={v} ctCalc={c} /><VatWizard data={vat} setData={setVat} onSave={() => draftStorage.save('vatDraft', vat)} onReset={() => { if (confirm('Reset VAT draft?')) { const next = normalizeVatDraft(vatDefault, workspaceSettings); setVat(next); draftStorage.clear('vatDraft'); } }} /></section>}
 
-    {activeModule === 'corporateTax' && <section className='screen-shell is-active wizard-shell'><LiveSummary mode='corporateTax' vatData={vat} vatCalc={v} ctCalc={c} /><div className='workspace-toolbar no-print'><button className='ghost' type='button' onClick={() => setActiveModule('home')}>← Back to Tax Home</button></div><CorporateTaxWizard data={ct} setData={setCt} onSave={() => draftStorage.save('ctDraft', ct)} onReset={() => { if (confirm('Reset Corporate Tax draft?')) { setCt(ctDefault); draftStorage.clear('ctDraft'); } }} /></section>}
+    {activeModule === 'corporateTax' && <section className='screen-shell is-active wizard-shell'><div className='workspace-toolbar no-print'><button className='ghost' type='button' onClick={() => setActiveModule('home')}>← Back to Tax Home</button></div><section className='card'><h2>Corporate Tax Workspace</h2></section><LiveSummary mode='corporateTax' vatData={vat} vatCalc={v} ctCalc={c} /><CorporateTaxWizard data={ct} setData={setCt} onSave={() => draftStorage.save('ctDraft', ct)} onReset={() => { if (confirm('Reset Corporate Tax draft?')) { setCt(ctDefault); draftStorage.clear('ctDraft'); } }} /></section>}
   </main>;
 }
