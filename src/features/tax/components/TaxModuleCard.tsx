@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card, CardActionArea, CardContent, Typography } from '@mui/material';
+import { Card, CardActionArea, CardContent, Typography, Box } from '@mui/material';
 import ArrowForwardRoundedIcon from '@mui/icons-material/ArrowForwardRounded';
 
 type TaxModuleCardProps = {
@@ -21,30 +21,41 @@ export function TaxModuleCard({
 }: TaxModuleCardProps) {
   return (
     <Card
-      className={`h-full rounded-2xl border bg-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl ${accentColor}`}
+      className={`h-full rounded-2xl border bg-white shadow-sm transition-all duration-200 hover:shadow-xl ${accentColor}`}
+      sx={{
+        borderRadius: 3,
+        transition: 'transform .2s ease, box-shadow .2s ease',
+        '&:hover': { transform: 'translateY(-2px)' },
+      }}
       elevation={0}
     >
-      <CardActionArea className="h-full" onClick={() => onSelect(route)}>
-        <div className="flex h-full min-h-[320px] flex-col overflow-hidden">
-          <div className="flex h-[220px] items-center justify-center overflow-hidden bg-slate-50 px-5 pt-5">
+      <CardActionArea className="h-full" onClick={() => onSelect(route)} aria-label={`Open ${title}`}>
+        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '190px 1fr' }, height: '100%' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', p: { xs: 2, md: 2.5 }, background: '#f8fafc' }}>
             <img
               src={image}
               alt={title}
-              className="mx-auto max-h-[220px] w-full object-contain"
+              style={{
+                width: '100%',
+                maxWidth: '100%',
+                height: 'auto',
+                maxHeight: 'clamp(120px, 20vw, 210px)',
+                objectFit: 'contain',
+              }}
             />
-          </div>
-          <CardContent className="flex items-center justify-between gap-3 p-5">
-            <div>
-              <Typography variant="h6" className="font-semibold text-slate-900">
-                {title}
-              </Typography>
-              <Typography variant="body2" className="mt-1 text-slate-600">
-                {subtitle}
-              </Typography>
-            </div>
-            <ArrowForwardRoundedIcon className="text-slate-500" />
+          </Box>
+          <CardContent sx={{ p: 2.2, '&:last-child': { pb: 2.2 }, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+            <Typography variant="h6" className="font-semibold text-slate-900">
+              {title}
+            </Typography>
+            <Typography variant="body2" className="mt-1 text-slate-600" sx={{ mb: 1.2 }}>
+              {subtitle}
+            </Typography>
+            <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.8, color: '#1565c0', fontWeight: 700, fontSize: '0.95rem' }}>
+              Start <ArrowForwardRoundedIcon fontSize="small" />
+            </Box>
           </CardContent>
-        </div>
+        </Box>
       </CardActionArea>
     </Card>
   );
