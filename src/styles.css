@@ -94,6 +94,28 @@
   .vat201-sheet table th,.vat201-sheet table td{padding:7px;font-size:11px}
 }
 
+
+@media(max-width:640px){
+  .card h2{font-size:15px;line-height:1.35;word-break:break-word}
+  .vat-input-premium{padding:16px}
+  .vat-input-title{font-size:24px;line-height:1.25}
+  .vat-input-subtitle{font-size:14px;line-height:1.45}
+  .vat-breakdown-card header{flex-direction:column;align-items:flex-start}
+  .currency-pill{font-size:12px;padding:5px 10px}
+  .vat-input-summary-grid{grid-template-columns:1fr}
+  .vat-input-table{min-width:0}
+  .vat-input-table thead{display:none}
+  .vat-input-table tbody,.vat-input-table tfoot{display:grid;gap:10px}
+  .vat-input-table tr{display:grid;gap:8px;padding:12px;border:1px solid #e2e8f0;border-radius:12px;background:#fff}
+  .vat-input-table td{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:0;border:0;white-space:normal;text-align:right}
+  .vat-input-table td::before{content:attr(data-label);font-size:12px;font-weight:700;color:#475569;text-align:left}
+  .vat-input-table td:first-child{justify-content:flex-start}
+  .vat-input-table td:first-child::before{display:none}
+  .vat-input-table input{min-width:0;max-width:180px;height:40px;font-size:16px}
+  .vat-total-row{background:#eef3fb;border-color:#cbd5e1}
+  .vat-total-row td{font-weight:700}
+  .vat-kpi-card strong{font-size:24px}
+}
 .vat201-report{background:#fff;border:1px solid #d1d5db;border-radius:8px;padding:14px;max-width:210mm;margin:0 auto;color:#111827}
 .vat201-header{display:grid;grid-template-columns:54px 1fr auto;gap:10px;align-items:center;border-bottom:1px solid #d1d5db;padding-bottom:8px}
 .vat201-logo{width:46px;height:46px;border:1px solid #d1d5db;border-radius:50%;display:grid;place-items:center;font-weight:800;color:#374151;font-size:11px}
@@ -168,13 +190,6 @@
   .vat-adjustments-grid{grid-template-columns:1fr}
 }
 
-@media(max-width:640px){
-  .card h2{font-size:15px;line-height:1.35;word-break:break-word}
-  .vat-input-premium{padding:16px}
-  .vat-input-title{font-size:28px}
-  .vat-input-summary-grid{grid-template-columns:1fr}
-  .vat-input-table input{min-width:120px}
-}
 .vat201-report{background:#fff;border:1px solid #cbd5e1;border-radius:6px;padding:16px;max-width:100%;margin:0 auto}
 .vat201-doc-header{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;border-bottom:1px solid #cbd5e1;padding-bottom:10px;margin-bottom:12px}
 .vat201-doc-header h1{margin:0;font-size:24px;color:#0f172a}
