@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card, CardActionArea, CardContent, Typography, Box } from '@mui/material';
+import { Card, CardActionArea, CardContent, Typography, Box, Chip, IconButton } from '@mui/material';
 import ArrowForwardRoundedIcon from '@mui/icons-material/ArrowForwardRounded';
 
 type TaxModuleCardProps = {
@@ -7,7 +7,7 @@ type TaxModuleCardProps = {
   subtitle: string;
   image: string;
   route: string;
-  accentColor?: string;
+  chips?: string[];
   onSelect: (route: string) => void;
 };
 
@@ -16,46 +16,37 @@ export function TaxModuleCard({
   subtitle,
   image,
   route,
-  accentColor = 'border-slate-200 hover:border-slate-300',
+  chips = [],
   onSelect,
 }: TaxModuleCardProps) {
   return (
     <Card
-      className={`h-full rounded-2xl border bg-white shadow-sm transition-all duration-200 hover:shadow-xl ${accentColor}`}
       sx={{
-        borderRadius: 3,
-        transition: 'transform .2s ease, box-shadow .2s ease',
-        '&:hover': { transform: 'translateY(-2px)' },
+        borderRadius: 4,
+        border: '1px solid #dbe6f3',
+        boxShadow: '0 8px 24px rgba(15,23,42,.08)',
+        overflow: 'hidden',
       }}
       elevation={0}
     >
-      <CardActionArea className="h-full" onClick={() => onSelect(route)} aria-label={`Open ${title}`}>
-        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '190px 1fr' }, height: '100%' }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', p: { xs: 2, md: 2.5 }, background: '#f8fafc' }}>
-            <img
-              src={image}
-              alt={title}
-              style={{
-                width: '100%',
-                maxWidth: '100%',
-                height: 'auto',
-                maxHeight: 'clamp(120px, 20vw, 210px)',
-                objectFit: 'contain',
-              }}
-            />
-          </Box>
-          <CardContent sx={{ p: 2.2, '&:last-child': { pb: 2.2 }, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-            <Typography variant="h6" className="font-semibold text-slate-900">
-              {title}
-            </Typography>
-            <Typography variant="body2" className="mt-1 text-slate-600" sx={{ mb: 1.2 }}>
-              {subtitle}
-            </Typography>
-            <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.8, color: '#1565c0', fontWeight: 700, fontSize: '0.95rem' }}>
-              Start <ArrowForwardRoundedIcon fontSize="small" />
+      <CardActionArea onClick={() => onSelect(route)} aria-label={`Open ${title}`}>
+        <CardContent sx={{ p: 1.8 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.25, minWidth: 0 }}>
+            <Box sx={{ width: 82, minWidth: 82, height: 60, borderRadius: 2.5, bgcolor: '#f8fafc', display: 'grid', placeItems: 'center', p: 0.7 }}>
+              <img src={image} alt={title} style={{ width: '100%', maxWidth: '100%', height: '100%', objectFit: 'contain' }} />
             </Box>
-          </CardContent>
-        </Box>
+            <Box sx={{ minWidth: 0, flex: 1 }}>
+              <Typography sx={{ fontWeight: 700, color: '#0f172a', lineHeight: 1.2 }}>{title}</Typography>
+              <Typography variant='body2' sx={{ color: '#475569', mt: 0.35 }}>{subtitle}</Typography>
+            </Box>
+            <IconButton sx={{ bgcolor: '#2563eb', color: '#fff', '&:hover': { bgcolor: '#1d4ed8' }, width: 36, height: 36 }}>
+              <ArrowForwardRoundedIcon fontSize='small' />
+            </IconButton>
+          </Box>
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.7, mt: 1.3 }}>
+            {chips.map((chip) => <Chip key={chip} label={chip} size='small' sx={{ bgcolor: '#eef2ff', color: '#334155', borderRadius: 2 }} />)}
+          </Box>
+        </CardContent>
       </CardActionArea>
     </Card>
   );
