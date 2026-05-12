@@ -2,6 +2,15 @@ import React from 'react';
 import { Box, Button, FormControl, FormHelperText, Grid, InputLabel, MenuItem, Select, Stack, TextField, Typography, Card, CardContent } from '@mui/material';
 import BusinessOutlinedIcon from '@mui/icons-material/BusinessOutlined';
 import CalendarMonthOutlinedIcon from '@mui/icons-material/CalendarMonthOutlined';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import TrendingUpOutlinedIcon from '@mui/icons-material/TrendingUpOutlined';
+import ShoppingCartOutlinedIcon from '@mui/icons-material/ShoppingCartOutlined';
+import AccountBalanceWalletOutlinedIcon from '@mui/icons-material/AccountBalanceWalletOutlined';
+import NorthOutlinedIcon from '@mui/icons-material/NorthOutlined';
+import SouthOutlinedIcon from '@mui/icons-material/SouthOutlined';
+import CalculateOutlinedIcon from '@mui/icons-material/CalculateOutlined';
+import ArrowBackOutlinedIcon from '@mui/icons-material/ArrowBackOutlined';
+import ArrowForwardOutlinedIcon from '@mui/icons-material/ArrowForwardOutlined';
 import { buildMonthlyEntries, calculateVat } from './lib/vatCalculator';
 import { validateRequired, validateVatPeriodSelection } from './lib/taxValidation';
 import { TAX_CONFIG } from './lib/taxConfig';
@@ -28,6 +37,13 @@ const EMIRATE_BOX_MAP = {
   Fujairah: '1g'
 };
 
+const metricCards = [
+  { key: 'sales', label: 'Total Sales (Input/Gross)', icon: <TrendingUpOutlinedIcon fontSize='small' /> },
+  { key: 'purchases', label: 'Total Purchases (Input/Gross)', icon: <ShoppingCartOutlinedIcon fontSize='small' /> },
+  { key: 'expenses', label: 'Total Expenses (Input/Gross)', icon: <AccountBalanceWalletOutlinedIcon fontSize='small' /> },
+  { key: 'outputVat', label: 'Total Output VAT', icon: <NorthOutlinedIcon fontSize='small' /> },
+  { key: 'recoverableVat', label: 'Total Recoverable VAT', icon: <SouthOutlinedIcon fontSize='small' /> }
+];
 
 export function VatWizard({ data, setData, onSave, onReset, onProgressChange }) {
   const fieldSx = { '& .MuiInputBase-root': { minHeight: 52, borderRadius: 3, color: '#071832', bgcolor: '#fff' }, '& .MuiOutlinedInput-notchedOutline': { borderColor: '#d7e3f0' }, '& .MuiInputBase-root:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#9cb7dc' }, '& .Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#2563eb', borderWidth: '1px' }, '& .Mui-focused': { boxShadow: '0 0 0 3px rgba(37,99,235,0.15)' } };
@@ -145,26 +161,13 @@ export function VatWizard({ data, setData, onSave, onReset, onProgressChange }) 
       {(reqErr) && <Grid size={12}><FormHelperText error>{reqErr}</FormHelperText></Grid>}
     </Grid>
     </Box>}
-    {step === 2 && <div className='vat-input-layout'>
-      <p className='field-help vat-input-help'>Your selected filing frequency is {data.filingFrequency}, so enter {monthCount} {monthCount === 1 ? 'month' : 'months'} of sales, purchases, and expenses.</p>
-      <p className='field-help'>VAT Mode: {data.vatPricingMode === VAT_PRICING_MODES.INCLUSIVE ? 'Inclusive' : 'Exclusive'}. FTA VAT Return Amount should be excluding VAT. If your sales are VAT-inclusive, the system automatically separates taxable value and VAT.</p>
-      <div className='vat-input-main'>
-        <div className='vat-monthly-wrap vat-monthly-wrap-desktop'><table className='vat-input-table'><thead><tr><th>Month</th><th>Sales</th><th>Purchases</th><th>Expenses</th><th>Output VAT</th><th>Recoverable VAT</th><th>Net VAT</th></tr></thead><tbody>{entries.map((entry) => <tr key={entry.month}><td>{entry.month}</td><td><input type='number' min='0' value={entry.sales} onChange={e => updateEntry(entry.month, 'sales', e.target.value)} /></td><td><input type='number' min='0' value={entry.purchases} onChange={e => updateEntry(entry.month, 'purchases', e.target.value)} /></td><td><input type='number' min='0' value={entry.expenses} onChange={e => updateEntry(entry.month, 'expenses', e.target.value)} /></td><td className='vat-readonly'>{money(getEntryOutputVat(entry, data.vatPricingMode))}</td><td className='vat-readonly'>{money(getEntryRecoverableVat(entry, data.vatPricingMode))}</td><td className='vat-readonly'>{money(getEntryNetVat(entry, data.vatPricingMode))}</td></tr>)}</tbody><tfoot><tr className='vat-total-row'><td>Total</td><td>{money(totals.sales)}</td><td>{money(totals.purchases)}</td><td>{money(totals.expenses)}</td><td>{money(totals.outputVat)}</td><td>{money(totals.recoverableVat)}</td><td>{money(totals.netVat)}</td></tr></tfoot></table></div>
-        <div className='vat-mobile-cards'>{entries.map((entry) => <article className='vat-mobile-card' key={`mobile-${entry.month}`}><h3>{entry.month}</h3><label className='field'><span>Sales</span><input type='number' min='0' value={entry.sales} onChange={e => updateEntry(entry.month, 'sales', e.target.value)} /></label><label className='field'><span>Purchases</span><input type='number' min='0' value={entry.purchases} onChange={e => updateEntry(entry.month, 'purchases', e.target.value)} /></label><label className='field'><span>Expenses</span><input type='number' min='0' value={entry.expenses} onChange={e => updateEntry(entry.month, 'expenses', e.target.value)} /></label><div className='vat-mobile-amounts'><p><span>Output VAT</span><strong>{money(getEntryOutputVat(entry, data.vatPricingMode))}</strong></p><p><span>Recoverable VAT</span><strong>{money(getEntryRecoverableVat(entry, data.vatPricingMode))}</strong></p><p><span>Net VAT</span><strong>{money(getEntryNetVat(entry, data.vatPricingMode))}</strong></p></div></article>)}</div>
-      </div>
-      <div className='vat-input-summary-grid'>
-        <TaxSummaryCard label='Total Sales (Input/Gross)' value={money(totals.sales)} />
-        <TaxSummaryCard label='Total Purchases (Input/Gross)' value={money(totals.purchases)} />
-        <TaxSummaryCard label='Total Expenses (Input/Gross)' value={money(totals.expenses)} />
-        <TaxSummaryCard label='Total Output VAT' value={money(totals.outputVat)} />
-        <TaxSummaryCard label='Total Recoverable VAT' value={money(totals.recoverableVat)} />
-        <TaxSummaryCard label={totals.netVat >= 0 ? 'Net VAT Payable' : 'Net VAT Refundable'} value={money(Math.abs(totals.netVat))} />
-      </div>
-      <div className='form-grid three vat-extra-inputs'>
-        <label className='field'><span>Zero-rated sales (AED)</span><input type='number' min='0' name='zeroRatedSales' placeholder='Enter zero-rated sales' value={data.zeroRatedSales} onChange={e => setData({ ...data, zeroRatedSales: e.target.value })} /><small className='field-help'>Used in VAT201 report Box 4 (0% supplies).</small></label>
-        <label className='field'><span>Exempt sales (AED)</span><input type='number' min='0' name='exemptSales' placeholder='Enter exempt sales' value={data.exemptSales} onChange={e => setData({ ...data, exemptSales: e.target.value })} /><small className='field-help'>Used in VAT201 report Box 5 (exempt supplies).</small></label>
-        <label className='field'><span>Non-recoverable VAT (AED)</span><input type='number' min='0' name='nonRecoverableVat' placeholder='Enter blocked input VAT' value={data.nonRecoverableVat} onChange={e => setData({ ...data, nonRecoverableVat: e.target.value })} /><small className='field-help'>Reference value for records and export.</small></label>
-      </div>
+    {step === 2 && <div className='vat-input-layout vat-input-premium'>
+      <h2 className='vat-input-title'>VAT Wizard: VAT Input</h2>
+      <p className='vat-input-subtitle'>Your selected filing frequency is {data.filingFrequency}, so enter {monthCount} {monthCount === 1 ? 'month' : 'months'} of sales, purchases, and expenses.</p>
+      <div className='vat-mode-alert'><InfoOutlinedIcon fontSize='small' /><p><strong>VAT Mode: {data.vatPricingMode === VAT_PRICING_MODES.INCLUSIVE ? 'Inclusive' : 'Exclusive'}.</strong> FTA VAT Return Amount should be excluding VAT. If your sales are VAT-inclusive, the system automatically separates taxable value and VAT.</p></div>
+      <section className='vat-breakdown-card'><header><h3>Quarterly Breakdown</h3><span className='currency-pill'>Currency: <strong>AED</strong></span></header><div className='vat-monthly-wrap'><table className='vat-input-table'><thead><tr><th>Month</th><th>Sales</th><th>Purchases</th><th>Expenses</th><th>Output VAT</th><th>Recoverable VAT</th><th>Net VAT</th></tr></thead><tbody>{entries.map((entry) => <tr key={entry.month}><td><span className='month-cell'><CalendarMonthOutlinedIcon fontSize='small' />{entry.month}</span></td><td><input type='number' min='0' placeholder='0.00' value={entry.sales} onChange={e => updateEntry(entry.month, 'sales', e.target.value)} /></td><td><input type='number' min='0' placeholder='0.00' value={entry.purchases} onChange={e => updateEntry(entry.month, 'purchases', e.target.value)} /></td><td><input type='number' min='0' placeholder='0.00' value={entry.expenses} onChange={e => updateEntry(entry.month, 'expenses', e.target.value)} /></td><td className='vat-readonly'>{money(getEntryOutputVat(entry, data.vatPricingMode))}</td><td className='vat-readonly'>{money(getEntryRecoverableVat(entry, data.vatPricingMode))}</td><td className='vat-readonly vat-net-cell'>{money(getEntryNetVat(entry, data.vatPricingMode))}</td></tr>)}</tbody><tfoot><tr className='vat-total-row'><td>Total</td><td>{money(totals.sales)}</td><td>{money(totals.purchases)}</td><td>{money(totals.expenses)}</td><td>{money(totals.outputVat)}</td><td>{money(totals.recoverableVat)}</td><td className='vat-net-cell'>{money(totals.netVat)}</td></tr></tfoot></table></div></section>
+      <div className='vat-input-summary-grid'>{metricCards.map((item) => <article className='vat-kpi-card' key={item.key}><span className='vat-kpi-icon'>{item.icon}</span><div><p>{item.label}</p><strong>{money(totals[item.key])}</strong></div></article>)}<article className={`vat-kpi-card net-kpi ${totals.netVat > 0 ? 'net-payable' : totals.netVat < 0 ? 'net-refundable' : 'net-neutral'}`}><span className='vat-kpi-icon'><CalculateOutlinedIcon fontSize='small' /></span><div><p>Net VAT Payable</p><strong>{money(Math.abs(totals.netVat))}</strong></div></article></div>
+      <section className='vat-adjustments-card'><h3>Adjustments (Optional)</h3><div className='vat-adjustments-grid'><label className='field'><span>Zero-rated sales (AED) <InfoOutlinedIcon fontSize='inherit' /></span><input type='number' min='0' name='zeroRatedSales' placeholder='0.00' value={data.zeroRatedSales} onChange={e => setData({ ...data, zeroRatedSales: e.target.value })} /><small className='field-help'>Used in VAT201 report Box 4 (0% supplies).</small></label><label className='field'><span>Exempt sales (AED) <InfoOutlinedIcon fontSize='inherit' /></span><input type='number' min='0' name='exemptSales' placeholder='0.00' value={data.exemptSales} onChange={e => setData({ ...data, exemptSales: e.target.value })} /><small className='field-help'>Used in VAT201 report Box 5 (exempt supplies).</small></label><label className='field'><span>Non-recoverable VAT (AED) <InfoOutlinedIcon fontSize='inherit' /></span><input type='number' min='0' name='nonRecoverableVat' placeholder='0.00' value={data.nonRecoverableVat} onChange={e => setData({ ...data, nonRecoverableVat: e.target.value })} /><small className='field-help'>Reference value for records and export.</small></label></div></section>
     </div>}
     {step === 3 && <div className='form-grid three'><input type='number' placeholder='Previous period adjustment' value={data.previousAdjustment} onChange={e => setData({ ...data, previousAdjustment: e.target.value })} /><input type='number' placeholder='Bad debt relief' value={data.badDebtRelief} onChange={e => setData({ ...data, badDebtRelief: e.target.value })} /><textarea placeholder='Other adjustment notes' value={data.adjustmentNotes} onChange={e => setData({ ...data, adjustmentNotes: e.target.value })} /></div>}
     {step === 4 && <div className='grid-section'><TaxSummaryCard label={result.vatPricingMode === VAT_PRICING_MODES.INCLUSIVE ? 'Net Amount' : 'Subtotal'} value={money(result.salesBreakdown.net)} /><TaxSummaryCard label={result.vatPricingMode === VAT_PRICING_MODES.INCLUSIVE ? 'VAT Included' : 'VAT 5%'} value={money(result.salesBreakdown.vat)} /><TaxSummaryCard label='Grand Total' value={money(result.salesBreakdown.total)} /><TaxSummaryCard label='Total input VAT' value={money(result.inputVat)} /><TaxSummaryCard label='Adjustments' value={money(result.adjustments)} /><TaxSummaryCard label={result.label} value={money(result.netVat)} /><p>For preparation only. Please verify before official FTA submission.</p></div>}
@@ -174,8 +177,8 @@ export function VatWizard({ data, setData, onSave, onReset, onProgressChange }) 
       <CardContent sx={{ py: 1.5, px: { xs: 1.3, md: 2.2 }, '&:last-child': { pb: 1.5 } }}>
     <div className='wizard-action-bar'>
       <Stack direction={{xs:'column',sm:'row'}} spacing={1.5} className='wizard-action-group wizard-action-group-left'>
-        <Button variant='outlined' onClick={back} disabled={step===1}>Back</Button>
-        <Button className='primary-gradient-btn' onClick={next} disabled={continueDisabled}>Continue</Button>
+        <Button variant='outlined' startIcon={<ArrowBackOutlinedIcon />} onClick={back} disabled={step===1}>Back</Button>
+        <Button className='primary-gradient-btn' endIcon={<ArrowForwardOutlinedIcon />} onClick={next} disabled={continueDisabled}>Continue</Button>
       </Stack>
       {step === 5 && <ExportActions onSave={onSave} onReset={onReset} onPrint={() => window.print()} onPdf={downloadProfessionalPdf} pdfLoading={pdfLoading} />}
     </div>
