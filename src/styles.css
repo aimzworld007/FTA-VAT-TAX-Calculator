@@ -374,3 +374,9 @@
 .tax-report-disclaimer{font-size:11px;color:#4b5563;margin:10px 0 0}.tax-report-footer{font-size:10px;color:#6b7280;margin-top:8px;padding-top:8px;border-top:1px solid #d1d5db;display:flex;justify-content:space-between}
 @media(max-width:900px){.tax-report-header{flex-direction:column}.tax-report-kpis,.vat201-kpi-grid{grid-template-columns:1fr}}
 @media print{.tax-report-table thead{display:table-header-group}.tax-report,#vat201-report,#corporate-tax-report{border:1px solid #94a3b8!important;padding:10px!important}}
+
+.wizard-action-bar{margin-top:16px;padding:12px;border:1px solid #dbe3ef;border-radius:12px;background:linear-gradient(180deg,#fff 0%,#f8fafc 100%);box-shadow:0 4px 12px rgba(15,23,42,.05);display:flex;gap:12px;justify-content:space-between;align-items:center;flex-wrap:wrap}
+.wizard-action-group{margin-top:0!important}
+.wizard-action-group-left{justify-content:flex-start}
+.wizard-action-group-right{justify-content:flex-end;margin-left:auto}
+@media(max-width:720px){.wizard-action-bar{display:grid;grid-template-columns:1fr}.wizard-action-group{width:100%}.wizard-action-group .MuiButton-root{flex:1}}
