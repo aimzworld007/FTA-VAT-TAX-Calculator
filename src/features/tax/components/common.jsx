@@ -1,24 +1,12 @@
 import React from 'react';
-import { Box, Button, Card, CardContent, IconButton, LinearProgress, Stack, Typography } from '@mui/material';
-import HomeRoundedIcon from '@mui/icons-material/HomeRounded';
+import { Box, Button, Card, CardContent, LinearProgress, Stack, Typography } from '@mui/material';
 import AutoGraphRoundedIcon from '@mui/icons-material/AutoGraphRounded';
 
 export const money=(v)=>new Intl.NumberFormat('en-AE',{style:'currency',currency:'AED'}).format(Number(v)||0);
 export function TaxSummaryCard({label,value}){return <Card className='premium-card'><CardContent><Typography variant='body2' color='text.secondary'>{label}</Typography><Typography variant='h6' sx={{fontWeight:700}}>{value}</Typography></CardContent></Card>;}
-export function WorkspaceHeader({ title: _title, progress = 0, onBack, centerContent }) {
+export function WorkspaceHeader({ title: _title, progress = 0, centerContent }) {
   return <Card sx={{ mb: 2, borderRadius: '28px', border: '1px solid #dbe6f3', bgcolor: '#fff', boxShadow: '0 10px 28px rgba(15, 23, 42, 0.07)' }}><CardContent sx={{ py: { xs: 1.4, md: 1.65 }, px: { xs: 1.4, md: 1.8 } }}>
-    <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', lg: 'auto minmax(0, 1fr) minmax(230px, 290px)' }, alignItems: 'center', gap: { xs: 1.2, sm: 1.4, lg: 1.5 } }}>
-      <Box sx={{ display: 'flex', justifyContent: { xs: 'flex-start', lg: 'center' }, pl: { xs: 0.2, lg: 0 } }}>
-        <IconButton
-          size='medium'
-          aria-label='Back to Home'
-          title='Back to Home'
-          onClick={onBack}
-          sx={{ border: '1px solid #dbe6f3', borderRadius: '50%', backgroundColor: '#fff', width: 68, height: 68, '& svg': { fontSize: 30, color: '#1d4ed8' } }}
-        >
-          <HomeRoundedIcon />
-        </IconButton>
-      </Box>
+    <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', lg: 'minmax(0, 1fr) minmax(230px, 290px)' }, alignItems: 'center', gap: { xs: 1.2, sm: 1.4, lg: 1.5 } }}>
       <Box sx={{ display: 'flex', justifyContent: { xs: 'flex-start', lg: 'center' }, width: '100%' }}>
         {centerContent}
       </Box>
