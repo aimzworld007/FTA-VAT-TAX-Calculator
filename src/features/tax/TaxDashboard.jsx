@@ -70,7 +70,11 @@ const legalLinks = [
 ];
 const drawerLinks = [...navLinks, ...legalLinks, { label: 'Support', href: 'https://ecashbiz.com/landing', icon: <SupportAgentIcon fontSize='small' /> }];
 
-const getVatStatus = (n) => n > 0 ? ['VAT Payable', 'error', money(n)] : n < 0 ? ['VAT Refundable', 'success', money(Math.abs(n))] : ['VAT Payable / Refundable', 'primary', money(0)];
+const getVatStatus = (n) => {
+  if (n > 0) return { label: 'VAT Payable', chipColor: 'error', amount: money(n), badge: 'PAYABLE', variant: 'danger' };
+  if (n < 0) return { label: 'VAT Refundable', chipColor: 'success', amount: money(Math.abs(n)), badge: 'REFUNDABLE', variant: 'success' };
+  return { label: 'VAT Result', chipColor: 'default', amount: money(0), badge: 'ZERO', variant: 'neutral' };
+};
 const normalizeVatDraft = (input, workspaceSettings) => { const merged = { ...vatDefault, ...input, vatPricingMode: normalizeVatPricingMode(input?.vatPricingMode || workspaceSettings.vatPricingMode) }; const selection = inferSelectionFromDates(merged); const period = getPeriodFromSelection(selection); const next = { ...merged, ...selection, ...period }; next.monthlyEntries = buildMonthlyEntries(next); return next; };
 
 function Header({ onOpenDrawer }) {
@@ -83,11 +87,17 @@ function Header({ onOpenDrawer }) {
 
 function LiveSummary({ mode, vatData, vatCalc, ctCalc }) { if (mode === 'corporateTax') return <Card><CardContent><Typography variant='h6' sx={{ mb: 2 }}>Corporate Tax Live Summary</Typography><Grid container spacing={2}><Grid size={{ xs: 12, md: 3 }}><TaxSummaryCard label='Corporate Tax Estimate' value={money(ctCalc.taxPayable)} /></Grid><Grid size={{ xs: 12, md: 3 }}><TaxSummaryCard label='Taxable Income' value={money(ctCalc.taxableIncome)} /></Grid><Grid size={{ xs: 12, md: 3 }}><TaxSummaryCard label='Profit Before Tax' value={money(ctCalc.profitBeforeTax)} /></Grid><Grid size={{ xs: 12, md: 3 }}><TaxSummaryCard label='Selected Tax Period' value={formatVatPeriodLabel(vatData)} /></Grid></Grid></CardContent></Card>; const [label, color, amt] = getVatStatus(vatCalc.netVat); return <Card><CardContent><Typography variant='h6' sx={{ mb: 2 }}>VAT Live Summary</Typography><Grid container spacing={2}><Grid size={{ xs: 12, md: 4 }}><TaxSummaryCard label={label} value={amt} /><Chip label={label.includes('Refundable') ? 'REFUNDABLE' : label.includes('Payable') ? 'PAYABLE' : 'BALANCED'} color={color} sx={{ mt: 1 }} /></Grid><Grid size={{ xs: 12, md: 4 }}><TaxSummaryCard label='VAT Taxable Sales' value={money(vatCalc.salesBreakdown.net)} /></Grid><Grid size={{ xs: 12, md: 4 }}><TaxSummaryCard label='Selected VAT Period' value={formatVatPeriodLabel(vatData)} /></Grid></Grid></CardContent></Card>; }
 
-function CompactKpiCard({ icon, label, value, extra }) {
-  return <Card sx={{ borderRadius: 2.5, border: '1px solid #dbe3ef', background: 'linear-gradient(180deg, #fff 0%, #f8fafc 100%)', boxShadow: '0 3px 10px rgba(15, 23, 42, 0.06)', minWidth: { xs: '100%', sm: 180 } }}>
+function CompactKpiCard({ icon, label, value, extra, variant = 'neutral' }) {
+  const variantSx = variant === 'danger'
+    ? { border: '1px solid #fecaca', background: 'linear-gradient(180deg, #fff1f2 0%, #ffe4e6 100%)' }
+    : variant === 'success'
+      ? { border: '1px solid #bbf7d0', background: 'linear-gradient(180deg, #f0fdf4 0%, #dcfce7 100%)' }
+      : { border: '1px solid #dbe3ef', background: 'linear-gradient(180deg, #fff 0%, #f8fafc 100%)' };
+  const iconColor = variant === 'danger' ? 'error.main' : variant === 'success' ? 'success.main' : 'primary.main';
+  return <Card sx={{ borderRadius: 2.5, boxShadow: '0 3px 10px rgba(15, 23, 42, 0.06)', minWidth: { xs: '100%', sm: 180 }, ...variantSx }}>
     <CardContent sx={{ py: 0.9, px: 1.1, '&:last-child': { pb: 0.9 } }}>
       <Stack direction='row' spacing={1} alignItems='center'>
-        <Box sx={{ color: 'primary.main', display: 'flex' }}>{icon}</Box>
+        <Box sx={{ color: iconColor, display: 'flex' }}>{icon}</Box>
         <Box sx={{ minWidth: 0 }}>
           <Typography variant='caption' color='text.secondary' sx={{ display: 'block', lineHeight: 1.15 }}>{label}</Typography>
           <Typography variant='body2' sx={{ fontWeight: 700, lineHeight: 1.25 }}>{value}</Typography>
@@ -99,11 +109,10 @@ function CompactKpiCard({ icon, label, value, extra }) {
 }
 
 function VatHeaderKpis({ vatData, vatCalc }) {
-  const [label, color, amt] = getVatStatus(vatCalc.netVat);
-  const payableBadge = label.includes('Refundable') ? 'REFUNDABLE' : label.includes('Payable') ? 'PAYABLE' : 'BALANCED';
+  const vatStatus = getVatStatus(vatCalc.netVat);
   return <Box sx={{ width: '100%' }}>
     <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, minmax(0, 1fr))', xl: 'repeat(3, minmax(170px, 1fr))' }, gap: 1, width: '100%', maxWidth: { lg: 760 }, mx: { lg: 'auto' } }}>
-      <CompactKpiCard icon={<PaidOutlinedIcon fontSize='small' />} label='VAT Payable' value={amt} extra={<Chip label={payableBadge} color={color} size='small' sx={{ height: 22, fontWeight: 700, fontSize: '0.65rem' }} />} />
+      <CompactKpiCard icon={<PaidOutlinedIcon fontSize='small' />} label={vatStatus.label} value={vatStatus.amount} variant={vatStatus.variant} extra={<Chip label={vatStatus.badge} color={vatStatus.chipColor} size='small' sx={{ height: 22, fontWeight: 700, fontSize: '0.65rem' }} />} />
       <CompactKpiCard icon={<TrendingUpOutlinedIcon fontSize='small' />} label='VAT Taxable Sales' value={money(vatCalc.salesBreakdown.net)} />
       <CompactKpiCard icon={<CalendarMonthOutlinedIcon fontSize='small' />} label='Selected VAT Period' value={formatVatPeriodLabel(vatData)} />
     </Box>
