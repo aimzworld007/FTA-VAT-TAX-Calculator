@@ -38,6 +38,9 @@ import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import NotificationsNoneRoundedIcon from '@mui/icons-material/NotificationsNoneRounded';
 import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined';
+import PaidOutlinedIcon from '@mui/icons-material/PaidOutlined';
+import TrendingUpOutlinedIcon from '@mui/icons-material/TrendingUpOutlined';
+import CalendarMonthOutlinedIcon from '@mui/icons-material/CalendarMonthOutlined';
 import { VatWizard } from './VatWizard';
 import { CorporateTaxWizard } from './CorporateTaxWizard';
 import { draftStorage } from './lib/localDraftStorage';
@@ -80,6 +83,33 @@ function Header({ onOpenDrawer }) {
 
 function LiveSummary({ mode, vatData, vatCalc, ctCalc }) { if (mode === 'corporateTax') return <Card><CardContent><Typography variant='h6' sx={{ mb: 2 }}>Corporate Tax Live Summary</Typography><Grid container spacing={2}><Grid size={{ xs: 12, md: 3 }}><TaxSummaryCard label='Corporate Tax Estimate' value={money(ctCalc.taxPayable)} /></Grid><Grid size={{ xs: 12, md: 3 }}><TaxSummaryCard label='Taxable Income' value={money(ctCalc.taxableIncome)} /></Grid><Grid size={{ xs: 12, md: 3 }}><TaxSummaryCard label='Profit Before Tax' value={money(ctCalc.profitBeforeTax)} /></Grid><Grid size={{ xs: 12, md: 3 }}><TaxSummaryCard label='Selected Tax Period' value={formatVatPeriodLabel(vatData)} /></Grid></Grid></CardContent></Card>; const [label, color, amt] = getVatStatus(vatCalc.netVat); return <Card><CardContent><Typography variant='h6' sx={{ mb: 2 }}>VAT Live Summary</Typography><Grid container spacing={2}><Grid size={{ xs: 12, md: 4 }}><TaxSummaryCard label={label} value={amt} /><Chip label={label.includes('Refundable') ? 'REFUNDABLE' : label.includes('Payable') ? 'PAYABLE' : 'BALANCED'} color={color} sx={{ mt: 1 }} /></Grid><Grid size={{ xs: 12, md: 4 }}><TaxSummaryCard label='VAT Taxable Sales' value={money(vatCalc.salesBreakdown.net)} /></Grid><Grid size={{ xs: 12, md: 4 }}><TaxSummaryCard label='Selected VAT Period' value={formatVatPeriodLabel(vatData)} /></Grid></Grid></CardContent></Card>; }
 
+function CompactKpiCard({ icon, label, value, extra }) {
+  return <Card sx={{ borderRadius: 2.5, border: '1px solid #dbe3ef', background: 'linear-gradient(180deg, #fff 0%, #f8fafc 100%)', boxShadow: '0 3px 10px rgba(15, 23, 42, 0.06)', minWidth: { xs: '100%', sm: 180 } }}>
+    <CardContent sx={{ py: 0.9, px: 1.1, '&:last-child': { pb: 0.9 } }}>
+      <Stack direction='row' spacing={1} alignItems='center'>
+        <Box sx={{ color: 'primary.main', display: 'flex' }}>{icon}</Box>
+        <Box sx={{ minWidth: 0 }}>
+          <Typography variant='caption' color='text.secondary' sx={{ display: 'block', lineHeight: 1.15 }}>{label}</Typography>
+          <Typography variant='body2' sx={{ fontWeight: 700, lineHeight: 1.25 }}>{value}</Typography>
+        </Box>
+        {extra && <Box sx={{ ml: 'auto' }}>{extra}</Box>}
+      </Stack>
+    </CardContent>
+  </Card>;
+}
+
+function VatHeaderKpis({ vatData, vatCalc }) {
+  const [label, color, amt] = getVatStatus(vatCalc.netVat);
+  const payableBadge = label.includes('Refundable') ? 'REFUNDABLE' : label.includes('Payable') ? 'PAYABLE' : 'BALANCED';
+  return <Box sx={{ width: '100%' }}>
+    <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, minmax(0, 1fr))', xl: 'repeat(3, minmax(170px, 1fr))' }, gap: 1, width: '100%', maxWidth: { lg: 760 }, mx: { lg: 'auto' } }}>
+      <CompactKpiCard icon={<PaidOutlinedIcon fontSize='small' />} label='VAT Payable' value={amt} extra={<Chip label={payableBadge} color={color} size='small' sx={{ height: 22, fontWeight: 700, fontSize: '0.65rem' }} />} />
+      <CompactKpiCard icon={<TrendingUpOutlinedIcon fontSize='small' />} label='VAT Taxable Sales' value={money(vatCalc.salesBreakdown.net)} />
+      <CompactKpiCard icon={<CalendarMonthOutlinedIcon fontSize='small' />} label='Selected VAT Period' value={formatVatPeriodLabel(vatData)} />
+    </Box>
+  </Box>;
+}
+
 export function TaxDashboard() {
   const [m, setM] = React.useState('home');
   const [drawerOpen, setDrawerOpen] = React.useState(false);
@@ -92,7 +122,7 @@ export function TaxDashboard() {
     <Drawer anchor='left' open={drawerOpen} onClose={() => setDrawerOpen(false)}><Box sx={{ width: 300, py: 1 }}><List>{drawerLinks.map((l) => <ListItemButton key={l.label} component='a' href={l.href} target={l.href.startsWith('http') ? '_blank' : undefined}><ListItemIcon>{l.icon}</ListItemIcon><ListItemText primary={l.label} /></ListItemButton>)}</List></Box></Drawer>
     <Container maxWidth={false} sx={{ maxWidth: 1400, py: { xs: 2, md: 3 }, px: { xs: 1.5, sm: 2.5, md: 3 } }}>
       {m === 'home' && <Stack spacing={2.2}><Card sx={{ borderRadius: 4, border: '1px solid #dbe3ef', boxShadow: '0 10px 28px rgba(15, 23, 42, .08)' }}><CardContent><Typography component='h1' variant='h4' sx={{ fontSize: { xs: '1.35rem', md: '1.75rem' }, fontWeight: 800, mb: 0.8 }}>Welcome</Typography><Typography variant='body1' color='text.secondary'>UAE tax workspace for VAT Return and Corporate Tax preparation. Select a module to continue.</Typography></CardContent></Card><InstallAppPrompt /><Card sx={{ borderRadius: 4, border: '1px solid #dbe3ef', boxShadow: '0 10px 28px rgba(15, 23, 42, .08)' }}><CardContent><Typography component='h2' variant='h5' sx={{ mb: 1 }}>Choose a tax module</Typography><Typography color='text.secondary' sx={{ mb: 2 }}>Launch a guided workspace with saved drafts, live summaries, and export options.</Typography><Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2, minmax(0,1fr))' }, gap: 2.2, maxWidth: '100%' }}><TaxModuleCard title='FTA VAT Return' subtitle='Prepare VAT returns with guided period and transaction workflows.' image='/FTA_VAT_RETRUN.png' route='vat' accentColor='border-sky-100 hover:border-sky-300' onSelect={setM} /><TaxModuleCard title='FTA Corporate Tax' subtitle='Estimate corporate tax and organize annual filing data quickly.' image='/FTA_CORPORATE_TAX.png' route='corporateTax' accentColor='border-emerald-100 hover:border-emerald-300' onSelect={setM} /></Box></CardContent></Card><Card sx={{ borderRadius: 4, border: '1px solid #dbe3ef', background: 'linear-gradient(180deg, #fff 0%, #f8fafc 100%)' }}><CardContent sx={{ py: { xs: 2, md: 2.2 } }}><Typography component='h2' variant='h6' sx={{ mb: 0.6, textAlign: 'center' }}>Support & Resources</Typography><Typography variant='body2' color='text.secondary' sx={{ textAlign: 'center', mb: 1.4 }}>Compliance and legal references.</Typography><Box sx={{ mx: 'auto', width: 'fit-content', maxWidth: '100%', display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center', gap: { xs: 0.6, sm: 1 }, px: { xs: 1.25, sm: 1.75 }, py: 0.9, borderRadius: 2.5, border: '1px solid #dbe3ef', backgroundColor: 'rgba(248, 250, 252, 0.88)', boxShadow: '0 2px 10px rgba(15, 23, 42, 0.05)' }}>{legalLinks.map((link, index) => <React.Fragment key={link.label}><Link href={link.href} color='text.secondary' underline='none' sx={{ fontSize: { xs: '0.78rem', sm: '0.82rem' }, fontWeight: 500, px: 0.25, transition: 'color 180ms ease', '&:hover': { color: 'primary.main' } }}>{link.label}</Link>{index < legalLinks.length - 1 && <Typography component='span' aria-hidden sx={{ color: 'text.disabled', lineHeight: 1 }}>•</Typography>}</React.Fragment>)}</Box></CardContent></Card></Stack>}
-      {m === 'vat' && <Stack spacing={2.2}><WorkspaceHeader title='VAT Return Workspace' progress={vp} onBack={() => setM('home')} /><LiveSummary mode='vat' vatData={vat} vatCalc={v} ctCalc={c} /><VatWizard data={vat} setData={setVat} onProgressChange={setVp} onSave={() => draftStorage.save('vatDraft', vat)} onReset={() => { if (confirm('Reset VAT draft?')) { const next = normalizeVatDraft(vatDefault, ws); setVat(next); draftStorage.clear('vatDraft'); } }} /></Stack>}
+      {m === 'vat' && <Stack spacing={2.2}><WorkspaceHeader title='VAT Return Workspace' progress={vp} onBack={() => setM('home')} centerContent={<VatHeaderKpis vatData={vat} vatCalc={v} />} /><VatWizard data={vat} setData={setVat} onProgressChange={setVp} onSave={() => draftStorage.save('vatDraft', vat)} onReset={() => { if (confirm('Reset VAT draft?')) { const next = normalizeVatDraft(vatDefault, ws); setVat(next); draftStorage.clear('vatDraft'); } }} /></Stack>}
       {m === 'corporateTax' && <Stack spacing={2.2}><WorkspaceHeader title='Corporate Tax Workspace' progress={cp} onBack={() => setM('home')} /><LiveSummary mode='corporateTax' vatData={vat} vatCalc={v} ctCalc={c} /><CorporateTaxWizard data={ct} setData={setCt} onProgressChange={setCp} onSave={() => draftStorage.save('ctDraft', ct)} onReset={() => { if (confirm('Reset Corporate Tax draft?')) { setCt(ctDefault); draftStorage.clear('ctDraft'); } }} /></Stack>}
     </Container>
     <Box sx={{ display: { xs: 'block', md: 'none' }, position: 'fixed', bottom: 0, left: 0, right: 0, borderTop: '1px solid #dbe3ef', background: '#fff', zIndex: 1200 }}>
