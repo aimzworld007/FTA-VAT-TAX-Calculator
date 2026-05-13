@@ -97,24 +97,6 @@
 
 @media(max-width:640px){
   .card h2{font-size:15px;line-height:1.35;word-break:break-word}
-  .vat-input-premium{padding:16px}
-  .vat-input-title{font-size:24px;line-height:1.25}
-  .vat-input-subtitle{font-size:14px;line-height:1.45}
-  .vat-breakdown-card header{flex-direction:column;align-items:flex-start}
-  .currency-pill{font-size:12px;padding:5px 10px}
-  .vat-input-summary-grid{grid-template-columns:1fr}
-  .vat-input-table{min-width:0}
-  .vat-input-table thead{display:none}
-  .vat-input-table tbody,.vat-input-table tfoot{display:grid;gap:10px}
-  .vat-input-table tr{display:grid;gap:8px;padding:12px;border:1px solid #e2e8f0;border-radius:12px;background:#fff}
-  .vat-input-table td{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:0;border:0;white-space:normal;text-align:right}
-  .vat-input-table td::before{content:attr(data-label);font-size:12px;font-weight:700;color:#475569;text-align:left}
-  .vat-input-table td:first-child{justify-content:flex-start}
-  .vat-input-table td:first-child::before{display:none}
-  .vat-input-table input{min-width:0;max-width:180px;height:40px;font-size:16px}
-  .vat-total-row{background:#eef3fb;border-color:#cbd5e1}
-  .vat-total-row td{font-weight:700}
-  .vat-kpi-card strong{font-size:24px}
 }
 .vat201-report{background:#fff;border:1px solid #d1d5db;border-radius:8px;padding:14px;max-width:210mm;margin:0 auto;color:#111827}
 .vat201-header{display:grid;grid-template-columns:54px 1fr auto;gap:10px;align-items:center;border-bottom:1px solid #d1d5db;padding-bottom:8px}
@@ -145,96 +127,58 @@
 }
 
 
-.vat-input-layout{display:grid;gap:16px;margin-bottom:18px;width:100%;max-width:100%;min-width:0;box-sizing:border-box}
-.vat-input-premium{background:#fff;border:1px solid #dbe5f2;border-radius:22px;box-shadow:0 12px 28px rgba(15,23,42,.08);padding:28px;width:100%;max-width:100%;min-width:0;box-sizing:border-box;overflow-x:hidden}
-.vat-page-shell{width:100%;max-width:1120px;margin:0 auto;padding:16px;padding-bottom:120px;box-sizing:border-box;overflow-x:hidden}
-.vat-input-title{margin:0;color:#07122f;font-size:34px;font-weight:800}
-.vat-input-subtitle{margin:0;color:#64748b;font-size:15px}
-.vat-mode-alert{display:flex;align-items:flex-start;gap:10px;background:#eaf2ff;border:1px solid #c7daf9;color:#2563eb;padding:12px 14px;border-radius:12px;width:100%;max-width:100%;min-width:0;box-sizing:border-box;overflow-wrap:anywhere}
-.vat-mode-alert p{margin:0;font-size:14px;line-height:1.45;min-width:0;overflow-wrap:anywhere;word-break:break-word}
-.vat-breakdown-card,.vat-adjustments-card{border:1px solid #dbe5f2;border-radius:14px;background:#fff;box-shadow:0 6px 16px rgba(15,23,42,.05);padding:14px;width:100%;max-width:100%;min-width:0;box-sizing:border-box}
-.vat-breakdown-card header{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px}
-.vat-breakdown-card h3,.vat-adjustments-card h3{margin:0;color:#07122f}
-.currency-pill{display:inline-flex;align-items:center;padding:6px 12px;border-radius:999px;background:#eef2f8;border:1px solid #dbe5f2;color:#64748b;font-size:14px}
-.vat-input-main{display:block;width:100%}
-.vat-monthly-wrap,.table-wrapper{min-width:0;width:100%;max-width:100%;overflow-x:auto;overflow-y:hidden;border:1px solid #dbe5f2;border-radius:12px;background:#fff;box-sizing:border-box}
-.vat-input-table{width:100%;min-width:820px;border-collapse:collapse;margin:0}
-.vat-input-table th,.vat-input-table td{padding:12px;border-bottom:1px solid #e6edf7;text-align:right;vertical-align:middle;white-space:nowrap}
+
+.vat-input-layout{display:grid;gap:18px;margin-bottom:18px;width:100%;min-width:0}
+.vat-page-shell{width:100%;max-width:1240px;margin:0 auto;padding:24px 24px 40px;box-sizing:border-box;overflow-x:hidden}
+.vat-input-premium{background:#fff;border:1px solid #e5edf8;border-radius:24px;box-shadow:0 16px 40px rgba(15,23,42,.06);padding:24px;width:100%;min-width:0;box-sizing:border-box}
+.vat-input-title{margin:0;color:#07122f;font-size:32px;font-weight:800}
+.vat-input-subtitle{margin:0;color:#64748b;font-size:14px}
+.vat-mode-alert{display:flex;align-items:flex-start;gap:10px;background:#f3f7ff;border:1px solid #dbe8ff;color:#1d4ed8;padding:12px 14px;border-radius:12px}
+.vat-mode-alert p{margin:0;font-size:13px;line-height:1.45}
+.vat-breakdown-card{border:0;border-radius:16px;background:#f8fbff;padding:14px}
+.vat-breakdown-card header{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:10px}
+.vat-breakdown-card h3{margin:0;color:#07122f;font-size:17px}
+.currency-pill{display:inline-flex;align-items:center;padding:4px 10px;border-radius:999px;background:#fff;border:1px solid #dbe5f2;color:#64748b;font-size:12px;white-space:nowrap}
+.vat-monthly-wrap,.table-wrapper{width:100%;overflow-x:auto;overflow-y:hidden;border:1px solid #e2e8f0;border-radius:12px;background:#fff}
+.vat-input-table{width:100%;min-width:860px;border-collapse:collapse}
+.vat-input-table th,.vat-input-table td{padding:10px 12px;border-bottom:1px solid #e9eef5;text-align:right;vertical-align:middle;white-space:nowrap;font-size:13px}
 .vat-input-table th:first-child,.vat-input-table td:first-child{text-align:left}
-.vat-input-table th{background:#f1f5f9;font-size:13px;font-weight:700;color:#334155}
-.vat-input-table input{width:100%;min-width:140px;height:44px;border:1px solid #dbe5f2;border-radius:10px;padding:0 12px;font-size:17px;color:#07122f;background:#fff;appearance:textfield}
-.vat-input-table input:focus{outline:none;border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,.15)}
-.month-cell{display:inline-flex;align-items:center;gap:8px;font-weight:700;color:#07122f}
-.vat-readonly{color:#1e293b;font-weight:700}
-.vat-net-cell{background:#f1fbf7;color:#059669!important;font-weight:800}
-.vat-total-row td{font-weight:800;background:#eef3fb}
-.vat-input-summary-grid,.summary-kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;width:100%;max-width:100%;min-width:0}
-.vat-kpi-card{display:flex;gap:12px;align-items:center;padding:16px;border-radius:14px;border:1px solid #dbe5f2;background:#fff;box-shadow:0 8px 18px rgba(15,23,42,.06);min-width:0;max-width:100%;box-sizing:border-box}
-.vat-kpi-icon{width:38px;height:38px;border-radius:10px;background:#ebf1ff;color:#2563eb;display:grid;place-items:center}
-.vat-kpi-card p{margin:0;color:#64748b;font-size:13px;line-height:1.25}
-.vat-kpi-card strong{color:#07122f;font-size:clamp(1.4rem,4.4vw,2.1rem);line-height:1.1;white-space:normal;overflow-wrap:anywhere;word-break:break-word}
+.vat-input-table th{background:#f8fafc;font-size:12px;font-weight:700;color:#334155;position:sticky;top:0;z-index:1}
+.vat-input-table input{width:100%;min-width:120px;height:38px;border:1px solid #dbe5f2;border-radius:10px;padding:0 10px;font-size:14px;color:#07122f;background:#fff;appearance:textfield;text-align:right}
+.vat-input-table input:focus{outline:none;border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,.12)}
+.month-cell{display:inline-flex;align-items:center;gap:6px;font-weight:600;color:#07122f}
+.vat-readonly{color:#0f172a;font-weight:700}
+.vat-net-cell{font-weight:800}
+.vat-total-row td{font-weight:800;background:#f1f5f9;position:sticky;bottom:0;z-index:1}
+.vat-input-summary-grid,.summary-kpi-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.vat-kpi-card{display:flex;gap:10px;align-items:flex-start;padding:14px;border-radius:14px;border:1px solid #e5edf8;background:#fff;box-shadow:0 6px 20px rgba(15,23,42,.05);min-width:0}
+.vat-kpi-icon{width:34px;height:34px;border-radius:10px;background:#ebf1ff;color:#2563eb;display:grid;place-items:center;flex:0 0 auto}
+.vat-kpi-card p{margin:0;color:#64748b;font-size:11px;line-height:1.3;text-transform:uppercase;letter-spacing:.03em}
+.vat-kpi-card strong{color:#07122f;font-size:clamp(20px,2vw,30px);line-height:1.05;white-space:normal;word-break:keep-all;overflow-wrap:anywhere}
 .vat-kpi-card > div{min-width:0}
-.net-payable .vat-kpi-icon{background:#fef2f2;color:#dc2626}.net-payable strong{color:#dc2626}
-.net-refundable .vat-kpi-icon{background:#ecfdf5;color:#059669}.net-refundable strong{color:#059669}
+.net-payable .vat-kpi-icon{background:#fef2f2;color:#dc2626}
+.net-payable strong{color:#dc2626}
+.net-refundable .vat-kpi-icon{background:#ecfdf5;color:#16a34a}
+.net-refundable strong{color:#16a34a}
 .net-neutral .vat-kpi-icon{background:#eef2ff;color:#2563eb}
-
-
-.vat-desktop-table{display:none}
-.vat-mobile-only{display:grid}
-.vat-mobile-cards{display:grid;gap:8px}
-.vat-mobile-card{border:1px solid #dbe5f2;border-radius:14px;background:#fff;box-shadow:0 6px 16px rgba(15,23,42,.05);padding:10px;display:grid;gap:8px}
-.vat-mobile-card header{display:flex;justify-content:space-between;align-items:center;gap:8px}
-.vat-mobile-input-grid{display:grid;gap:6px}
-.vat-mobile-input-grid label{display:grid;gap:4px}
-.vat-mobile-input-grid label span{font-size:11px;color:#475569;font-weight:600}
-.vat-mobile-input-grid input{width:100%;height:38px;border:1px solid #dbe5f2;border-radius:9px;padding:0 10px;font-size:14px;color:#07122f;background:#fff;appearance:textfield}
-.vat-mobile-input-grid input:focus{outline:none;border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,.12)}
-.vat-mobile-metrics{display:grid;gap:5px;border-top:1px dashed #dbe5f2;padding-top:6px}
-.vat-mobile-metrics p{margin:0;display:flex;justify-content:space-between;align-items:center;gap:10px}
-.vat-mobile-metrics p span{font-size:12px;color:#64748b}
-.vat-mobile-metrics p strong{font-size:14px;color:#0f172a}
-.vat-mobile-metrics p.net-payable strong{color:#dc2626}
-.vat-mobile-metrics p.net-refundable strong{color:#059669}
-.vat-adjustments-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
-.vat-adjustments-grid .field{gap:6px}
-.vat-adjustments-grid .field span{display:flex;align-items:center;gap:6px;color:#07122f}
-
-@media(min-width:900.02px){
-  .vat-desktop-table{display:block}
-  .vat-mobile-only{display:none}
-}
+.vat-mobile-only{display:none}
+.vat-desktop-table{display:block}
 
 @media(max-width:1024px){
-  .vat-input-summary-grid,.summary-kpi-grid{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
-}
-
-@media(max-width:900px){
-  .vat-desktop-table{display:none}
-  .vat-mobile-only{display:grid}
-  .vat-input-premium{padding:18px}
-  .vat-input-title{font-size:28px}
-  .vat-input-table{min-width:820px}
-  .vat-kpi-card strong{font-size:28px}
-  .vat-adjustments-grid{grid-template-columns:1fr}
+  .vat-page-shell{padding:20px 16px 28px}
+  .vat-input-summary-grid,.summary-kpi-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
 
 @media(max-width:640px){
-  .vat-page-shell{max-width:none;padding:12px;padding-bottom:140px}
-  .vat-main-card{border:1px solid #e5eaf3;border-radius:24px;padding:18px 14px;box-shadow:0 10px 30px rgba(15,23,42,.06)}
-  .vat-nested-card,.vat-inner-shell,.vat-background-frame{border:0;box-shadow:none;background:transparent;padding-left:0;padding-right:0}
-  .vat-monthly-wrap{border:0;background:transparent}
-  .vat-mobile-card{border:1px solid #e2e8f0;box-shadow:none;padding:12px}
-  .vat-input-summary-grid,.kpi-grid{grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:12px}
-  .vat-kpi-card,.kpi-card{padding:14px;border-radius:18px;min-width:0;align-items:flex-start}
-  .vat-kpi-icon{width:34px;height:34px}
-  .vat-kpi-card p,.kpi-title{font-size:.9rem;line-height:1.25}
-  .vat-kpi-card strong,.kpi-value{font-size:clamp(1.35rem,6vw,2rem);line-height:1.1;white-space:normal;overflow-wrap:anywhere}
+  .vat-page-shell{padding:14px 12px 24px}
+  .vat-input-premium{padding:16px;border-radius:18px}
+  .vat-input-title{font-size:26px}
+  .vat-breakdown-card{padding:10px;background:#f8fbff}
+  .vat-breakdown-card header{flex-direction:column;align-items:flex-start}
+  .vat-monthly-wrap,.table-wrapper{margin:0 -2px 0 0}
+  .vat-input-table{min-width:760px}
+  .vat-input-summary-grid,.summary-kpi-grid{grid-template-columns:1fr}
 }
-
-@media(max-width:420px){
-  .vat-input-summary-grid,.kpi-grid{grid-template-columns:1fr}
-}
-
 .vat201-report{background:#fff;border:1px solid #cbd5e1;border-radius:6px;padding:16px;max-width:100%;margin:0 auto}
 .vat201-doc-header{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;border-bottom:1px solid #cbd5e1;padding-bottom:10px;margin-bottom:12px}
 .vat201-doc-header h1{margin:0;font-size:24px;color:#0f172a}
