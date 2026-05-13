@@ -31,7 +31,7 @@ import { MONTHS, formatVatPeriodLabel, getPeriodFromSelection } from './lib/vatP
 import { VAT_PRICING_MODES, splitVatFromAmount } from './lib/vatPricing';
 import { downloadPdf, generateVatPdfBlob } from './services/vatPdfApi';
 
-const steps = ['Business Details', 'VAT Input', 'Adjustments', 'Review', 'Export'];
+const steps = ['Business Details', 'VAT Input', 'Preview', 'Export'];
 const n = (v) => Number(v) || 0;
 const clampInput = (v) => Math.max(0, n(v));
 const currentYear = new Date().getFullYear();
@@ -56,9 +56,10 @@ const metricCards = [
   { key: 'recoverableVat', label: 'Total Recoverable VAT', icon: <SouthOutlinedIcon fontSize='small' /> }
 ];
 
-export function VatWizard({ data, setData, onSave, onReset, onProgressChange, forcedStep }) {
+export function VatWizard({ data, setData, onSave, onReset, onProgressChange, forcedStep, navigateToStep }) {
   const fieldSx = { '& .MuiInputBase-root': { minHeight: { xs: 44, md: 48 }, height: { xs: 44, md: 48 }, borderRadius: '12px', color: '#071832', bgcolor: '#fff' }, '& .MuiOutlinedInput-notchedOutline': { borderColor: '#d7e3f0' }, '& .MuiInputBase-root:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#9cb7dc' }, '& .Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#2563eb', borderWidth: '1px' }, '& .Mui-focused': { boxShadow: '0 0 0 3px rgba(37,99,235,0.15)' }, '& .MuiInputBase-input': { padding: '0 14px', fontSize: 14, lineHeight: 1.2 }, '& .MuiSelect-select': { display: 'flex', alignItems: 'center', padding: '0 38px 0 14px !important', fontSize: 14, lineHeight: 1.2 }, '& .MuiInputLabel-root': { fontSize: 12, lineHeight: 1.1 }, '@media (max-width:768px)': { '& .MuiInputBase-input': { padding: '0 12px' }, '& .MuiSelect-select': { padding: '0 36px 0 12px !important' } } };
   const [step, setStep] = React.useState(forcedStep || 1);
+  const stepToPath = React.useMemo(() => ({ 1: '/vat/business-details', 2: '/vat/input', 3: '/vat/preview', 4: '/vat/export' }), []);
   const [downloadLoading, setDownloadLoading] = React.useState(false);
   const result = calculateVat(data);
   const reqErr = validateRequired(data.businessName, 'Business name') || validateRequired(data.trn, 'TRN') || validateRequired(data.businessLocationEmirate, 'Business location emirate') || validateVatPeriodSelection(data);
@@ -71,11 +72,19 @@ export function VatWizard({ data, setData, onSave, onReset, onProgressChange, fo
     }
   }, [data.filingFrequency, data.filingYear, data.filingMonth, data.filingQuarter, data.filingStartMonth]);
 
-  const next = () => setStep((s) => Math.min(5, s + 1));
-  const back = () => setStep((s) => Math.max(1, s - 1));
+  const next = () => {
+    const nextStep = Math.min(4, step + 1);
+    if (navigateToStep) navigateToStep(stepToPath[nextStep]);
+    else setStep(nextStep);
+  };
+  const back = () => {
+    const prevStep = Math.max(1, step - 1);
+    if (navigateToStep) navigateToStep(stepToPath[prevStep]);
+    else setStep(prevStep);
+  };
 
   React.useEffect(() => {
-    onProgressChange?.(Math.round((step / 5) * 100));
+    onProgressChange?.(step * 25);
   }, [step, onProgressChange]);
 
   React.useEffect(() => { if (forcedStep) setStep(forcedStep); }, [forcedStep]);
@@ -129,7 +138,7 @@ export function VatWizard({ data, setData, onSave, onReset, onProgressChange, fo
       setDownloadLoading(false);
     }
   };
-  const continueDisabled = (step === 1 && Boolean(reqErr)) || step === 5;
+  const continueDisabled = (step === 1 && Boolean(reqErr)) || step === 4;
   return <div className='vat-wizard'><FormSection title={`VAT Wizard: ${steps[step - 1]}`}>
     {step === 1 && <Box>
       <Stack direction='row' spacing={1.5} alignItems='center' sx={{ mb: 2.5 }}>
@@ -177,17 +186,15 @@ export function VatWizard({ data, setData, onSave, onReset, onProgressChange, fo
       {(reqErr) && <Grid size={12}><FormHelperText error>{reqErr}</FormHelperText></Grid>}
     </Grid>
     </Box>}
-    {step === 2 && <div className='vat-page-shell'>
-      <div className='vat-input-layout vat-input-premium vat-main-card vat-input-card wizard-card'>
-      <h2 className='vat-input-title'>VAT Wizard: VAT Input</h2>
+    {step === 2 && <section className='vat-input-layout vat-input-premium vat-main-card vat-input-card wizard-card'>
+      <h2 className='vat-input-title'>VAT Input</h2>
       <p className='vat-input-subtitle'>Your selected filing frequency is {data.filingFrequency}, so enter {monthCount} {monthCount === 1 ? 'month' : 'months'} of sales, purchases, and expenses.</p>
       <div className='vat-mode-alert'><InfoOutlinedIcon fontSize='small' /><p><strong>VAT Mode: {data.vatPricingMode === VAT_PRICING_MODES.INCLUSIVE ? 'Inclusive' : 'Exclusive'}.</strong> FTA VAT Return Amount should be excluding VAT. If your sales are VAT-inclusive, the system automatically separates taxable value and VAT.</p></div>
       <section className='vat-breakdown-card vat-nested-card quarterly-breakdown'><header><h3>{data.filingFrequency} Breakdown</h3><span className='currency-pill'>Currency: <strong>AED</strong></span></header><div className='vat-monthly-wrap vat-desktop-table table-wrapper'><table className='vat-input-table'><thead><tr><th>Month</th><th>Sales</th><th>Purchases</th><th>Expenses</th><th>Output VAT</th><th>Recoverable VAT</th><th>Net VAT</th></tr></thead><tbody>{entries.map((entry) => <tr key={entry.month}><td data-label='Month'><span className='month-cell'><CalendarMonthOutlinedIcon fontSize='small' />{entry.month}</span></td><td data-label='Sales'><input type='number' min='0' placeholder='0.00' value={entry.sales} onChange={e => updateEntry(entry.month, 'sales', e.target.value)} /></td><td data-label='Purchases'><input type='number' min='0' placeholder='0.00' value={entry.purchases} onChange={e => updateEntry(entry.month, 'purchases', e.target.value)} /></td><td data-label='Expenses'><input type='number' min='0' placeholder='0.00' value={entry.expenses} onChange={e => updateEntry(entry.month, 'expenses', e.target.value)} /></td><td className='vat-readonly' data-label='Output VAT'>{money(getEntryOutputVat(entry, data.vatPricingMode))}</td><td className='vat-readonly' data-label='Recoverable VAT'>{money(getEntryRecoverableVat(entry, data.vatPricingMode))}</td><td className='vat-readonly vat-net-cell' data-label='Net VAT'>{money(getEntryNetVat(entry, data.vatPricingMode))}</td></tr>)}</tbody><tfoot><tr className='vat-total-row'><td data-label='Month'>Total</td><td data-label='Sales'>{money(totals.sales)}</td><td data-label='Purchases'>{money(totals.purchases)}</td><td data-label='Expenses'>{money(totals.expenses)}</td><td data-label='Output VAT'>{money(totals.outputVat)}</td><td data-label='Recoverable VAT'>{money(totals.recoverableVat)}</td><td className='vat-net-cell' data-label='Net VAT'>{money(totals.netVat)}</td></tr></tfoot></table></div>
       <div className='vat-mobile-cards vat-mobile-only'>{entries.map((entry) => { const entryNetVat = getEntryNetVat(entry, data.vatPricingMode); return <article className='vat-mobile-card' key={`mobile-${entry.month}`}><header><span className='month-cell'><CalendarMonthOutlinedIcon fontSize='small' />{entry.month}</span><span className='currency-pill'>AED</span></header><div className='vat-mobile-input-grid'><label><span>Sales (AED)</span><input type='number' min='0' placeholder='0.00' value={entry.sales} onChange={e => updateEntry(entry.month, 'sales', e.target.value)} /></label><label><span>Purchases (AED)</span><input type='number' min='0' placeholder='0.00' value={entry.purchases} onChange={e => updateEntry(entry.month, 'purchases', e.target.value)} /></label><label><span>Expenses (AED)</span><input type='number' min='0' placeholder='0.00' value={entry.expenses} onChange={e => updateEntry(entry.month, 'expenses', e.target.value)} /></label></div><div className='vat-mobile-metrics'><p><span>Output VAT</span><strong>{money(getEntryOutputVat(entry, data.vatPricingMode))}</strong></p><p><span>Recoverable VAT</span><strong>{money(getEntryRecoverableVat(entry, data.vatPricingMode))}</strong></p><p className={entryNetVat > 0 ? 'net-payable' : entryNetVat < 0 ? 'net-refundable' : 'net-neutral'}><span>Net VAT</span><strong>{entryNetVat > 0 ? 'Payable ' : entryNetVat < 0 ? 'Refundable ' : ''}{money(Math.abs(entryNetVat))}</strong></p></div></article>; })}</div></section>
       <div className='vat-input-summary-grid summary-kpi-grid kpi-grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'>{metricCards.map((item) => <article className='vat-kpi-card kpi-card' key={item.key}><span className='vat-kpi-icon'>{item.icon}</span><div><p className='kpi-title'>{item.label}</p><strong className='kpi-value'>{money(totals[item.key])}</strong></div></article>)}<article className={`vat-kpi-card kpi-card net-kpi ${totals.netVat > 0 ? 'net-payable' : totals.netVat < 0 ? 'net-refundable' : 'net-neutral'}`}><span className='vat-kpi-icon'><CalculateOutlinedIcon fontSize='small' /></span><div><p className='kpi-title'>Net VAT Payable</p><strong className='kpi-value'>{money(Math.abs(totals.netVat))}</strong></div></article></div>
-      </div>
-    </div>}
-    {step === 3 && <Box>
+    </section>}
+    {false && step === 99 && <Box>
       <Stack direction='row' spacing={1.5} alignItems='center' sx={{ mb: 2.5 }}>
         <Box sx={{ width: 52, height: 52, borderRadius: '50%', bgcolor: '#eaf1ff', color: 'primary.main', display: 'grid', placeItems: 'center' }}>
           <PlaylistAddCheckCircleOutlinedIcon />
@@ -259,7 +266,7 @@ export function VatWizard({ data, setData, onSave, onReset, onProgressChange, fo
         </CardContent>
       </Card>
     </Box>}
-    {step === 4 && <Box sx={{ bgcolor: '#f5f8fc', borderRadius: 5, p: { xs: 1.5, md: 2 } }}>
+    {step === 3 && <Box sx={{ bgcolor: '#f5f8fc', borderRadius: 5, p: { xs: 1.5, md: 2 } }}>
       <Card sx={{ borderRadius: 5, border: '1px solid #dbe5f2', boxShadow: '0 8px 20px rgba(15,23,42,.06)' }}>
         <CardContent sx={{ p: { xs: 2, md: 3 } }}>
           <Typography variant='h5' sx={{ fontWeight: 800, color: '#0f2251' }}>VAT Return Review</Typography>
@@ -289,20 +296,20 @@ export function VatWizard({ data, setData, onSave, onReset, onProgressChange, fo
         </CardContent>
       </Card>
     </Box>}
-    {step === 5 && <Vat201Report data={{ ...data, monthlyEntries: buildMonthlyEntries(data) }} result={result} />}
+    {step === 4 && <Vat201Report data={{ ...data, monthlyEntries: buildMonthlyEntries(data) }} result={result} />}
   </FormSection>
     <Card sx={{ mt: 2, borderRadius: 4, border: '1px solid #dbe6f3', boxShadow: '0 10px 24px rgba(15,23,42,.06)' }}>
       <CardContent sx={{ py: 1.5, px: { xs: 1.3, md: 2.2 }, '&:last-child': { pb: 1.5 } }}>
     <div className='wizard-action-bar'>
       <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, alignItems: 'center', justifyContent: 'space-between', gap: 1.5, width: '100%' }}>
         <Box sx={{ width: { xs: '100%', md: '50%' }, display: 'flex', justifyContent: { xs: 'stretch', md: 'flex-start' } }}>
-          <Button fullWidth={step < 5} variant='outlined' startIcon={<ArrowBackOutlinedIcon />} onClick={back} disabled={step===1}>Back</Button>
+          <Button fullWidth={step < 4} variant='outlined' startIcon={<ArrowBackOutlinedIcon />} onClick={back} disabled={step===1}>Back</Button>
         </Box>
-        {step < 5 && <Box sx={{ width: { xs: '100%', md: '50%' }, display: 'flex', justifyContent: { xs: 'stretch', md: 'flex-end' } }}>
+        {step < 4 && <Box sx={{ width: { xs: '100%', md: '50%' }, display: 'flex', justifyContent: { xs: 'stretch', md: 'flex-end' } }}>
           <Button fullWidth className='primary-gradient-btn' endIcon={<ArrowForwardOutlinedIcon />} onClick={next} disabled={continueDisabled}>Continue</Button>
         </Box>}
       </Box>
-      {step === 5 && <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} className='wizard-action-group wizard-action-group-right'>
+      {step === 4 && <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} className='wizard-action-group wizard-action-group-right'>
         <Button variant='outlined' startIcon={<PrintOutlinedIcon />} onClick={() => window.print()}>Print</Button>
         {onSave && <Button variant='outlined' startIcon={<IosShareOutlinedIcon />} onClick={onSave}>Save Draft</Button>}
         <Button className='danger-soft-btn' variant='outlined' onClick={onReset}>Reset</Button>

@@ -7,7 +7,7 @@ import { VatWizard } from '../features/tax/VatWizard';
 import { CorporateTaxWizard } from '../features/tax/CorporateTaxWizard';
 import { PremiumHome, AppShell } from '../features/home/PremiumHome';
 
-const mapStep = { 'business-details': 1, input: 2, preview: 4, export: 5 };
+const mapStep = { 'business-details': 1, input: 2, preview: 3, export: 4 };
 const mapTaxStep = { 'business-details': 1, input: 3, preview: 5, export: 6 };
 
 function RoutedModules() {
@@ -37,7 +37,7 @@ function RoutedModules() {
 
   if (pathname === '/') return <PremiumHome />;
   if (module === 'vat') {
-    return <AppShell><TaxModuleLayout moduleTitle='VAT Module' basePath='/vat' currentStep={step || 'business-details'}><VatWizard data={vat} setData={setVat} forcedStep={mapStep[step] || 1} /></TaxModuleLayout></AppShell>;
+    return <AppShell><TaxModuleLayout moduleTitle='VAT Module' basePath='/vat' currentStep={step || 'business-details'}><VatWizard data={vat} setData={setVat} forcedStep={mapStep[step] || 1} navigateToStep={navigate} /></TaxModuleLayout></AppShell>;
   }
   if (module === 'tax') {
     return <AppShell><TaxModuleLayout moduleTitle='Corporate Tax Module' basePath='/tax' currentStep={step || 'business-details'}><CorporateTaxWizard data={ct} setData={setCt} forcedStep={mapTaxStep[step] || 1} /></TaxModuleLayout></AppShell>;
