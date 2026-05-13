@@ -1,16 +1,17 @@
 import React from 'react';
-import { Alert, Box, Button, Card, CardContent, Snackbar, Stack, Typography } from '@mui/material';
-import { usePathname, RouteLink } from '../components/Router';
+import { Alert, Snackbar } from '@mui/material';
+import { usePathname } from '../components/Router';
 import { TaxAssistantProvider, useTaxAssistant } from '../modules/taxAssistant/TaxAssistantContext';
 import { TaxModuleLayout } from '../modules/taxAssistant/TaxModuleLayout';
 import { VatWizard } from '../features/tax/VatWizard';
 import { CorporateTaxWizard } from '../features/tax/CorporateTaxWizard';
 import { AppFooter } from '../features/layout/AppFooter';
+import { PremiumHome } from '../features/home/PremiumHome';
 
 const mapStep = { 'business-details': 1, input: 2, preview: 4, export: 5 };
 const mapTaxStep = { 'business-details': 1, input: 3, preview: 5, export: 6 };
 
-function Home() { return <Box sx={{ maxWidth: 900, mx: 'auto', p: 2 }}><Typography variant='h4' sx={{fontWeight:800, mb:2}}>UAE VAT & Corporate Tax Assistant</Typography><Stack direction={{xs:'column', md:'row'}} spacing={2}><Card sx={{flex:1}}><CardContent><Typography variant='h6'>VAT Module</Typography><Button component={RouteLink} to='/vat/business-details'>Open VAT</Button></CardContent></Card><Card sx={{flex:1}}><CardContent><Typography variant='h6'>Corporate Tax Module</Typography><Button component={RouteLink} to='/tax/business-details'>Open Tax</Button></CardContent></Card></Stack></Box>; }
+function Home() { return <PremiumHome />; }
 
 function RoutedModules(){ const {pathname, navigate}=usePathname(); const {vat,setVat,ct,setCt}=useTaxAssistant(); const [msg,setMsg]=React.useState(''); const parts=pathname.split('/').filter(Boolean); const module=parts[0]; const step=parts[1]||'';
 const guardVat = !vat.businessName || !vat.trn;
