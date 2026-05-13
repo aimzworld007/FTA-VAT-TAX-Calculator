@@ -452,17 +452,21 @@ tr:nth-child(even) td{background:#fbfdff}
 
 .page-container,.wizard-card,.vat-input-card,.quarterly-breakdown{width:100%;max-width:100%;min-width:0;box-sizing:border-box}
 
-.vatWizardLayout{display:grid;gap:16px}
-.vatWizardHeader{border-radius:16px!important;border:1px solid #dbe4f0!important;box-shadow:0 10px 30px rgba(15,23,42,.06)!important}
-.wizardHeaderTop{gap:14px}
-.moduleSelector{background:linear-gradient(135deg,#2563eb,#1d4ed8)!important;color:#fff!important;box-shadow:0 8px 18px rgba(37,99,235,.25)!important}
+.vatWizardPage{display:grid;gap:18px}
+.backHomeButton{display:inline-flex!important;align-items:center;gap:10px;width:fit-content;padding:12px 18px!important;border-radius:14px!important;border:1px solid #c7d7fe!important;background:#fff!important;color:#2563eb!important;font-weight:700!important;cursor:pointer;box-shadow:0 4px 14px rgba(37,99,235,.08)!important;text-transform:none!important}
+.backHomeButton:hover{background:#eff6ff!important}
+.wizardHeroCard{background:#fff;border-radius:24px!important;border:1px solid #dbe4f0!important;box-shadow:0 10px 30px rgba(15,23,42,.06)!important}
+.wizardHeroTop{display:flex;justify-content:space-between;align-items:flex-start;gap:20px}
 .wizardPercent{white-space:nowrap}
-.wizardStepper{-webkit-overflow-scrolling:touch;scrollbar-width:thin}
-.wizardStepper .MuiButton-root{flex-shrink:0}
+.wizardStepper{margin-top:6px;display:flex;align-items:center;gap:10px;-webkit-overflow-scrolling:touch;scrollbar-width:thin}
+.stepCard{position:relative;border-radius:18px!important;border:1px solid #dbe4f0!important;padding:14px 16px!important;background:#fff!important;min-width:220px;display:flex!important;justify-content:flex-start;text-transform:none!important;color:#334155!important;box-shadow:none!important}
+.stepCard.completed{background:linear-gradient(135deg,#2563eb,#1d4ed8)!important;color:#fff!important;border-color:#1d4ed8!important}
+.stepCard.completed .MuiSvgIcon-root{color:#fff}
+.stepCard.active{border-color:#2563eb!important;background:#eff6ff!important;box-shadow:0 8px 24px rgba(37,99,235,.12)!important;color:#1e3a8a!important}
+.stepCard.active .MuiSvgIcon-root{color:#2563eb}
+.stepCard.pending .MuiSvgIcon-root{color:#94a3b8}
+.stepConnector{height:2px;flex:1;min-width:20px;background:#cbd5e1;border-radius:999px}
+.stepConnector.completed{background:#2563eb}
 .businessCard{border-radius:16px!important;border:1px solid #dbe4f0!important}
 .wizardNavBtn{min-height:44px!important}
-@media (max-width:900px){
-  .vatWizardLayout{gap:12px}
-  .wizardHeaderTop{flex-direction:column;align-items:stretch}
-  .wizardPercent{text-align:left}
-}
+@media (max-width:900px){.wizardHeroTop{flex-direction:column}.wizardStepper{overflow-x:auto;padding-bottom:6px}.stepConnector{min-width:30px}.stepCard{min-width:220px}}

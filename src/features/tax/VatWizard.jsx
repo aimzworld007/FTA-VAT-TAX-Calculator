@@ -4,8 +4,6 @@ import BusinessOutlinedIcon from '@mui/icons-material/BusinessOutlined';
 import CheckRoundedIcon from '@mui/icons-material/CheckRounded';
 import RadioButtonUncheckedRoundedIcon from '@mui/icons-material/RadioButtonUncheckedRounded';
 import FiberManualRecordRoundedIcon from '@mui/icons-material/FiberManualRecordRounded';
-import ApartmentRoundedIcon from '@mui/icons-material/ApartmentRounded';
-import KeyboardArrowDownRoundedIcon from '@mui/icons-material/KeyboardArrowDownRounded';
 import CalendarMonthOutlinedIcon from '@mui/icons-material/CalendarMonthOutlined';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import TrendingUpOutlinedIcon from '@mui/icons-material/TrendingUpOutlined';
@@ -26,6 +24,7 @@ import PrintOutlinedIcon from '@mui/icons-material/PrintOutlined';
 import IosShareOutlinedIcon from '@mui/icons-material/IosShareOutlined';
 import DownloadOutlinedIcon from '@mui/icons-material/DownloadOutlined';
 import ArrowBackOutlinedIcon from '@mui/icons-material/ArrowBackOutlined';
+import ArrowLeftIcon from '@mui/icons-material/ArrowLeft';
 import ArrowForwardOutlinedIcon from '@mui/icons-material/ArrowForwardOutlined';
 import { buildMonthlyEntries, calculateVat } from './lib/vatCalculator';
 import { validateRequired, validateVatPeriodSelection } from './lib/taxValidation';
@@ -149,32 +148,38 @@ export function VatWizard({ data, setData, onSave, onReset, onProgressChange, fo
     const status = stepNumber < step ? 'completed' : stepNumber === step ? 'active' : 'pending';
     return { label, stepNumber, status };
   });
-  return <div className='vat-wizard vatWizardLayout'>
-    <Card className='vatWizardHeader' sx={{ borderRadius: '14px', border: '1px solid #e5e7eb', bgcolor: '#ffffff', boxShadow: '0 8px 24px rgba(15,23,42,0.06)' }}>
-      <CardContent sx={{ p: { xs: 1.5, md: 2 } }}>
-        <Stack spacing={1.4}>
-          <Box className='wizardHeaderTop' sx={{ display: 'flex', alignItems: { xs: 'flex-start', sm: 'center' }, flexDirection: { xs: 'column', sm: 'row' }, justifyContent: 'space-between', gap: 1 }}>
-            <Button className='moduleSelector' variant='contained' sx={{ borderRadius: '10px', px: 1.5, minHeight: 42, textTransform: 'none', fontWeight: 700, gap: 0.7 }} startIcon={<ApartmentRoundedIcon sx={{ color: '#fff' }} />} endIcon={<KeyboardArrowDownRoundedIcon sx={{ color: '#dbeafe' }} />}>VAT Return Module</Button>
-            <Typography className='wizardPercent' sx={{ fontSize: 13, color: '#475569', fontWeight: 700 }}>{step * 25}% Completed</Typography>
+  return <div className='vat-wizard vatWizardPage'>
+    <Button
+      className='backHomeButton'
+      onClick={() => navigateToStep?.('/')}
+      startIcon={<ArrowLeftIcon fontSize='small' />}
+    >
+      VAT Return Module
+    </Button>
+    <Card className='wizardHeroCard'>
+      <CardContent sx={{ p: { xs: 2, md: 3 } }}>
+        <Stack spacing={2}>
+          <Box className='wizardHeroTop'>
+            <Box>
+              <Typography component='h1' sx={{ fontSize: { xs: 28, md: 32 }, fontWeight: 800, m: 0, color: '#0f172a' }}>UAE VAT & Tax Filing Assistant</Typography>
+              <Typography sx={{ mt: 1, color: '#64748b', fontSize: 14 }}>Create, review and file your VAT returns with ease</Typography>
+            </Box>
+            <Typography className='wizardPercent' sx={{ fontSize: 14, color: '#1d4ed8', fontWeight: 700 }}>{step * 25}% Completed</Typography>
           </Box>
-          <Box>
-            <Typography sx={{ fontSize: { xs: 20, md: 24 }, fontWeight: 800, color: '#0f172a', lineHeight: 1.2 }}>UAE VAT & Tax Filing Assistant</Typography>
-            <Typography sx={{ fontSize: 13, color: '#64748b', mt: 0.4 }}>Create, review and file your VAT returns with ease</Typography>
-          </Box>
-          <Box className='wizardStepper' sx={{ display: 'flex', alignItems: 'center', overflowX: 'auto', pb: 0.3, gap: 0.8 }}>
+          <Box className='wizardStepper'>
             {stepMeta.map((item, idx) => <React.Fragment key={item.label}>
-              <Button disableRipple onClick={() => navigateToStep ? navigateToStep(stepToPath[item.stepNumber]) : setStep(item.stepNumber)} sx={{ px: 1, py: 0.8, minWidth: 'fit-content', borderRadius: '10px', textTransform: 'none', bgcolor: item.status === 'active' ? '#f8fbff' : 'transparent', border: item.status === 'active' ? '1px solid #dbeafe' : '1px solid transparent' }}>
-                <Stack direction='row' spacing={0.8} alignItems='center'>
-                  <Box sx={{ width: 24, height: 24, borderRadius: '999px', display: 'grid', placeItems: 'center', color: item.status === 'completed' ? '#fff' : item.status === 'active' ? '#2563eb' : '#94a3b8', bgcolor: item.status === 'completed' ? '#2563eb' : '#fff', border: item.status === 'pending' ? '1px solid #cbd5e1' : '1px solid #2563eb', boxShadow: item.status === 'active' ? '0 0 0 4px rgba(37,99,235,0.12)' : 'none' }}>
-                    {item.status === 'completed' ? <CheckRoundedIcon sx={{ fontSize: 16 }} /> : item.status === 'active' ? <FiberManualRecordRoundedIcon sx={{ fontSize: 11 }} /> : <RadioButtonUncheckedRoundedIcon sx={{ fontSize: 14 }} />}
+              <Button disableRipple onClick={() => navigateToStep ? navigateToStep(stepToPath[item.stepNumber]) : setStep(item.stepNumber)} className={`stepCard ${item.status}`}>
+                <Stack spacing={1}>
+                  <Box sx={{ width: 28, height: 28, borderRadius: '999px', display: 'grid', placeItems: 'center' }}>
+                    {item.status === 'completed' ? <CheckRoundedIcon sx={{ fontSize: 18 }} /> : item.status === 'active' ? <FiberManualRecordRoundedIcon sx={{ fontSize: 12 }} /> : <RadioButtonUncheckedRoundedIcon sx={{ fontSize: 16 }} />}
                   </Box>
-                  <Box sx={{ textAlign: 'left' }}>
-                    <Typography sx={{ fontSize: 12.5, fontWeight: 700, color: '#1e293b', whiteSpace: 'nowrap' }}>{item.label}</Typography>
-                    <Chip label={item.status === 'completed' ? 'Completed' : item.status === 'active' ? 'In Progress' : 'Pending'} size='small' sx={{ mt: 0.2, height: 19, borderRadius: '6px', bgcolor: item.status === 'completed' ? '#dbeafe' : item.status === 'active' ? '#eff6ff' : '#f1f5f9', color: item.status === 'completed' ? '#1d4ed8' : item.status === 'active' ? '#2563eb' : '#64748b', '& .MuiChip-label': { px: 0.7, fontSize: 10, fontWeight: 700 } }} />
+                  <Box>
+                    <Typography sx={{ fontSize: 13, fontWeight: 700, textAlign: 'left', textTransform: 'none', color: 'inherit' }}>{item.label}</Typography>
+                    <Chip label={item.status === 'completed' ? 'Completed' : item.status === 'active' ? 'In Progress' : 'Pending'} size='small' sx={{ mt: 0.5, height: 20, borderRadius: '999px', bgcolor: item.status === 'completed' ? 'rgba(255,255,255,.18)' : item.status === 'active' ? '#dbeafe' : '#f1f5f9', color: item.status === 'completed' ? '#e2e8f0' : item.status === 'active' ? '#1d4ed8' : '#64748b', '& .MuiChip-label': { px: 1, fontSize: 10, fontWeight: 700 } }} />
                   </Box>
                 </Stack>
               </Button>
-              {idx < stepMeta.length - 1 && <Box sx={{ minWidth: { xs: 18, sm: 44 }, height: 2, borderRadius: 99, bgcolor: idx + 1 < step ? '#2563eb' : '#cbd5e1' }} />}
+              {idx < stepMeta.length - 1 && <Box className={`stepConnector ${idx + 1 < step ? 'completed' : ''}`} />}
             </React.Fragment>)}
           </Box>
         </Stack>
