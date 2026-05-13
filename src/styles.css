@@ -451,3 +451,18 @@ tr:nth-child(even) td{background:#fbfdff}
 }
 
 .page-container,.wizard-card,.vat-input-card,.quarterly-breakdown{width:100%;max-width:100%;min-width:0;box-sizing:border-box}
+
+.vatWizardLayout{display:grid;gap:16px}
+.vatWizardHeader{border-radius:16px!important;border:1px solid #dbe4f0!important;box-shadow:0 10px 30px rgba(15,23,42,.06)!important}
+.wizardHeaderTop{gap:14px}
+.moduleSelector{background:linear-gradient(135deg,#2563eb,#1d4ed8)!important;color:#fff!important;box-shadow:0 8px 18px rgba(37,99,235,.25)!important}
+.wizardPercent{white-space:nowrap}
+.wizardStepper{-webkit-overflow-scrolling:touch;scrollbar-width:thin}
+.wizardStepper .MuiButton-root{flex-shrink:0}
+.businessCard{border-radius:16px!important;border:1px solid #dbe4f0!important}
+.wizardNavBtn{min-height:44px!important}
+@media (max-width:900px){
+  .vatWizardLayout{gap:12px}
+  .wizardHeaderTop{flex-direction:column;align-items:stretch}
+  .wizardPercent{text-align:left}
+}

@@ -1,6 +1,11 @@
 import React from 'react';
-import { Alert, Box, Button, Card, CardContent, FormControl, FormHelperText, Grid, InputAdornment, InputLabel, MenuItem, Select, Stack, TextField, Typography } from '@mui/material';
+import { Alert, Box, Button, Card, CardContent, Chip, FormControl, FormHelperText, Grid, InputAdornment, InputLabel, MenuItem, Select, Stack, TextField, Typography } from '@mui/material';
 import BusinessOutlinedIcon from '@mui/icons-material/BusinessOutlined';
+import CheckRoundedIcon from '@mui/icons-material/CheckRounded';
+import RadioButtonUncheckedRoundedIcon from '@mui/icons-material/RadioButtonUncheckedRounded';
+import FiberManualRecordRoundedIcon from '@mui/icons-material/FiberManualRecordRounded';
+import ApartmentRoundedIcon from '@mui/icons-material/ApartmentRounded';
+import KeyboardArrowDownRoundedIcon from '@mui/icons-material/KeyboardArrowDownRounded';
 import CalendarMonthOutlinedIcon from '@mui/icons-material/CalendarMonthOutlined';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import TrendingUpOutlinedIcon from '@mui/icons-material/TrendingUpOutlined';
@@ -25,7 +30,7 @@ import ArrowForwardOutlinedIcon from '@mui/icons-material/ArrowForwardOutlined';
 import { buildMonthlyEntries, calculateVat } from './lib/vatCalculator';
 import { validateRequired, validateVatPeriodSelection } from './lib/taxValidation';
 import { TAX_CONFIG } from './lib/taxConfig';
-import { FormSection, money } from './components/common.jsx';
+import { money } from './components/common.jsx';
 import { Vat201Report } from './components/Vat201Report.jsx';
 import { MONTHS, formatVatPeriodLabel, getPeriodFromSelection } from './lib/vatPeriod';
 import { VAT_PRICING_MODES, splitVatFromAmount } from './lib/vatPricing';
@@ -139,7 +144,44 @@ export function VatWizard({ data, setData, onSave, onReset, onProgressChange, fo
     }
   };
   const continueDisabled = (step === 1 && Boolean(reqErr)) || step === 4;
-  return <div className='vat-wizard'><FormSection title={`VAT Wizard: ${steps[step - 1]}`}>
+  const stepMeta = steps.map((label, i) => {
+    const stepNumber = i + 1;
+    const status = stepNumber < step ? 'completed' : stepNumber === step ? 'active' : 'pending';
+    return { label, stepNumber, status };
+  });
+  return <div className='vat-wizard vatWizardLayout'>
+    <Card className='vatWizardHeader' sx={{ borderRadius: '14px', border: '1px solid #e5e7eb', bgcolor: '#ffffff', boxShadow: '0 8px 24px rgba(15,23,42,0.06)' }}>
+      <CardContent sx={{ p: { xs: 1.5, md: 2 } }}>
+        <Stack spacing={1.4}>
+          <Box className='wizardHeaderTop' sx={{ display: 'flex', alignItems: { xs: 'flex-start', sm: 'center' }, flexDirection: { xs: 'column', sm: 'row' }, justifyContent: 'space-between', gap: 1 }}>
+            <Button className='moduleSelector' variant='contained' sx={{ borderRadius: '10px', px: 1.5, minHeight: 42, textTransform: 'none', fontWeight: 700, gap: 0.7 }} startIcon={<ApartmentRoundedIcon sx={{ color: '#fff' }} />} endIcon={<KeyboardArrowDownRoundedIcon sx={{ color: '#dbeafe' }} />}>VAT Return Module</Button>
+            <Typography className='wizardPercent' sx={{ fontSize: 13, color: '#475569', fontWeight: 700 }}>{step * 25}% Completed</Typography>
+          </Box>
+          <Box>
+            <Typography sx={{ fontSize: { xs: 20, md: 24 }, fontWeight: 800, color: '#0f172a', lineHeight: 1.2 }}>UAE VAT & Tax Filing Assistant</Typography>
+            <Typography sx={{ fontSize: 13, color: '#64748b', mt: 0.4 }}>Create, review and file your VAT returns with ease</Typography>
+          </Box>
+          <Box className='wizardStepper' sx={{ display: 'flex', alignItems: 'center', overflowX: 'auto', pb: 0.3, gap: 0.8 }}>
+            {stepMeta.map((item, idx) => <React.Fragment key={item.label}>
+              <Button disableRipple onClick={() => navigateToStep ? navigateToStep(stepToPath[item.stepNumber]) : setStep(item.stepNumber)} sx={{ px: 1, py: 0.8, minWidth: 'fit-content', borderRadius: '10px', textTransform: 'none', bgcolor: item.status === 'active' ? '#f8fbff' : 'transparent', border: item.status === 'active' ? '1px solid #dbeafe' : '1px solid transparent' }}>
+                <Stack direction='row' spacing={0.8} alignItems='center'>
+                  <Box sx={{ width: 24, height: 24, borderRadius: '999px', display: 'grid', placeItems: 'center', color: item.status === 'completed' ? '#fff' : item.status === 'active' ? '#2563eb' : '#94a3b8', bgcolor: item.status === 'completed' ? '#2563eb' : '#fff', border: item.status === 'pending' ? '1px solid #cbd5e1' : '1px solid #2563eb', boxShadow: item.status === 'active' ? '0 0 0 4px rgba(37,99,235,0.12)' : 'none' }}>
+                    {item.status === 'completed' ? <CheckRoundedIcon sx={{ fontSize: 16 }} /> : item.status === 'active' ? <FiberManualRecordRoundedIcon sx={{ fontSize: 11 }} /> : <RadioButtonUncheckedRoundedIcon sx={{ fontSize: 14 }} />}
+                  </Box>
+                  <Box sx={{ textAlign: 'left' }}>
+                    <Typography sx={{ fontSize: 12.5, fontWeight: 700, color: '#1e293b', whiteSpace: 'nowrap' }}>{item.label}</Typography>
+                    <Chip label={item.status === 'completed' ? 'Completed' : item.status === 'active' ? 'In Progress' : 'Pending'} size='small' sx={{ mt: 0.2, height: 19, borderRadius: '6px', bgcolor: item.status === 'completed' ? '#dbeafe' : item.status === 'active' ? '#eff6ff' : '#f1f5f9', color: item.status === 'completed' ? '#1d4ed8' : item.status === 'active' ? '#2563eb' : '#64748b', '& .MuiChip-label': { px: 0.7, fontSize: 10, fontWeight: 700 } }} />
+                  </Box>
+                </Stack>
+              </Button>
+              {idx < stepMeta.length - 1 && <Box sx={{ minWidth: { xs: 18, sm: 44 }, height: 2, borderRadius: 99, bgcolor: idx + 1 < step ? '#2563eb' : '#cbd5e1' }} />}
+            </React.Fragment>)}
+          </Box>
+        </Stack>
+      </CardContent>
+    </Card>
+    <Card className='businessCard' sx={{ borderRadius: '14px', border: '1px solid #e5e7eb', bgcolor: '#fff', boxShadow: '0 8px 24px rgba(15,23,42,0.05)' }}>
+      <CardContent sx={{ p: { xs: 1.5, md: 2.2 } }}>
     {step === 1 && <Box>
       <Stack direction='row' spacing={1.5} alignItems='center' sx={{ mb: 2.5 }}>
         <Box sx={{ width: 52, height: 52, borderRadius: '50%', bgcolor: '#eaf1ff', color: 'primary.main', display: 'grid', placeItems: 'center' }}>
@@ -295,16 +337,17 @@ export function VatWizard({ data, setData, onSave, onReset, onProgressChange, fo
       </CardContent>
     </Card>}
     {step === 4 && <Vat201Report data={{ ...data, monthlyEntries: buildMonthlyEntries(data) }} result={result} />}
-  </FormSection>
+      </CardContent>
+    </Card>
     <Card sx={{ mt: 1.4, borderRadius: '14px', border: '1px solid #e5e7eb', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
       <CardContent sx={{ py: 1.1, px: { xs: 1, md: 1.8 }, '&:last-child': { pb: 1.1 } }}>
     <div className='wizard-action-bar'>
       <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, alignItems: 'center', justifyContent: 'space-between', gap: 1.5, width: '100%' }}>
         <Box sx={{ width: { xs: '100%', md: '50%' }, display: 'flex', justifyContent: { xs: 'stretch', md: 'flex-start' } }}>
-          <Button fullWidth={step < 4} variant='outlined' startIcon={<ArrowBackOutlinedIcon />} onClick={back} disabled={step===1}>Back</Button>
+          <Button className='wizardNavBtn' fullWidth={step < 4} variant='outlined' startIcon={<ArrowBackOutlinedIcon />} onClick={back} disabled={step===1}>Back</Button>
         </Box>
         {step < 4 && <Box sx={{ width: { xs: '100%', md: '50%' }, display: 'flex', justifyContent: { xs: 'stretch', md: 'flex-end' } }}>
-          <Button fullWidth className='primary-gradient-btn' endIcon={<ArrowForwardOutlinedIcon />} onClick={next} disabled={continueDisabled}>Continue</Button>
+          <Button fullWidth className='primary-gradient-btn wizardNavBtn' endIcon={<ArrowForwardOutlinedIcon />} onClick={next} disabled={continueDisabled}>Continue</Button>
         </Box>}
       </Box>
       {step === 4 && <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} className='wizard-action-group wizard-action-group-right'>
