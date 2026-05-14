@@ -108,7 +108,7 @@ function RoutedModules() {
     return <AppShell><VatWizard data={vat} setData={setVat} forcedStep={mapStep[step] || 1} navigateToStep={navigate} /></AppShell>;
   }
   if (module === 'tax') {
-    return <AppShell><TaxModuleLayout moduleTitle='Corporate Tax Module' basePath='/tax' currentStep={step || 'business-details'}><CorporateTaxWizard data={ct} setData={setCt} forcedStep={mapTaxStep[step] || 1} /></TaxModuleLayout></AppShell>;
+    return <AppShell><TaxModuleLayout moduleTitle='Corporate Tax Module' basePath='/tax' currentStep={step || 'business-details'} showModuleHeader={false}><CorporateTaxWizard data={ct} setData={setCt} forcedStep={mapTaxStep[step] || 1} /></TaxModuleLayout></AppShell>;
   }
   return <AppShell><Alert severity='warning'>Page not found.</Alert></AppShell>;
 }
