@@ -73,7 +73,11 @@ export function buildMonthlyEntriesFromPeriod(data, existingEntries = []) {
   const existing = Array.isArray(existingEntries) ? existingEntries : [];
   const byMonth = new Map(existing.map((entry) => [entry?.month, entry]));
   const n = (v) => Math.max(0, Number(v) || 0);
-  const parseAdjustment = (v) => Number(v) || 0;
+  const parseAdjustment = (v) => {
+    if (v === '' || v === '-' || v === '.' || v === '-.') return v;
+    const parsed = Number(v);
+    return Number.isFinite(parsed) ? parsed : 0;
+  };
 
   return monthLabels.map((month) => {
     const prev = byMonth.get(month) || {};
