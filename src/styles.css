@@ -487,3 +487,21 @@ tr:nth-child(even) td{background:#fbfdff}
 .businessCard{border-radius:16px!important;border:1px solid #dbe4f0!important}
 .wizardNavBtn{min-height:44px!important}
 @media (max-width:900px){.wizardHeroTop{flex-direction:column}.wizardStepper{overflow-x:auto;padding-bottom:6px}.stepConnector{min-width:24px}.stepCard{min-width:138px}.stepIconWrap{width:68px;height:68px}.stepConnector{margin-top:33px}}
+
+.vatWizardPage .vat-export-header{border-radius:14px!important}
+.vatWizardPage .vat-export-header .vat-export-header-content{padding:16px 20px!important}
+.vatWizardPage .vat-export-header .wizardHeroTop{gap:12px}
+.vatWizardPage .vat-export-header .wizardStepper{margin-top:0;padding:0}
+.vatWizardPage .vat-export-preview-wrap{margin-top:12px}
+
+.vatWizardPage .export-action-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;margin-top:16px;border:1px solid rgba(15,23,42,.10);border-radius:12px;background:#fff;box-shadow:0 8px 24px rgba(15,23,42,.06)}
+.vatWizardPage .export-action-right{display:flex;align-items:center;justify-content:flex-end;gap:10px;flex-wrap:wrap}
+.vatWizardPage .export-action-back{min-width:120px}
+
+@media (max-width:640px){
+  .vatWizardPage .vat-export-header .vat-export-header-content{padding:12px 14px!important}
+  .vatWizardPage .export-action-bar{align-items:stretch;flex-direction:column;padding:12px}
+  .vatWizardPage .export-action-right{width:100%;justify-content:stretch}
+  .vatWizardPage .export-action-right .MuiButton-root,
+  .vatWizardPage .export-action-bar .MuiButton-root{flex:1;min-width:0}
+}
