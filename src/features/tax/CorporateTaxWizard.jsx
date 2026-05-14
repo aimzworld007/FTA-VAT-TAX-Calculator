@@ -24,14 +24,14 @@ import { CorporateTaxReport } from './components/CorporateTaxReport';
 import { calculateCorporateTax } from './lib/corporateTaxCalculator';
 import { downloadPdfReport } from './lib/pdfGenerator';
 
-const steps = ['Company Details', 'Income', 'Expenses', 'Taxable Profit', 'Tax Calculation', 'Export'];
+const steps = ['Company Details', 'Input', 'Preview', 'Export'];
 
 export function CorporateTaxWizard({ data, setData, onSave, onReset, onProgressChange, forcedStep }) {
   const [step, setStep] = React.useState(forcedStep || 1);
   const result = calculateCorporateTax(data);
 
   React.useEffect(() => {
-    onProgressChange?.(Math.round((step / 6) * 100));
+    onProgressChange?.(step * 25);
   }, [step, onProgressChange]);
 
   React.useEffect(() => { if (forcedStep) setStep(forcedStep); }, [forcedStep]);
@@ -47,7 +47,7 @@ export function CorporateTaxWizard({ data, setData, onSave, onReset, onProgressC
   };
 
   const missingRequired = !data.companyName || !data.taxRegistrationNumber || !data.businessActivity;
-  const next = () => setStep((s) => Math.min(6, s + 1));
+  const next = () => setStep((s) => Math.min(4, s + 1));
   const back = () => setStep((s) => Math.max(1, s - 1));
 
   const NumberField = ({ label, keyName, helperText }) => (
@@ -87,27 +87,40 @@ export function CorporateTaxWizard({ data, setData, onSave, onReset, onProgressC
       </Box>}
 
       {step === 2 && <Box>
-        <Alert icon={<InfoOutlinedIcon fontSize='inherit' />} severity='info' sx={{ mb: 2.5, borderRadius: 3, border: '1px solid #bfdbfe', bgcolor: '#eff6ff' }}>Enter income values in AED for the selected financial period.</Alert>
-        <Grid container spacing={{ xs: 1.5, md: 2 }}>
-          <NumberField label='Total revenue' keyName='revenue' helperText='Gross turnover for the period.' />
-          <NumberField label='Other income' keyName='otherIncome' helperText='Non-operating income and gains.' />
-          <NumberField label='Exempt income' keyName='exemptIncome' helperText='Income treated as exempt from corporate tax.' />
-        </Grid>
+        <Alert icon={<InfoOutlinedIcon fontSize='inherit' />} severity='info' sx={{ mb: 2, borderRadius: 3, border: '1px solid #bfdbfe', bgcolor: '#eff6ff' }}>Enter all input values in AED within one streamlined step.</Alert>
+        <Card sx={{ borderRadius: 4, border: '1px solid #dbe6f3', boxShadow: '0 10px 24px rgba(15,23,42,.06)' }}>
+          <CardContent sx={{ p: { xs: 2, md: 2.25 } }}>
+            <Stack spacing={2}>
+              <Box>
+                <Typography variant='subtitle1' sx={{ fontWeight: 700, mb: 1 }}>Income</Typography>
+                <Grid container spacing={{ xs: 1.25, md: 1.5 }}>
+                  <NumberField label='Total revenue' keyName='revenue' helperText='Gross turnover for the period.' />
+                  <NumberField label='Other income' keyName='otherIncome' helperText='Non-operating income and gains.' />
+                  <NumberField label='Exempt income' keyName='exemptIncome' helperText='Income treated as exempt from corporate tax.' />
+                </Grid>
+              </Box>
+              <Box>
+                <Typography variant='subtitle1' sx={{ fontWeight: 700, mb: 1 }}>Expenses</Typography>
+                <Grid container spacing={{ xs: 1.25, md: 1.5 }}>
+                  <NumberField label='Direct expenses' keyName='directExpenses' helperText='Cost of goods sold / service delivery.' />
+                  <NumberField label='Admin & general expenses' keyName='adminExpenses' helperText='Operating and overhead expenses.' />
+                  <NumberField label='Non-deductible expenses' keyName='nonDeductibleExpenses' helperText='Reference amount for disallowed expenses.' />
+                </Grid>
+              </Box>
+              <Box>
+                <Typography variant='subtitle1' sx={{ fontWeight: 700, mb: 1 }}>Taxable Profit</Typography>
+                <Grid container spacing={{ xs: 1.25, md: 1.5 }}>
+                  <NumberField label='Accounting profit' keyName='accountingProfit' helperText='Auto-calculated if empty or zero.' />
+                  <NumberField label='Add-back adjustments' keyName='addBackAdjustments' helperText='Items added back for tax computation.' />
+                  <NumberField label='Deductible adjustments' keyName='deductibleAdjustments' helperText='Additional deductible tax adjustments.' />
+                </Grid>
+              </Box>
+            </Stack>
+          </CardContent>
+        </Card>
       </Box>}
 
-      {step === 3 && <Grid container spacing={{ xs: 1.5, md: 2 }}>
-        <NumberField label='Direct expenses' keyName='directExpenses' helperText='Cost of goods sold / service delivery.' />
-        <NumberField label='Admin & general expenses' keyName='adminExpenses' helperText='Operating and overhead expenses.' />
-        <NumberField label='Non-deductible expenses' keyName='nonDeductibleExpenses' helperText='Reference amount for disallowed expenses.' />
-      </Grid>}
-
-      {step === 4 && <Grid container spacing={{ xs: 1.5, md: 2 }}>
-        <NumberField label='Accounting profit' keyName='accountingProfit' helperText='Leave zero to let calculator infer from income and expenses.' />
-        <NumberField label='Add-back adjustments' keyName='addBackAdjustments' helperText='Items added back for tax computation.' />
-        <NumberField label='Deductible adjustments' keyName='deductibleAdjustments' helperText='Additional deductible tax adjustments.' />
-      </Grid>}
-
-      {step >= 5 && <Box>
+      {step >= 3 && <Box>
         <Card sx={{ borderRadius: 4, border: '1px solid #dbe6f3', boxShadow: '0 10px 24px rgba(15,23,42,.06)', mb: 2 }}>
           <CardContent>
             <Typography variant='h6' sx={{ fontWeight: 700, mb: 1.6 }}>Corporate Tax Live Snapshot</Typography>
@@ -122,9 +135,9 @@ export function CorporateTaxWizard({ data, setData, onSave, onReset, onProgressC
 
     <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} sx={{ mt: 2 }}>
       <Button variant='outlined' onClick={back} disabled={step === 1} startIcon={<ArrowBackOutlinedIcon />}>Back</Button>
-      <Button className='primary-gradient-btn' onClick={next} disabled={step === 6 || (step === 1 && missingRequired)} endIcon={<ArrowForwardOutlinedIcon />}>Continue</Button>
+      <Button className='primary-gradient-btn' onClick={next} disabled={step === 4 || (step === 1 && missingRequired)} endIcon={<ArrowForwardOutlinedIcon />}>Continue</Button>
     </Stack>
 
-    {step === 6 && <ExportActions onSave={onSave} onReset={onReset} onPrint={() => window.print()} onPdf={() => downloadPdfReport({ reportId: 'corporate-tax-report', reportType: 'corporate-tax', companyName: data.companyName, taxPeriod: data.financialYearStart && data.financialYearEnd ? `${data.financialYearStart}_to_${data.financialYearEnd}` : 'period' })} />}
+    {step === 4 && <ExportActions onSave={onSave} onReset={onReset} onPrint={() => window.print()} onPdf={() => downloadPdfReport({ reportId: 'corporate-tax-report', reportType: 'corporate-tax', companyName: data.companyName, taxPeriod: data.financialYearStart && data.financialYearEnd ? `${data.financialYearStart}_to_${data.financialYearEnd}` : 'period' })} />}
   </div>;
 }
