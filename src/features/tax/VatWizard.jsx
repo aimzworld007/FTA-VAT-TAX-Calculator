@@ -24,7 +24,7 @@ import ArrowLeftIcon from '@mui/icons-material/ArrowLeft';
 import ArrowForwardOutlinedIcon from '@mui/icons-material/ArrowForwardOutlined';
 import { Building2, CheckCircle2, ClipboardList, Eye, Upload } from 'lucide-react';
 import { buildMonthlyEntries, calculateVat } from './lib/vatCalculator';
-import { validateRequired, validateVatPeriodSelection } from './lib/taxValidation';
+import { validateBusinessName, validateTrn, validateRequired, validateVatPeriodSelection } from './lib/taxValidation';
 import { TAX_CONFIG } from './lib/taxConfig';
 import { money } from './components/common.jsx';
 import { Vat201Report } from './components/Vat201Report.jsx';
@@ -68,7 +68,7 @@ export function VatWizard({ data, setData, onSave, onReset, onProgressChange, fo
   const stepToPath = React.useMemo(() => ({ 1: '/vat/business-details', 2: '/vat/input', 3: '/vat/preview', 4: '/vat/export' }), []);
   const [downloadLoading, setDownloadLoading] = React.useState(false);
   const result = calculateVat(data);
-  const reqErr = validateRequired(data.businessName, 'Business name') || validateRequired(data.trn, 'TRN') || validateRequired(data.businessLocationEmirate, 'Business location emirate') || validateVatPeriodSelection(data);
+  const reqErr = validateBusinessName(data.businessName) || validateTrn(data.trn) || validateRequired(data.businessLocationEmirate, 'Business location emirate') || validateVatPeriodSelection(data);
 
   React.useEffect(() => {
     const period = getPeriodFromSelection(data);
@@ -202,7 +202,7 @@ export function VatWizard({ data, setData, onSave, onReset, onProgressChange, fo
       </Stack>
       <Grid container spacing={{ xs: 1.5, md: 2 }}>
       <Grid size={{ xs: 12, md: 6 }}><TextField fullWidth required label='Business name' value={data.businessName} onChange={e => setData({ ...data, businessName: e.target.value })} sx={fieldSx} /></Grid>
-      <Grid size={{ xs: 12, md: 6 }}><TextField fullWidth required label='TRN' value={data.trn} onChange={e => setData({ ...data, trn: e.target.value })} sx={fieldSx} /></Grid>
+      <Grid size={{ xs: 12, md: 6 }}><TextField fullWidth required label='TRN' value={data.trn} onChange={e => setData({ ...data, trn: e.target.value.replace(/[^0-9]/g, '') })} sx={fieldSx} /></Grid>
       <Grid size={{ xs: 12, md: 6 }}>
         <FormControl fullWidth required sx={fieldSx}>
           <InputLabel>Business Location Emirate *</InputLabel>
