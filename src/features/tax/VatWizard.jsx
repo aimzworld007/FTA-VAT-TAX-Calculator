@@ -163,7 +163,7 @@ export function VatWizard({ data, setData, onSave, onReset, onProgressChange, fo
         <Stack spacing={2}>
           <Box className='wizardHeroTop'>
             <Box>
-              <Typography component='h1' sx={{ fontSize: { xs: 28, md: 32 }, fontWeight: 800, m: 0, color: '#0f172a' }}>UAE VAT & Tax Filing Assistant</Typography>
+              <Typography component='h1' sx={{ fontSize: { xs: 28, md: 32 }, fontWeight: 800, m: 0, color: '#0f172a' }}>UAE VAT Filing Assistant</Typography>
               <Typography sx={{ mt: 1, color: '#64748b', fontSize: 14 }}>Create, review and file your VAT returns with ease</Typography>
             </Box>
             <Typography className='wizardPercent' sx={{ fontSize: 14, color: '#1d4ed8', fontWeight: 700 }}>{step * 25}% Completed</Typography>
