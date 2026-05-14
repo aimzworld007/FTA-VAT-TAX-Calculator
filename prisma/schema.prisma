@@ -1,0 +1,51 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum TaxType {
+  VAT
+  CORPORATE
+}
+
+model User {
+  id            String         @id @default(uuid())
+  email         String         @unique
+  passwordHash  String
+  createdAt     DateTime       @default(now())
+  taxRecords    TaxRecord[]
+  refreshTokens RefreshToken[]
+}
+
+model TaxRecord {
+  id            String   @id @default(uuid())
+  userId        String
+  taxType       TaxType
+  periodStart   DateTime?
+  periodEnd     DateTime?
+  inputPayload  Json
+  resultPayload Json
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+}
+
+model RefreshToken {
+  id        String    @id @default(uuid())
+  userId    String
+  tokenHash String
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, expiresAt])
+}
