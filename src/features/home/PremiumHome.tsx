@@ -49,7 +49,13 @@ function Sidebar({ mobile = false, onClose }: { mobile?: boolean; onClose?: () =
   const { pathname } = usePathname();
   const navItem = (label: string, to: string, icon?: React.ReactNode) => {
     const active = pathname === to || pathname.startsWith(`${to}/`) || (to === '/vat' && pathname.startsWith('/vat/')) || (to === '/tax' && pathname.startsWith('/tax/'));
-    return <Button key={label} component={RouteLink} to={to} onClick={onClose} fullWidth startIcon={icon} endIcon={<ChevronRightRoundedIcon sx={{ fontSize: 17 }} />} sx={{ justifyContent: 'space-between', textTransform: 'none', color: '#0f172a', py: 1.2, px: 1.2, minHeight: 44, borderRadius: 1.5, fontSize: '0.875rem', fontWeight: 600, borderLeft: active ? '3px solid #2563eb' : '3px solid transparent', bgcolor: active ? '#eff6ff' : 'transparent' }}><span>{label}</span></Button>;
+    return <Button key={label} component={RouteLink} to={to} onClick={onClose} fullWidth sx={{ justifyContent: 'space-between', textTransform: 'none', color: '#0f172a', py: 1.25, px: 1.3, minHeight: 48, borderRadius: 3, fontSize: '0.875rem', fontWeight: 700, borderLeft: active ? '3px solid #2563eb' : '3px solid transparent', bgcolor: active ? '#eff6ff' : 'transparent', '&:hover': { bgcolor: active ? '#eff6ff' : '#f8fafc' } }}>
+      <Stack direction='row' alignItems='center' spacing={1.2} sx={{ minWidth: 0, flex: 1 }}>
+        <Box sx={{ width: 22, height: 22, color: active ? '#1d4ed8' : '#0f172a', display: 'grid', placeItems: 'center', flexShrink: 0 }}>{icon}</Box>
+        <Typography sx={{ fontSize: '0.98rem', fontWeight: 700, lineHeight: 1.2, textAlign: 'left', color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{label}</Typography>
+      </Stack>
+      <ChevronRightRoundedIcon sx={{ fontSize: 18, color: '#475569', ml: 1 }} />
+    </Button>;
   };
 
   return <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', bgcolor: '#fff', borderRight: `1px solid ${SHELL.colorBorder}` }}>
