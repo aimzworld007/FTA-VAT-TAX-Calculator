@@ -73,6 +73,7 @@ export function buildMonthlyEntriesFromPeriod(data, existingEntries = []) {
   const existing = Array.isArray(existingEntries) ? existingEntries : [];
   const byMonth = new Map(existing.map((entry) => [entry?.month, entry]));
   const n = (v) => Math.max(0, Number(v) || 0);
+  const parseAdjustment = (v) => Number(v) || 0;
 
   return monthLabels.map((month) => {
     const prev = byMonth.get(month) || {};
@@ -80,7 +81,8 @@ export function buildMonthlyEntriesFromPeriod(data, existingEntries = []) {
       month,
       sales: n(prev.sales),
       purchases: n(prev.purchases),
-      expenses: n(prev.expenses)
+      expenses: n(prev.expenses),
+      adjustment: parseAdjustment(prev.adjustment)
     };
   });
 }
