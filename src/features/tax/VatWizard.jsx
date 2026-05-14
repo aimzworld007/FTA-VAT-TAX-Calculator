@@ -37,6 +37,11 @@ const steps = [
 ];
 const n = (v) => Number(v) || 0;
 const clampInput = (v) => Math.max(0, n(v));
+const parseAdjustmentInput = (v) => {
+  if (v === '' || v === '-' || v === '.' || v === '-.') return v;
+  const parsed = Number(v);
+  return Number.isFinite(parsed) ? parsed : 0;
+};
 const currentYear = new Date().getFullYear();
 const years = Array.from({ length: 8 }, (_, i) => currentYear - 5 + i);
 
@@ -85,7 +90,7 @@ export function VatWizard({ data, setData, onSave, onReset, onProgressChange, fo
   React.useEffect(() => { if (forcedStep) setStep(forcedStep); }, [forcedStep]);
 
   const updateEntry = (month, key, value) => {
-    const nextValue = key === 'adjustment' ? n(value) : clampInput(value);
+    const nextValue = key === 'adjustment' ? parseAdjustmentInput(value) : clampInput(value);
     const updated = buildMonthlyEntries(data).map((entry) => (entry.month === month ? { ...entry, [key]: nextValue } : entry));
     const totalAdjustment = updated.reduce((sum, entry) => sum + n(entry.adjustment), 0);
     setData({ ...data, monthlyEntries: updated, previousAdjustment: totalAdjustment });
@@ -243,7 +248,7 @@ export function VatWizard({ data, setData, onSave, onReset, onProgressChange, fo
       </Stack>
       <section className='vat-breakdown-card quarterly-breakdown'>
         <header><h3>{data.filingFrequency} Breakdown</h3><span className='currency-pill'>Currency: <strong>AED</strong></span></header>
-        <div className='vat-monthly-wrap vat-desktop-table table-wrapper'><table className='vat-input-table'><thead><tr><th>Month</th><th>Sales</th><th>Purchases</th><th>Expenses</th><th>Adjustment <Tooltip title='Optional VAT adjustment for corrections or manual VAT adjustments.'><HelpOutlineOutlinedIcon sx={{ fontSize: 14, verticalAlign: 'middle', ml: 0.5 }} /></Tooltip></th></tr></thead><tbody>{entries.map((entry) => <tr key={entry.month}><td data-label='Month'><span className='month-cell'><CalendarMonthOutlinedIcon fontSize='small' />{entry.month}</span></td><td data-label='Sales'><input type='number' min='0' placeholder='0.00' value={entry.sales} onChange={e => updateEntry(entry.month, 'sales', e.target.value)} /></td><td data-label='Purchases'><input type='number' min='0' placeholder='0.00' value={entry.purchases} onChange={e => updateEntry(entry.month, 'purchases', e.target.value)} /></td><td data-label='Expenses'><input type='number' min='0' placeholder='0.00' value={entry.expenses} onChange={e => updateEntry(entry.month, 'expenses', e.target.value)} /></td><td data-label='Adjustment'><input type='number' placeholder='0.00' value={n(entry.adjustment)} onChange={e => updateEntry(entry.month, 'adjustment', e.target.value)} /></td></tr>)}</tbody></table></div>
+        <div className='vat-monthly-wrap vat-desktop-table table-wrapper'><table className='vat-input-table'><thead><tr><th>Month</th><th>Sales</th><th>Purchases</th><th>Expenses</th><th>Adjustment <Tooltip title='Optional VAT adjustment for corrections or manual VAT adjustments.'><HelpOutlineOutlinedIcon sx={{ fontSize: 14, verticalAlign: 'middle', ml: 0.5 }} /></Tooltip></th></tr></thead><tbody>{entries.map((entry) => <tr key={entry.month}><td data-label='Month'><span className='month-cell'><CalendarMonthOutlinedIcon fontSize='small' />{entry.month}</span></td><td data-label='Sales'><input type='number' min='0' placeholder='0.00' value={entry.sales} onChange={e => updateEntry(entry.month, 'sales', e.target.value)} /></td><td data-label='Purchases'><input type='number' min='0' placeholder='0.00' value={entry.purchases} onChange={e => updateEntry(entry.month, 'purchases', e.target.value)} /></td><td data-label='Expenses'><input type='number' min='0' placeholder='0.00' value={entry.expenses} onChange={e => updateEntry(entry.month, 'expenses', e.target.value)} /></td><td data-label='Adjustment'><input type='number' placeholder='0.00' value={entry.adjustment ?? ''} onChange={e => updateEntry(entry.month, 'adjustment', e.target.value)} /></td></tr>)}</tbody></table></div>
       </section>
       <Stack direction='row' spacing={1} flexWrap='wrap' sx={{ mt: 1 }}>{[
         { label: 'Total Sales', value: totals.sales },
