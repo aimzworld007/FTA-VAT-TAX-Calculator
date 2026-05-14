@@ -6,8 +6,13 @@ import {
   Card,
   CardContent,
   Chip,
+  FormControl,
+  FormHelperText,
   Grid,
   InputAdornment,
+  InputLabel,
+  MenuItem,
+  Select,
   Stack,
   TextField,
   Typography
@@ -17,21 +22,31 @@ import TrendingUpOutlinedIcon from '@mui/icons-material/TrendingUpOutlined';
 import ReceiptLongOutlinedIcon from '@mui/icons-material/ReceiptLongOutlined';
 import CalculateOutlinedIcon from '@mui/icons-material/CalculateOutlined';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import CalendarMonthOutlinedIcon from '@mui/icons-material/CalendarMonthOutlined';
 import ArrowBackOutlinedIcon from '@mui/icons-material/ArrowBackOutlined';
 import ArrowForwardOutlinedIcon from '@mui/icons-material/ArrowForwardOutlined';
-import { ExportActions, FormSection, money } from './components/common.jsx';
+import ArrowLeftIcon from '@mui/icons-material/ArrowLeft';
+import { Building2, CheckCircle2, ClipboardList, Eye, Upload } from 'lucide-react';
+import { ExportActions, money } from './components/common.jsx';
 import { CorporateTaxReport } from './components/CorporateTaxReport';
 import { calculateCorporateTax } from './lib/corporateTaxCalculator';
 import { downloadPdfReport } from './lib/pdfGenerator';
 
-const steps = ['Company Details', 'Income', 'Expenses', 'Taxable Profit', 'Tax Calculation', 'Export'];
+const steps = [
+  { key: 'company', label: 'Company Details', icon: Building2 },
+  { key: 'input', label: 'Tax Input', icon: ClipboardList },
+  { key: 'preview', label: 'Preview', icon: Eye },
+  { key: 'export', label: 'Export', icon: Upload }
+];
+
+const EMIRATE_OPTIONS = ['Abu Dhabi', 'Dubai', 'Sharjah', 'Ajman', 'Umm Al Quwain', 'Ras Al Khaimah', 'Fujairah'];
 
 export function CorporateTaxWizard({ data, setData, onSave, onReset, onProgressChange, forcedStep }) {
   const [step, setStep] = React.useState(forcedStep || 1);
   const result = calculateCorporateTax(data);
 
   React.useEffect(() => {
-    onProgressChange?.(Math.round((step / 6) * 100));
+    onProgressChange?.(step * 25);
   }, [step, onProgressChange]);
 
   React.useEffect(() => { if (forcedStep) setStep(forcedStep); }, [forcedStep]);
@@ -43,11 +58,12 @@ export function CorporateTaxWizard({ data, setData, onSave, onReset, onProgressC
     '& .Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#2563eb', borderWidth: '1px' },
     '& .Mui-focused': { boxShadow: '0 0 0 3px rgba(37,99,235,0.15)' },
     '& .MuiInputBase-input': { padding: '0 14px', fontSize: 14, lineHeight: 1.2 },
+    '& .MuiSelect-select': { display: 'flex', alignItems: 'center', padding: '0 38px 0 14px !important', fontSize: 14, lineHeight: 1.2 },
     '& .MuiInputLabel-root': { fontSize: 12, lineHeight: 1.1 }
   };
 
   const missingRequired = !data.companyName || !data.taxRegistrationNumber || !data.businessActivity;
-  const next = () => setStep((s) => Math.min(6, s + 1));
+  const next = () => setStep((s) => Math.min(4, s + 1));
   const back = () => setStep((s) => Math.max(1, s - 1));
 
   const NumberField = ({ label, keyName, helperText }) => (
@@ -66,65 +82,123 @@ export function CorporateTaxWizard({ data, setData, onSave, onReset, onProgressC
     </Grid>
   );
 
-  return <div>
-    <FormSection title={`Corporate Tax Wizard: ${steps[step - 1]}`}>
-      {step === 1 && <Box>
-        <Stack direction='row' spacing={1.5} alignItems='center' sx={{ mb: 2.5 }}>
-          <Box sx={{ width: 52, height: 52, borderRadius: '50%', bgcolor: '#eaf1ff', color: 'primary.main', display: 'grid', placeItems: 'center' }}><BusinessOutlinedIcon /></Box>
-          <Box>
-            <Typography variant='h6' sx={{ fontWeight: 700, mb: 0.3 }}>Corporate Tax Wizard: Company Details</Typography>
-            <Typography variant='body2' color='text.secondary'>Enter company profile details for your UAE Corporate Tax workspace.</Typography>
+  const stepMeta = steps.map((stepItem, i) => {
+    const stepNumber = i + 1;
+    const status = stepNumber < step ? 'completed' : stepNumber === step ? 'active' : 'pending';
+    return { ...stepItem, stepNumber, status };
+  });
+
+  return <div className='vat-wizard vatWizardPage'>
+    <Button className='backHomeButton' onClick={() => window.history.back()} startIcon={<ArrowLeftIcon fontSize='small' />}>
+      Corporate Tax Module
+    </Button>
+
+    <Card className='wizardHeroCard'>
+      <CardContent sx={{ p: { xs: 2, md: 3 } }}>
+        <Stack spacing={2}>
+          <Box className='wizardHeroTop'>
+            <Box>
+              <Typography component='h1' sx={{ fontSize: { xs: 28, md: 32 }, fontWeight: 800, m: 0, color: '#0f172a' }}>UAE Corporate Tax Filing Assistant</Typography>
+              <Typography sx={{ mt: 1, color: '#64748b', fontSize: 14 }}>Prepare, review and estimate your UAE Corporate Tax return with ease</Typography>
+            </Box>
+            <Typography className='wizardPercent' sx={{ fontSize: 14, color: '#1d4ed8', fontWeight: 700 }}>{step * 25}% Completed</Typography>
+          </Box>
+          <Box className='wizardStepper'>
+            {stepMeta.map((item, idx) => <React.Fragment key={item.label}>
+              <Button disableRipple onClick={() => setStep(item.stepNumber)} className={`stepCard ${item.status}`}>
+                <Stack spacing={1} alignItems='center'>
+                  <Box className='stepIconWrap'>
+                    {item.status === 'completed' ? <CheckCircle2 size={28} strokeWidth={2.2} /> : <item.icon size={25} strokeWidth={2.2} />}
+                    <Box className={`stepNumberBadge ${item.status}`}>{item.stepNumber}</Box>
+                  </Box>
+                  <Box>
+                    <Typography sx={{ fontSize: 13, fontWeight: 700, textAlign: 'center', textTransform: 'none', color: 'inherit' }}>{item.label}</Typography>
+                    <Chip label={item.status === 'completed' ? 'Completed' : item.status === 'active' ? 'In Progress' : 'Pending'} size='small' sx={{ mt: 0.5, height: 20, borderRadius: '999px', bgcolor: item.status === 'completed' ? 'rgba(255,255,255,.18)' : item.status === 'active' ? '#dbeafe' : '#f1f5f9', color: item.status === 'completed' ? '#e2e8f0' : item.status === 'active' ? '#1d4ed8' : '#64748b', '& .MuiChip-label': { px: 1, fontSize: 10, fontWeight: 700 } }} />
+                  </Box>
+                </Stack>
+              </Button>
+              {idx < stepMeta.length - 1 && <Box className={`stepConnector ${idx + 1 < step ? 'completed' : ''}`} />}
+            </React.Fragment>)}
           </Box>
         </Stack>
-        <Grid container spacing={{ xs: 1.5, md: 2 }}>
-          <Grid size={{ xs: 12, md: 4 }}><TextField fullWidth required label='Company name' value={data.companyName} onChange={e => setData({ ...data, companyName: e.target.value })} sx={fieldSx} /></Grid>
-          <Grid size={{ xs: 12, md: 4 }}><TextField fullWidth required label='Tax registration number' value={data.taxRegistrationNumber} onChange={e => setData({ ...data, taxRegistrationNumber: e.target.value })} sx={fieldSx} /></Grid>
-          <Grid size={{ xs: 12, md: 4 }}><TextField fullWidth required label='Business activity' value={data.businessActivity} onChange={e => setData({ ...data, businessActivity: e.target.value })} sx={fieldSx} /></Grid>
-          <Grid size={{ xs: 12, md: 6 }}><TextField fullWidth type='date' label='Financial year start' value={data.financialYearStart} onChange={e => setData({ ...data, financialYearStart: e.target.value })} InputLabelProps={{ shrink: true }} sx={fieldSx} /></Grid>
-          <Grid size={{ xs: 12, md: 6 }}><TextField fullWidth type='date' label='Financial year end' value={data.financialYearEnd} onChange={e => setData({ ...data, financialYearEnd: e.target.value })} InputLabelProps={{ shrink: true }} sx={fieldSx} /></Grid>
-          {missingRequired && <Grid size={12}><Typography color='error' variant='caption'>Company name, tax registration number, and business activity are required.</Typography></Grid>}
-        </Grid>
-      </Box>}
+      </CardContent>
+    </Card>
 
-      {step === 2 && <Box>
-        <Alert icon={<InfoOutlinedIcon fontSize='inherit' />} severity='info' sx={{ mb: 2.5, borderRadius: 3, border: '1px solid #bfdbfe', bgcolor: '#eff6ff' }}>Enter income values in AED for the selected financial period.</Alert>
-        <Grid container spacing={{ xs: 1.5, md: 2 }}>
-          <NumberField label='Total revenue' keyName='revenue' helperText='Gross turnover for the period.' />
-          <NumberField label='Other income' keyName='otherIncome' helperText='Non-operating income and gains.' />
-          <NumberField label='Exempt income' keyName='exemptIncome' helperText='Income treated as exempt from corporate tax.' />
-        </Grid>
-      </Box>}
-
-      {step === 3 && <Grid container spacing={{ xs: 1.5, md: 2 }}>
-        <NumberField label='Direct expenses' keyName='directExpenses' helperText='Cost of goods sold / service delivery.' />
-        <NumberField label='Admin & general expenses' keyName='adminExpenses' helperText='Operating and overhead expenses.' />
-        <NumberField label='Non-deductible expenses' keyName='nonDeductibleExpenses' helperText='Reference amount for disallowed expenses.' />
-      </Grid>}
-
-      {step === 4 && <Grid container spacing={{ xs: 1.5, md: 2 }}>
-        <NumberField label='Accounting profit' keyName='accountingProfit' helperText='Leave zero to let calculator infer from income and expenses.' />
-        <NumberField label='Add-back adjustments' keyName='addBackAdjustments' helperText='Items added back for tax computation.' />
-        <NumberField label='Deductible adjustments' keyName='deductibleAdjustments' helperText='Additional deductible tax adjustments.' />
-      </Grid>}
-
-      {step >= 5 && <Box>
-        <Card sx={{ borderRadius: 4, border: '1px solid #dbe6f3', boxShadow: '0 10px 24px rgba(15,23,42,.06)', mb: 2 }}>
-          <CardContent>
-            <Typography variant='h6' sx={{ fontWeight: 700, mb: 1.6 }}>Corporate Tax Live Snapshot</Typography>
-            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(4,minmax(0,1fr))' }, gap: 1.2 }}>
-              {[{ label: 'Profit Before Tax', value: money(result.profitBeforeTax), icon: <TrendingUpOutlinedIcon fontSize='small' /> }, { label: 'Taxable Income', value: money(result.taxableIncome), icon: <ReceiptLongOutlinedIcon fontSize='small' /> }, { label: 'Tax Above 0% Threshold', value: money(result.taxableAboveThreshold), icon: <CalculateOutlinedIcon fontSize='small' /> }, { label: 'Estimated Tax Payable', value: money(result.taxPayable), icon: <CalculateOutlinedIcon fontSize='small' />, badge: true }].map((item) => <Card key={item.label} sx={{ border: '1px solid #dbe6f3', borderRadius: 3, boxShadow: 'none' }}><CardContent sx={{ py: 1.4, '&:last-child': { pb: 1.4 } }}><Stack direction='row' spacing={1} alignItems='center'><Box sx={{ width: 32, height: 32, borderRadius: '50%', bgcolor: '#eaf1ff', color: 'primary.main', display: 'grid', placeItems: 'center' }}>{item.icon}</Box><Box><Typography variant='caption' color='text.secondary'>{item.label}</Typography><Typography variant='subtitle2' sx={{ fontWeight: 800 }}>{item.value}</Typography></Box>{item.badge && <Chip label='9%' color='success' size='small' sx={{ ml: 'auto' }} />}</Stack></CardContent></Card>)}
+    <Card className='businessCard' sx={{ borderRadius: '14px', border: '1px solid #e5e7eb', bgcolor: '#fff', boxShadow: '0 8px 24px rgba(15,23,42,0.05)' }}>
+      <CardContent sx={{ p: { xs: 1.5, md: 2.2 } }}>
+        {step === 1 && <Box>
+          <Stack direction='row' spacing={1.5} alignItems='center' sx={{ mb: 2.5 }}>
+            <Box sx={{ width: 52, height: 52, borderRadius: '50%', bgcolor: '#eaf1ff', color: 'primary.main', display: 'grid', placeItems: 'center' }}><BusinessOutlinedIcon /></Box>
+            <Box>
+              <Typography variant='h6' sx={{ fontWeight: 700, mb: 0.3 }}>Corporate Tax Wizard: Company Details</Typography>
+              <Typography variant='body2' color='text.secondary'>Enter company profile details for UAE Corporate Tax workspace.</Typography>
             </Box>
-          </CardContent>
-        </Card>
-        <CorporateTaxReport data={data} />
-      </Box>}
-    </FormSection>
+          </Stack>
+          <Grid container spacing={{ xs: 1.5, md: 2 }}>
+            <Grid size={{ xs: 12, md: 6 }}><TextField fullWidth required label='Company name' value={data.companyName} onChange={e => setData({ ...data, companyName: e.target.value })} sx={fieldSx} /></Grid>
+            <Grid size={{ xs: 12, md: 6 }}><TextField fullWidth required label='Tax registration number' value={data.taxRegistrationNumber} onChange={e => setData({ ...data, taxRegistrationNumber: e.target.value })} sx={fieldSx} /></Grid>
+            <Grid size={{ xs: 12, md: 6 }}><TextField fullWidth required label='Business activity' value={data.businessActivity} onChange={e => setData({ ...data, businessActivity: e.target.value })} sx={fieldSx} /></Grid>
+            <Grid size={{ xs: 12, md: 6 }}>
+              <FormControl fullWidth sx={fieldSx}>
+                <InputLabel>Business location emirate</InputLabel>
+                <Select label='Business location emirate' value={data.businessLocationEmirate || ''} onChange={e => setData({ ...data, businessLocationEmirate: e.target.value })}>
+                  {EMIRATE_OPTIONS.map((emirate) => <MenuItem key={emirate} value={emirate}>{emirate}</MenuItem>)}
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid size={{ xs: 12, md: 6 }}><TextField fullWidth required type='date' label='Financial year start' value={data.financialYearStart} onChange={e => setData({ ...data, financialYearStart: e.target.value })} InputLabelProps={{ shrink: true }} sx={fieldSx} /></Grid>
+            <Grid size={{ xs: 12, md: 6 }}><TextField fullWidth required type='date' label='Financial year end' value={data.financialYearEnd} onChange={e => setData({ ...data, financialYearEnd: e.target.value })} InputLabelProps={{ shrink: true }} sx={fieldSx} /></Grid>
+            <Grid size={{ xs: 12, md: 6 }}><TextField fullWidth label='Corporate tax period' value={data.financialYearStart && data.financialYearEnd ? `${data.financialYearStart} to ${data.financialYearEnd}` : ''} sx={fieldSx} slotProps={{ input: { readOnly: true } }} /></Grid>
+            <Grid size={{ xs: 12, md: 6 }}><TextField fullWidth label='Accounting / pricing mode' value='Standard' sx={fieldSx} slotProps={{ input: { readOnly: true } }} /></Grid>
+            <Grid size={12}>
+              <Box sx={{ mt: 0.5, border: '1px solid #93c5fd', bgcolor: '#eaf1ff', borderRadius: 3, px: 2, py: 1.5, display: 'flex', alignItems: 'center', gap: 1.2, width: '100%' }}>
+                <CalendarMonthOutlinedIcon color='primary' fontSize='small' />
+                <Typography color='primary.main' sx={{ fontWeight: 700 }}>Selected Tax Period: {data.financialYearStart || '--'} - {data.financialYearEnd || '--'}</Typography>
+              </Box>
+            </Grid>
+            {missingRequired && <Grid size={12}><FormHelperText error>Company name, tax registration number, and business activity are required.</FormHelperText></Grid>}
+          </Grid>
+        </Box>}
 
-    <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} sx={{ mt: 2 }}>
+        {step === 2 && <Box>
+          <Alert icon={<InfoOutlinedIcon fontSize='inherit' />} severity='info' sx={{ mb: 2.5, borderRadius: 3, border: '1px solid #bfdbfe', bgcolor: '#eff6ff' }}>Enter tax input values in AED for the selected financial period.</Alert>
+          <Grid container spacing={{ xs: 1.5, md: 2 }}>
+            <NumberField label='Total revenue' keyName='revenue' helperText='Gross turnover for the period.' />
+            <NumberField label='Other income' keyName='otherIncome' helperText='Non-operating income and gains.' />
+            <NumberField label='Exempt income' keyName='exemptIncome' helperText='Income treated as exempt from corporate tax.' />
+            <NumberField label='Direct expenses' keyName='directExpenses' helperText='Cost of goods sold / service delivery.' />
+            <NumberField label='Admin & general expenses' keyName='adminExpenses' helperText='Operating and overhead expenses.' />
+            <NumberField label='Non-deductible expenses' keyName='nonDeductibleExpenses' helperText='Reference amount for disallowed expenses.' />
+            <NumberField label='Accounting profit' keyName='accountingProfit' helperText='Leave zero to let calculator infer from income and expenses.' />
+            <NumberField label='Add-back adjustments' keyName='addBackAdjustments' helperText='Items added back for tax computation.' />
+            <NumberField label='Deductible adjustments' keyName='deductibleAdjustments' helperText='Additional deductible tax adjustments.' />
+          </Grid>
+        </Box>}
+
+        {step === 3 && <Box>
+          <Card sx={{ borderRadius: 4, border: '1px solid #dbe6f3', boxShadow: '0 10px 24px rgba(15,23,42,.06)', mb: 2 }}>
+            <CardContent>
+              <Typography variant='h6' sx={{ fontWeight: 700, mb: 1.6 }}>Corporate Tax Live Snapshot</Typography>
+              <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(4,minmax(0,1fr))' }, gap: 1.2 }}>
+                {[{ label: 'Profit Before Tax', value: money(result.profitBeforeTax), icon: <TrendingUpOutlinedIcon fontSize='small' /> }, { label: 'Taxable Income', value: money(result.taxableIncome), icon: <ReceiptLongOutlinedIcon fontSize='small' /> }, { label: 'Tax Above 0% Threshold', value: money(result.taxableAboveThreshold), icon: <CalculateOutlinedIcon fontSize='small' /> }, { label: 'Estimated Tax Payable', value: money(result.taxPayable), icon: <CalculateOutlinedIcon fontSize='small' />, badge: true }].map((item) => <Card key={item.label} sx={{ border: '1px solid #dbe6f3', borderRadius: 3, boxShadow: 'none' }}><CardContent sx={{ py: 1.4, '&:last-child': { pb: 1.4 } }}><Stack direction='row' spacing={1} alignItems='center'><Box sx={{ width: 32, height: 32, borderRadius: '50%', bgcolor: '#eaf1ff', color: 'primary.main', display: 'grid', placeItems: 'center' }}>{item.icon}</Box><Box><Typography variant='caption' color='text.secondary'>{item.label}</Typography><Typography variant='subtitle2' sx={{ fontWeight: 800 }}>{item.value}</Typography></Box>{item.badge && <Chip label='9%' color='success' size='small' sx={{ ml: 'auto' }} />}</Stack></CardContent></Card>)}
+              </Box>
+            </CardContent>
+          </Card>
+          <CorporateTaxReport data={data} />
+        </Box>}
+
+        {step === 4 && <Box>
+          <CorporateTaxReport data={data} />
+          <Box sx={{ mt: 2 }}>
+            <ExportActions onSave={onSave} onReset={onReset} onPrint={() => window.print()} onPdf={() => downloadPdfReport({ reportId: 'corporate-tax-report', reportType: 'corporate-tax', companyName: data.companyName, taxPeriod: data.financialYearStart && data.financialYearEnd ? `${data.financialYearStart}_to_${data.financialYearEnd}` : 'period' })} />
+          </Box>
+        </Box>}
+      </CardContent>
+    </Card>
+
+    <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} sx={{ mt: 2, p: { xs: 1.5, md: 2 }, borderRadius: 3, border: '1px solid #dbe6f3', bgcolor: '#fff', boxShadow: '0 8px 20px rgba(15,23,42,.05)' }}>
       <Button variant='outlined' onClick={back} disabled={step === 1} startIcon={<ArrowBackOutlinedIcon />}>Back</Button>
-      <Button className='primary-gradient-btn' onClick={next} disabled={step === 6 || (step === 1 && missingRequired)} endIcon={<ArrowForwardOutlinedIcon />}>Continue</Button>
+      <Button className='primary-gradient-btn' onClick={next} disabled={step === 4 || (step === 1 && missingRequired)} endIcon={<ArrowForwardOutlinedIcon />}>Continue</Button>
     </Stack>
-
-    {step === 6 && <ExportActions onSave={onSave} onReset={onReset} onPrint={() => window.print()} onPdf={() => downloadPdfReport({ reportId: 'corporate-tax-report', reportType: 'corporate-tax', companyName: data.companyName, taxPeriod: data.financialYearStart && data.financialYearEnd ? `${data.financialYearStart}_to_${data.financialYearEnd}` : 'period' })} />}
   </div>;
 }
