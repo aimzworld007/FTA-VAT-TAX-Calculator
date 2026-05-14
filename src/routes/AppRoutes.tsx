@@ -1,12 +1,12 @@
 import React from 'react';
 import { Alert, Box, Button, Card, CardContent, Snackbar, Stack, TextField, Typography } from '@mui/material';
 import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded';
-import { usePathname } from '../components/Router';
+import { RouteLink, usePathname } from '../components/Router';
 import { TaxAssistantProvider, useTaxAssistant } from '../modules/taxAssistant/TaxAssistantContext';
 import { TaxModuleLayout } from '../modules/taxAssistant/TaxModuleLayout';
 import { VatWizard } from '../features/tax/VatWizard';
 import { CorporateTaxWizard } from '../features/tax/CorporateTaxWizard';
-import { PremiumHome, AppShell } from '../features/home/PremiumHome';
+import { AppShell } from '../features/home/PremiumHome';
 import { AuthProvider, useAuth } from '../modules/auth/AuthContext';
 
 const mapStep = { 'business-details': 1, input: 2, preview: 3, export: 4 };
@@ -80,20 +80,25 @@ function ResourcePage({ page, onBack }: { page: (typeof resourcePages)['/documen
 
 function LoginPage() {
   const { navigate } = usePathname();
-  const { login } = useAuth();
+  const { login, loading } = useAuth();
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
+  const [error, setError] = React.useState('');
 
-  const onSubmit = (event: React.FormEvent) => {
+  const onSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    if (login(email, password)) navigate('/');
+    const result = await login(email, password);
+    if (result.ok) navigate('/');
+    else setError(result.error || 'Login failed');
   };
 
   return <AppShell><Card sx={{ maxWidth: 440, mx: 'auto' }}><CardContent><Stack component='form' spacing={2} onSubmit={onSubmit}>
     <Typography variant='h5' sx={{ fontWeight: 800 }}>Login</Typography>
     <TextField label='Email' value={email} onChange={(e) => setEmail(e.target.value)} required />
     <TextField label='Password' type='password' value={password} onChange={(e) => setPassword(e.target.value)} required />
-    <Button type='submit' variant='contained'>Login</Button>
+    {error ? <Alert severity='error'>{error}</Alert> : null}
+    <Button type='submit' variant='contained' disabled={loading}>{loading ? 'Please wait...' : 'Login'}</Button>
+    <Button onClick={() => navigate('/register')} variant='text'>Create account</Button>
   </Stack></CardContent></Card></AppShell>;
 }
 
@@ -110,6 +115,42 @@ function ProfilePage() {
   </Stack></CardContent></Card></AppShell>;
 }
 
+
+function RegisterPage() {
+  const { navigate } = usePathname();
+  const { register, loading } = useAuth();
+  const [email, setEmail] = React.useState('');
+  const [password, setPassword] = React.useState('');
+  const [error, setError] = React.useState('');
+
+  const onSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    const result = await register(email, password);
+    if (result.ok) navigate('/');
+    else setError(result.error || 'Registration failed');
+  };
+
+  return <AppShell><Card sx={{ maxWidth: 440, mx: 'auto' }}><CardContent><Stack component='form' spacing={2} onSubmit={onSubmit}>
+    <Typography variant='h5' sx={{ fontWeight: 800 }}>Register</Typography>
+    <TextField label='Email' type='email' value={email} onChange={(e) => setEmail(e.target.value)} required />
+    <TextField label='Password' type='password' value={password} onChange={(e) => setPassword(e.target.value)} helperText='Minimum 8 characters' required />
+    {error ? <Alert severity='error'>{error}</Alert> : null}
+    <Button type='submit' variant='contained' disabled={loading}>{loading ? 'Please wait...' : 'Create account'}</Button>
+  </Stack></CardContent></Card></AppShell>;
+}
+
+function UserDashboardPage() {
+  const { user } = useAuth();
+  return <AppShell><Stack spacing={2}><Typography variant='h4' sx={{ fontWeight: 800 }}>User Dashboard</Typography>
+    <Typography sx={{ color: '#475569' }}>Welcome, {user?.name}. Manage VAT, Corporate Tax and your profile from one place.</Typography>
+    <Stack direction={{ xs: 'column', md: 'row' }} spacing={1.2}>
+      <Button component={RouteLink} to='/vat/business-details' variant='contained'>Start VAT Return</Button>
+      <Button component={RouteLink} to='/tax/business-details' variant='contained' color='secondary'>Start Corporate Tax</Button>
+      <Button component={RouteLink} to='/profile' variant='outlined'>Manage Profile</Button>
+    </Stack>
+  </Stack></AppShell>;
+}
+
 function RoutedModules() {
   const { pathname, navigate } = usePathname();
   const { vat, setVat, ct, setCt } = useTaxAssistant();
@@ -123,9 +164,8 @@ function RoutedModules() {
   const guardTax = !ct.companyName || !ct.taxRegistrationNumber || !ct.businessActivity;
 
   React.useEffect(() => {
-    if (!user && pathname !== '/login') navigate('/login');
-    if (user && pathname === '/login') navigate('/');
-    if (pathname === '/dashboard') navigate('/');
+    if (!user && !['/login', '/register'].includes(pathname)) navigate('/login');
+    if (user && ['/login', '/register'].includes(pathname)) navigate('/dashboard');
     if (pathname === '/terms') navigate('/terms-and-conditions');
     if (module === 'vat' && !step) navigate('/vat/business-details');
     if (module === 'tax' && !step) navigate('/tax/business-details');
@@ -140,8 +180,9 @@ function RoutedModules() {
   }, [pathname, module, step, guardVat, guardTax, navigate]);
 
   if (pathname === '/login') return <LoginPage />;
+  if (pathname === '/register') return <RegisterPage />;
+  if (pathname === '/dashboard' || pathname === '/') return <UserDashboardPage />;
   if (pathname === '/profile') return <ProfilePage />;
-  if (pathname === '/') return <PremiumHome />;
   if (pathname in resourcePages) return <ResourcePage page={resourcePages[pathname as keyof typeof resourcePages]} onBack={() => navigate('/')} />;
   if (module === 'vat') {
     return <AppShell><VatWizard data={vat} setData={setVat} forcedStep={mapStep[step] || 1} navigateToStep={navigate} /></AppShell>;
