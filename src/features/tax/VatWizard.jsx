@@ -1,10 +1,7 @@
 import React from 'react';
 import { Alert, Box, Button, Card, CardContent, Chip, FormControl, FormHelperText, Grid, InputAdornment, InputLabel, MenuItem, Select, Stack, TextField, Typography } from '@mui/material';
-import BusinessOutlinedIcon from '@mui/icons-material/BusinessOutlined';
 import CalculateOutlinedIcon from '@mui/icons-material/CalculateOutlined';
-import CheckRoundedIcon from '@mui/icons-material/CheckRounded';
-import IosShareOutlinedIcon from '@mui/icons-material/IosShareOutlined';
-import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
+import BusinessOutlinedIcon from '@mui/icons-material/BusinessOutlined';
 import CalendarMonthOutlinedIcon from '@mui/icons-material/CalendarMonthOutlined';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import TrendingUpOutlinedIcon from '@mui/icons-material/TrendingUpOutlined';
@@ -25,6 +22,7 @@ import DownloadOutlinedIcon from '@mui/icons-material/DownloadOutlined';
 import ArrowBackOutlinedIcon from '@mui/icons-material/ArrowBackOutlined';
 import ArrowLeftIcon from '@mui/icons-material/ArrowLeft';
 import ArrowForwardOutlinedIcon from '@mui/icons-material/ArrowForwardOutlined';
+import { Building2, CheckCircle2, ClipboardList, Eye, Upload } from 'lucide-react';
 import { buildMonthlyEntries, calculateVat } from './lib/vatCalculator';
 import { validateRequired, validateVatPeriodSelection } from './lib/taxValidation';
 import { TAX_CONFIG } from './lib/taxConfig';
@@ -35,10 +33,10 @@ import { VAT_PRICING_MODES, splitVatFromAmount } from './lib/vatPricing';
 import { downloadPdf, generateVatPdfBlob } from './services/vatPdfApi';
 
 const steps = [
-  { key: 'business', label: 'Business Details', icon: BusinessOutlinedIcon },
-  { key: 'input', label: 'VAT Input', icon: CalculateOutlinedIcon },
-  { key: 'preview', label: 'Preview', icon: VisibilityOutlinedIcon },
-  { key: 'export', label: 'Export', icon: IosShareOutlinedIcon }
+  { key: 'business', label: 'Business Details', icon: Building2 },
+  { key: 'input', label: 'VAT Input', icon: ClipboardList },
+  { key: 'preview', label: 'Preview', icon: Eye },
+  { key: 'export', label: 'Export', icon: Upload }
 ];
 const n = (v) => Number(v) || 0;
 const clampInput = (v) => Math.max(0, n(v));
@@ -173,12 +171,13 @@ export function VatWizard({ data, setData, onSave, onReset, onProgressChange, fo
           <Box className='wizardStepper'>
             {stepMeta.map((item, idx) => <React.Fragment key={item.label}>
               <Button disableRipple onClick={() => navigateToStep ? navigateToStep(stepToPath[item.stepNumber]) : setStep(item.stepNumber)} className={`stepCard ${item.status}`}>
-                <Stack spacing={1}>
+                <Stack spacing={1} alignItems='center'>
                   <Box className='stepIconWrap'>
-                    {item.status === 'completed' ? <CheckRoundedIcon sx={{ fontSize: 20 }} /> : <item.icon style={{ fontSize: 19 }} />}
+                    {item.status === 'completed' ? <CheckCircle2 size={28} strokeWidth={2.2} /> : <item.icon size={25} strokeWidth={2.2} />}
+                    <Box className={`stepNumberBadge ${item.status}`}>{item.stepNumber}</Box>
                   </Box>
                   <Box>
-                    <Typography sx={{ fontSize: 13, fontWeight: 700, textAlign: 'left', textTransform: 'none', color: 'inherit' }}>{item.label}</Typography>
+                    <Typography sx={{ fontSize: 13, fontWeight: 700, textAlign: 'center', textTransform: 'none', color: 'inherit' }}>{item.label}</Typography>
                     <Chip label={item.status === 'completed' ? 'Completed' : item.status === 'active' ? 'In Progress' : 'Pending'} size='small' sx={{ mt: 0.5, height: 20, borderRadius: '999px', bgcolor: item.status === 'completed' ? 'rgba(255,255,255,.18)' : item.status === 'active' ? '#dbeafe' : '#f1f5f9', color: item.status === 'completed' ? '#e2e8f0' : item.status === 'active' ? '#1d4ed8' : '#64748b', '& .MuiChip-label': { px: 1, fontSize: 10, fontWeight: 700 } }} />
                   </Box>
                 </Stack>

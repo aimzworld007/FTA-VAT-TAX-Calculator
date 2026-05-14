@@ -471,19 +471,19 @@ tr:nth-child(even) td{background:#fbfdff}
 .wizardHeroCard{background:#fff;border-radius:24px!important;border:1px solid #dbe4f0!important;box-shadow:0 10px 30px rgba(15,23,42,.06)!important}
 .wizardHeroTop{display:flex;justify-content:space-between;align-items:flex-start;gap:20px}
 .wizardPercent{white-space:nowrap}
-.wizardStepper{margin-top:6px;display:flex;align-items:center;gap:10px;-webkit-overflow-scrolling:touch;scrollbar-width:thin}
-.stepCard{position:relative;border-radius:18px!important;border:1px solid #dbe4f0!important;padding:14px 16px!important;background:#fff!important;min-width:220px;display:flex!important;justify-content:flex-start;text-transform:none!important;color:#334155!important;box-shadow:none!important}
-.stepIconWrap{width:40px;height:40px;border-radius:999px;display:flex;align-items:center;justify-content:center;background:#f1f5f9;color:#94a3b8}
-.stepCard.completed{background:linear-gradient(135deg,#2563eb,#1d4ed8)!important;color:#fff!important;border-color:#1d4ed8!important}
-.stepCard.completed .MuiSvgIcon-root{color:#fff}
-.stepCard.completed .stepIconWrap{background:rgba(255,255,255,.16);color:#fff}
-.stepCard.active{border-color:#2563eb!important;background:#eff6ff!important;box-shadow:0 8px 24px rgba(37,99,235,.12)!important;color:#1e3a8a!important}
-.stepCard.active .MuiSvgIcon-root{color:#2563eb}
-.stepCard.active .stepIconWrap{background:#dbeafe;color:#1d4ed8}
-.stepCard.pending .MuiSvgIcon-root{color:#94a3b8}
-.stepCard.pending .stepIconWrap{background:#f1f5f9;color:#94a3b8}
-.stepConnector{height:2px;flex:1;min-width:20px;background:#cbd5e1;border-radius:999px}
+.wizardStepper{margin-top:2px;display:flex;align-items:flex-start;gap:10px;-webkit-overflow-scrolling:touch;scrollbar-width:thin;padding:2px 0}
+.stepCard{position:relative;border-radius:16px!important;border:0!important;padding:6px 8px!important;background:transparent!important;min-width:150px;display:flex!important;justify-content:center;text-transform:none!important;color:#64748b!important;box-shadow:none!important}
+.stepIconWrap{position:relative;width:78px;height:78px;border-radius:999px;display:flex;align-items:center;justify-content:center;background:#f8fafc;border:2px solid #d7dee8;color:#94a3b8;transition:all .2s ease}
+.stepNumberBadge{position:absolute;top:-3px;right:-2px;min-width:22px;height:22px;border-radius:999px;font-size:11px;font-weight:700;display:grid;place-items:center;border:2px solid #fff}
+.stepCard.completed{color:#1d4ed8!important}
+.stepCard.completed .stepIconWrap{background:#eff6ff;border-color:#3b82f6;color:#1d4ed8}
+.stepCard.active{color:#1d4ed8!important}
+.stepCard.active .stepIconWrap{background:#eaf3ff;border-color:#2563eb;color:#1d4ed8;box-shadow:0 8px 20px rgba(37,99,235,.15)}
+.stepCard.pending .stepIconWrap{background:#f8fafc;border-color:#d7dee8;color:#94a3b8}
+.stepNumberBadge.active,.stepNumberBadge.completed{background:#2563eb;color:#fff}
+.stepNumberBadge.pending{background:#e5e7eb;color:#64748b}
+.stepConnector{height:2px;flex:1;min-width:18px;background:#dbe2ea;border-radius:999px;margin-top:38px}
 .stepConnector.completed{background:#2563eb}
 .businessCard{border-radius:16px!important;border:1px solid #dbe4f0!important}
 .wizardNavBtn{min-height:44px!important}
-@media (max-width:900px){.wizardHeroTop{flex-direction:column}.wizardStepper{overflow-x:auto;padding-bottom:6px}.stepConnector{min-width:30px}.stepCard{min-width:220px}}
+@media (max-width:900px){.wizardHeroTop{flex-direction:column}.wizardStepper{overflow-x:auto;padding-bottom:6px}.stepConnector{min-width:24px}.stepCard{min-width:138px}.stepIconWrap{width:68px;height:68px}.stepConnector{margin-top:33px}}
