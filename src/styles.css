@@ -254,10 +254,11 @@
   display:block;
   width:100%;
   max-width:220px;
+  max-height:180px;
   height:auto;
   object-fit:contain;
   flex-shrink:0;
-  overflow:hidden;
+  margin-left:auto;
 }
 @media(max-width:899px){
   .dashboard-hero-illustration{
