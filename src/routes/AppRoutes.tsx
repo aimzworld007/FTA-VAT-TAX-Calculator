@@ -1,5 +1,5 @@
 import React from 'react';
-import { Alert, Box, Button, Card, CardContent, Snackbar, Stack, Typography } from '@mui/material';
+import { Alert, Box, Button, Card, CardContent, Snackbar, Stack, TextField, Typography } from '@mui/material';
 import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded';
 import { usePathname } from '../components/Router';
 import { TaxAssistantProvider, useTaxAssistant } from '../modules/taxAssistant/TaxAssistantContext';
@@ -7,6 +7,7 @@ import { TaxModuleLayout } from '../modules/taxAssistant/TaxModuleLayout';
 import { VatWizard } from '../features/tax/VatWizard';
 import { CorporateTaxWizard } from '../features/tax/CorporateTaxWizard';
 import { PremiumHome, AppShell } from '../features/home/PremiumHome';
+import { AuthProvider, useAuth } from '../modules/auth/AuthContext';
 
 const mapStep = { 'business-details': 1, input: 2, preview: 3, export: 4 };
 const mapTaxStep = { 'business-details': 1, input: 3, preview: 5, export: 6 };
@@ -76,9 +77,43 @@ function ResourcePage({ page, onBack }: { page: (typeof resourcePages)['/documen
   );
 }
 
+
+function LoginPage() {
+  const { navigate } = usePathname();
+  const { login } = useAuth();
+  const [email, setEmail] = React.useState('');
+  const [password, setPassword] = React.useState('');
+
+  const onSubmit = (event: React.FormEvent) => {
+    event.preventDefault();
+    if (login(email, password)) navigate('/');
+  };
+
+  return <AppShell><Card sx={{ maxWidth: 440, mx: 'auto' }}><CardContent><Stack component='form' spacing={2} onSubmit={onSubmit}>
+    <Typography variant='h5' sx={{ fontWeight: 800 }}>Login</Typography>
+    <TextField label='Email' value={email} onChange={(e) => setEmail(e.target.value)} required />
+    <TextField label='Password' type='password' value={password} onChange={(e) => setPassword(e.target.value)} required />
+    <Button type='submit' variant='contained'>Login</Button>
+  </Stack></CardContent></Card></AppShell>;
+}
+
+function ProfilePage() {
+  const { user, updateProfile } = useAuth();
+  const [name, setName] = React.useState(user?.name || '');
+  const [email, setEmail] = React.useState(user?.email || '');
+
+  return <AppShell><Card sx={{ maxWidth: 560 }}><CardContent><Stack spacing={2}>
+    <Typography variant='h5' sx={{ fontWeight: 800 }}>Profile Management</Typography>
+    <TextField label='Name' value={name} onChange={(e) => setName(e.target.value)} />
+    <TextField label='Email' value={email} onChange={(e) => setEmail(e.target.value)} />
+    <Button variant='contained' onClick={() => updateProfile({ name, email })}>Save Profile</Button>
+  </Stack></CardContent></Card></AppShell>;
+}
+
 function RoutedModules() {
   const { pathname, navigate } = usePathname();
   const { vat, setVat, ct, setCt } = useTaxAssistant();
+  const { user } = useAuth();
   const [msg, setMsg] = React.useState('');
   const parts = pathname.split('/').filter(Boolean);
   const module = parts[0];
@@ -88,6 +123,8 @@ function RoutedModules() {
   const guardTax = !ct.companyName || !ct.taxRegistrationNumber || !ct.businessActivity;
 
   React.useEffect(() => {
+    if (!user && pathname !== '/login') navigate('/login');
+    if (user && pathname === '/login') navigate('/');
     if (pathname === '/dashboard') navigate('/');
     if (pathname === '/terms') navigate('/terms-and-conditions');
     if (module === 'vat' && !step) navigate('/vat/business-details');
@@ -102,6 +139,8 @@ function RoutedModules() {
     }
   }, [pathname, module, step, guardVat, guardTax, navigate]);
 
+  if (pathname === '/login') return <LoginPage />;
+  if (pathname === '/profile') return <ProfilePage />;
   if (pathname === '/') return <PremiumHome />;
   if (pathname in resourcePages) return <ResourcePage page={resourcePages[pathname as keyof typeof resourcePages]} onBack={() => navigate('/')} />;
   if (module === 'vat') {
@@ -114,5 +153,5 @@ function RoutedModules() {
 }
 
 export default function AppRoutes() {
-  return <TaxAssistantProvider><RoutedModules /><Snackbar open={false} /></TaxAssistantProvider>;
+  return <AuthProvider><TaxAssistantProvider><RoutedModules /><Snackbar open={false} /></TaxAssistantProvider></AuthProvider>;
 }
