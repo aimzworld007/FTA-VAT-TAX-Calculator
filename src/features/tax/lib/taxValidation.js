@@ -16,3 +16,15 @@ export function validateVatPeriodSelection(data) {
   if (data?.filingFrequency === 'Quarterly') return validateRequired(data?.filingStartMonth, 'Quarter start month');
   return '';
 }
+
+export function validateBusinessName(value) {
+  const input = String(value || '').trim();
+  if (!input) return 'Business name is required.';
+  return /^\d+$/.test(input) ? 'Business name cannot be only numbers.' : '';
+}
+
+export function validateTrn(value) {
+  const input = String(value || '').trim();
+  if (!input) return 'TRN is required.';
+  return /^\d+$/.test(input) ? '' : 'TRN must contain numbers only.';
+}

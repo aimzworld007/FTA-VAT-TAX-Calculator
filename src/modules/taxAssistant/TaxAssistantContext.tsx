@@ -5,7 +5,7 @@ import { VAT_PRICING_MODES, normalizeVatPricingMode } from '../../features/tax/l
 import { inferSelectionFromDates, getPeriodFromSelection } from '../../features/tax/lib/vatPeriod';
 
 const currentYear = new Date().getFullYear();
-const wsDefault = { vatPricingMode: VAT_PRICING_MODES.EXCLUSIVE };
+const wsDefault = { vatPricingMode: VAT_PRICING_MODES.INCLUSIVE };
 const vatDefault = { businessName: '', trn: '', businessLocationEmirate: '', filingFrequency: 'Quarterly', filingYear: currentYear, filingMonth: 'January', filingQuarter: 'Q1', filingStartMonth: 'January', taxPeriodStart: '', taxPeriodEnd: '', standardRatedSales: 0, zeroRatedSales: 0, exemptSales: 0, standardRatedPurchases: 0, recoverableInputVat: 0, nonRecoverableVat: 0, previousAdjustment: 0, badDebtRelief: 0, adjustmentNotes: '', monthlyEntries: [], vatPricingMode: wsDefault.vatPricingMode };
 const ctDefault = { companyName: '', taxRegistrationNumber: '', financialYearStart: '', financialYearEnd: '', businessActivity: '', revenue: 0, otherIncome: 0, exemptIncome: 0, directExpenses: 0, adminExpenses: 0, nonDeductibleExpenses: 0, accountingProfit: 0, addBackAdjustments: 0, deductibleAdjustments: 0 };
 
