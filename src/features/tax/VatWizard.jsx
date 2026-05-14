@@ -158,8 +158,8 @@ export function VatWizard({ data, setData, onSave, onReset, onProgressChange, fo
     >
       VAT Return Module
     </Button>
-    <Card className='wizardHeroCard'>
-      <CardContent sx={{ p: { xs: 2, md: 3 } }}>
+    <Card className='wizardHeroCard vat-export-header'>
+      <CardContent className='vat-export-header-content' sx={{ p: { xs: 1.5, md: 2.25 } }}>
         <Stack spacing={2}>
           <Box className='wizardHeroTop'>
             <Box>
@@ -344,28 +344,30 @@ export function VatWizard({ data, setData, onSave, onReset, onProgressChange, fo
         <Alert icon={<InfoOutlinedIcon fontSize='inherit' />} severity='info' sx={{ mt: 1.6, borderRadius: '10px', border: '1px solid #dbeafe', bgcolor: '#f8fbff' }}><Typography sx={{ fontWeight: 700 }}>Important Notice</Typography>For preparation assistance only. Please verify all values before official UAE FTA submission.</Alert>
       </CardContent>
     </Card>}
-    {step === 4 && <Vat201Report data={{ ...data, monthlyEntries: buildMonthlyEntries(data) }} result={result} />}
+    {step === 4 && <div className='vat-export-preview-wrap'><Vat201Report data={{ ...data, monthlyEntries: buildMonthlyEntries(data) }} result={result} /></div>}
       </CardContent>
     </Card>
-    <Card sx={{ mt: 1.4, borderRadius: '14px', border: '1px solid #e5e7eb', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+    {step < 4 && <Card sx={{ mt: 1.4, borderRadius: '14px', border: '1px solid #e5e7eb', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
       <CardContent sx={{ py: 1.1, px: { xs: 1, md: 1.8 }, '&:last-child': { pb: 1.1 } }}>
-    <div className='wizard-action-bar'>
-      <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, alignItems: 'center', justifyContent: 'space-between', gap: 1.5, width: '100%' }}>
-        <Box sx={{ width: { xs: '100%', md: '50%' }, display: 'flex', justifyContent: { xs: 'stretch', md: 'flex-start' } }}>
-          <Button className='wizardNavBtn' fullWidth={step < 4} variant='outlined' startIcon={<ArrowBackOutlinedIcon />} onClick={back} disabled={step===1}>Back</Button>
-        </Box>
-        {step < 4 && <Box sx={{ width: { xs: '100%', md: '50%' }, display: 'flex', justifyContent: { xs: 'stretch', md: 'flex-end' } }}>
-          <Button fullWidth className='primary-gradient-btn wizardNavBtn' endIcon={<ArrowForwardOutlinedIcon />} onClick={next} disabled={continueDisabled}>Continue</Button>
-        </Box>}
-      </Box>
-      {step === 4 && <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} className='wizard-action-group wizard-action-group-right'>
-        <Button variant='outlined' startIcon={<PrintOutlinedIcon />} onClick={() => window.print()}>Print</Button>
-        {onSave && <Button variant='outlined' startIcon={<IosShareOutlinedIcon />} onClick={onSave}>Save Draft</Button>}
+        <div className='wizard-action-bar'>
+          <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, alignItems: 'center', justifyContent: 'space-between', gap: 1.5, width: '100%' }}>
+            <Box sx={{ width: { xs: '100%', md: '50%' }, display: 'flex', justifyContent: { xs: 'stretch', md: 'flex-start' } }}>
+              <Button className='wizardNavBtn' fullWidth variant='outlined' startIcon={<ArrowBackOutlinedIcon />} onClick={back} disabled={step === 1}>Back</Button>
+            </Box>
+            <Box sx={{ width: { xs: '100%', md: '50%' }, display: 'flex', justifyContent: { xs: 'stretch', md: 'flex-end' } }}>
+              <Button fullWidth className='primary-gradient-btn wizardNavBtn' endIcon={<ArrowForwardOutlinedIcon />} onClick={next} disabled={continueDisabled}>Continue</Button>
+            </Box>
+          </Box>
+        </div>
+      </CardContent>
+    </Card>}
+    {step === 4 && <div className='export-action-bar'>
+      <Button className='wizardNavBtn export-action-back' variant='outlined' startIcon={<ArrowBackOutlinedIcon />} onClick={back}>Back</Button>
+      <div className='export-action-right'>
         <Button className='danger-soft-btn' variant='outlined' onClick={onReset}>Reset</Button>
+        <Button variant='outlined' startIcon={<PrintOutlinedIcon />} onClick={() => window.print()}>Print</Button>
         <Button className='primary-gradient-btn' variant='contained' startIcon={<DownloadOutlinedIcon />} onClick={handleDownloadPdf} disabled={downloadLoading}>{downloadLoading ? 'Downloading PDF…' : 'Download PDF'}</Button>
-      </Stack>}
-    </div>
-    </CardContent>
-    </Card>
+      </div>
+    </div>}
   </div>;
 }
