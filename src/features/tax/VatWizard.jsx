@@ -1,13 +1,9 @@
 import React from 'react';
-import { Alert, Box, Button, Card, CardContent, Chip, FormControl, FormHelperText, Grid, InputAdornment, InputLabel, MenuItem, Select, Stack, TextField, Typography } from '@mui/material';
-import CalculateOutlinedIcon from '@mui/icons-material/CalculateOutlined';
+import { Alert, Box, Button, Card, CardContent, Chip, FormControl, FormHelperText, Grid, InputAdornment, InputLabel, LinearProgress, MenuItem, Select, Stack, TextField, Tooltip, Typography } from '@mui/material';
 import BusinessOutlinedIcon from '@mui/icons-material/BusinessOutlined';
 import CalendarMonthOutlinedIcon from '@mui/icons-material/CalendarMonthOutlined';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import TrendingUpOutlinedIcon from '@mui/icons-material/TrendingUpOutlined';
-import ShoppingCartOutlinedIcon from '@mui/icons-material/ShoppingCartOutlined';
-import AccountBalanceWalletOutlinedIcon from '@mui/icons-material/AccountBalanceWalletOutlined';
-import NorthOutlinedIcon from '@mui/icons-material/NorthOutlined';
 import SouthOutlinedIcon from '@mui/icons-material/SouthOutlined';
 import PlaylistAddCheckCircleOutlinedIcon from '@mui/icons-material/PlaylistAddCheckCircleOutlined';
 import NotesOutlinedIcon from '@mui/icons-material/NotesOutlined';
@@ -17,6 +13,7 @@ import SouthWestOutlinedIcon from '@mui/icons-material/SouthWestOutlined';
 import TuneOutlinedIcon from '@mui/icons-material/TuneOutlined';
 import BalanceOutlinedIcon from '@mui/icons-material/BalanceOutlined';
 import GppGoodOutlinedIcon from '@mui/icons-material/GppGoodOutlined';
+import HelpOutlineOutlinedIcon from '@mui/icons-material/HelpOutlineOutlined';
 import PrintOutlinedIcon from '@mui/icons-material/PrintOutlined';
 import DownloadOutlinedIcon from '@mui/icons-material/DownloadOutlined';
 import ArrowBackOutlinedIcon from '@mui/icons-material/ArrowBackOutlined';
@@ -35,7 +32,7 @@ import { downloadPdf, generateVatPdfBlob } from './services/vatPdfApi';
 const steps = [
   { key: 'business', label: 'Business Details', icon: Building2 },
   { key: 'input', label: 'VAT Input', icon: ClipboardList },
-  { key: 'preview', label: 'Preview', icon: Eye },
+  { key: 'preview', label: 'VAT Return Review', icon: Eye },
   { key: 'export', label: 'Export', icon: Upload }
 ];
 const n = (v) => Number(v) || 0;
@@ -53,14 +50,6 @@ const EMIRATE_BOX_MAP = {
   'Ras Al Khaimah': '1f',
   Fujairah: '1g'
 };
-
-const metricCards = [
-  { key: 'sales', label: 'Total Sales (Input/Gross)', icon: <TrendingUpOutlinedIcon fontSize='small' /> },
-  { key: 'purchases', label: 'Total Purchases (Input/Gross)', icon: <ShoppingCartOutlinedIcon fontSize='small' /> },
-  { key: 'expenses', label: 'Total Expenses (Input/Gross)', icon: <AccountBalanceWalletOutlinedIcon fontSize='small' /> },
-  { key: 'outputVat', label: 'Total Output VAT', icon: <NorthOutlinedIcon fontSize='small' /> },
-  { key: 'recoverableVat', label: 'Total Recoverable VAT', icon: <SouthOutlinedIcon fontSize='small' /> }
-];
 
 export function VatWizard({ data, setData, onSave, onReset, onProgressChange, forcedStep, navigateToStep }) {
   const fieldSx = { '& .MuiInputBase-root': { minHeight: { xs: 44, md: 48 }, height: { xs: 44, md: 48 }, borderRadius: '12px', color: '#071832', bgcolor: '#fff' }, '& .MuiOutlinedInput-notchedOutline': { borderColor: '#d7e3f0' }, '& .MuiInputBase-root:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#9cb7dc' }, '& .Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#2563eb', borderWidth: '1px' }, '& .Mui-focused': { boxShadow: '0 0 0 3px rgba(37,99,235,0.15)' }, '& .MuiInputBase-input': { padding: '0 14px', fontSize: 14, lineHeight: 1.2 }, '& .MuiSelect-select': { display: 'flex', alignItems: 'center', padding: '0 38px 0 14px !important', fontSize: 14, lineHeight: 1.2 }, '& .MuiInputLabel-root': { fontSize: 12, lineHeight: 1.1 }, '@media (max-width:768px)': { '& .MuiInputBase-input': { padding: '0 12px' }, '& .MuiSelect-select': { padding: '0 36px 0 12px !important' } } };
@@ -96,8 +85,10 @@ export function VatWizard({ data, setData, onSave, onReset, onProgressChange, fo
   React.useEffect(() => { if (forcedStep) setStep(forcedStep); }, [forcedStep]);
 
   const updateEntry = (month, key, value) => {
-    const updated = buildMonthlyEntries(data).map((entry) => (entry.month === month ? { ...entry, [key]: clampInput(value) } : entry));
-    setData({ ...data, monthlyEntries: updated });
+    const nextValue = key === 'adjustment' ? n(value) : clampInput(value);
+    const updated = buildMonthlyEntries(data).map((entry) => (entry.month === month ? { ...entry, [key]: nextValue } : entry));
+    const totalAdjustment = updated.reduce((sum, entry) => sum + n(entry.adjustment), 0);
+    setData({ ...data, monthlyEntries: updated, previousAdjustment: totalAdjustment });
   };
 
   const monthCount = buildMonthlyEntries(data).length;
@@ -116,10 +107,8 @@ export function VatWizard({ data, setData, onSave, onReset, onProgressChange, fo
     sales: acc.sales + n(entry.sales),
     purchases: acc.purchases + n(entry.purchases),
     expenses: acc.expenses + n(entry.expenses),
-    outputVat: acc.outputVat + getEntryOutputVat(entry, data.vatPricingMode),
-    recoverableVat: acc.recoverableVat + getEntryRecoverableVat(entry, data.vatPricingMode),
-    netVat: acc.netVat + getEntryNetVat(entry, data.vatPricingMode)
-  }), { sales: 0, purchases: 0, expenses: 0, outputVat: 0, recoverableVat: 0, netVat: 0 });
+    adjustments: acc.adjustments + n(entry.adjustment)
+  }), { sales: 0, purchases: 0, expenses: 0, adjustments: 0 });
 
 
 
@@ -237,12 +226,31 @@ export function VatWizard({ data, setData, onSave, onReset, onProgressChange, fo
     </Grid>
     </Box>}
     {step === 2 && <section className='vat-input-layout vat-input-premium vat-main-card vat-input-card wizard-card'>
-      <h2 className='vat-input-title'>VAT Input</h2>
-      <p className='vat-input-subtitle'>Your selected filing frequency is {data.filingFrequency}, so enter {monthCount} {monthCount === 1 ? 'month' : 'months'} of sales, purchases, and expenses.</p>
-      <div className='vat-mode-alert'><InfoOutlinedIcon fontSize='small' /><p><strong>VAT Mode: {data.vatPricingMode === VAT_PRICING_MODES.INCLUSIVE ? 'Inclusive' : 'Exclusive'}.</strong> FTA VAT Return Amount should be excluding VAT. If your sales are VAT-inclusive, the system automatically separates taxable value and VAT.</p></div>
-      <section className='vat-breakdown-card vat-nested-card quarterly-breakdown'><header><h3>{data.filingFrequency} Breakdown</h3><span className='currency-pill'>Currency: <strong>AED</strong></span></header><div className='vat-monthly-wrap vat-desktop-table table-wrapper'><table className='vat-input-table'><thead><tr><th>Month</th><th>Sales</th><th>Purchases</th><th>Expenses</th><th>Output VAT</th><th>Recoverable VAT</th><th>Net VAT</th></tr></thead><tbody>{entries.map((entry) => <tr key={entry.month}><td data-label='Month'><span className='month-cell'><CalendarMonthOutlinedIcon fontSize='small' />{entry.month}</span></td><td data-label='Sales'><input type='number' min='0' placeholder='0.00' value={entry.sales} onChange={e => updateEntry(entry.month, 'sales', e.target.value)} /></td><td data-label='Purchases'><input type='number' min='0' placeholder='0.00' value={entry.purchases} onChange={e => updateEntry(entry.month, 'purchases', e.target.value)} /></td><td data-label='Expenses'><input type='number' min='0' placeholder='0.00' value={entry.expenses} onChange={e => updateEntry(entry.month, 'expenses', e.target.value)} /></td><td className='vat-readonly' data-label='Output VAT'>{money(getEntryOutputVat(entry, data.vatPricingMode))}</td><td className='vat-readonly' data-label='Recoverable VAT'>{money(getEntryRecoverableVat(entry, data.vatPricingMode))}</td><td className='vat-readonly vat-net-cell' data-label='Net VAT'>{money(getEntryNetVat(entry, data.vatPricingMode))}</td></tr>)}</tbody><tfoot><tr className='vat-total-row'><td data-label='Month'>Total</td><td data-label='Sales'>{money(totals.sales)}</td><td data-label='Purchases'>{money(totals.purchases)}</td><td data-label='Expenses'>{money(totals.expenses)}</td><td data-label='Output VAT'>{money(totals.outputVat)}</td><td data-label='Recoverable VAT'>{money(totals.recoverableVat)}</td><td className='vat-net-cell' data-label='Net VAT'>{money(totals.netVat)}</td></tr></tfoot></table></div>
-      <div className='vat-mobile-cards vat-mobile-only'>{entries.map((entry) => { const entryNetVat = getEntryNetVat(entry, data.vatPricingMode); return <article className='vat-mobile-card' key={`mobile-${entry.month}`}><header><span className='month-cell'><CalendarMonthOutlinedIcon fontSize='small' />{entry.month}</span><span className='currency-pill'>AED</span></header><div className='vat-mobile-input-grid'><label><span>Sales (AED)</span><input type='number' min='0' placeholder='0.00' value={entry.sales} onChange={e => updateEntry(entry.month, 'sales', e.target.value)} /></label><label><span>Purchases (AED)</span><input type='number' min='0' placeholder='0.00' value={entry.purchases} onChange={e => updateEntry(entry.month, 'purchases', e.target.value)} /></label><label><span>Expenses (AED)</span><input type='number' min='0' placeholder='0.00' value={entry.expenses} onChange={e => updateEntry(entry.month, 'expenses', e.target.value)} /></label></div><div className='vat-mobile-metrics'><p><span>Output VAT</span><strong>{money(getEntryOutputVat(entry, data.vatPricingMode))}</strong></p><p><span>Recoverable VAT</span><strong>{money(getEntryRecoverableVat(entry, data.vatPricingMode))}</strong></p><p className={entryNetVat > 0 ? 'net-payable' : entryNetVat < 0 ? 'net-refundable' : 'net-neutral'}><span>Net VAT</span><strong>{entryNetVat > 0 ? 'Payable ' : entryNetVat < 0 ? 'Refundable ' : ''}{money(Math.abs(entryNetVat))}</strong></p></div></article>; })}</div></section>
-      <div className='vat-input-summary-grid summary-kpi-grid kpi-grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'>{metricCards.map((item) => <article className='vat-kpi-card kpi-card' key={item.key}><span className='vat-kpi-icon'>{item.icon}</span><div><p className='kpi-title'>{item.label}</p><strong className='kpi-value'>{money(totals[item.key])}</strong></div></article>)}<article className={`vat-kpi-card kpi-card net-kpi ${totals.netVat > 0 ? 'net-payable' : totals.netVat < 0 ? 'net-refundable' : 'net-neutral'}`}><span className='vat-kpi-icon'><CalculateOutlinedIcon fontSize='small' /></span><div><p className='kpi-title'>Net VAT Payable</p><strong className='kpi-value'>{money(Math.abs(totals.netVat))}</strong></div></article></div>
+      <Stack spacing={1.5}>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <Box>
+            <Typography variant='h6' sx={{ fontWeight: 700 }}>VAT Input</Typography>
+            <Typography variant='body2' color='text.secondary'>Enter sales, purchases, and expenses for the selected VAT period.</Typography>
+          </Box>
+          <Typography sx={{ fontWeight: 700, color: '#2563eb' }}>{step * 25}%</Typography>
+        </Box>
+        <LinearProgress variant='determinate' value={step * 25} sx={{ height: 8, borderRadius: 2 }} />
+        <Stack direction='row' spacing={1} flexWrap='wrap'>
+          <Chip size='small' label={`VAT Mode: ${data.vatPricingMode === VAT_PRICING_MODES.INCLUSIVE ? 'Inclusive' : 'Exclusive'}`} />
+          <Chip size='small' label={`Period: ${formatVatPeriodLabel(data)}`} />
+        </Stack>
+        <Typography variant='caption' color='text.secondary'>VAT is automatically calculated at 5% based on entered values.</Typography>
+      </Stack>
+      <section className='vat-breakdown-card quarterly-breakdown'>
+        <header><h3>{data.filingFrequency} Breakdown</h3><span className='currency-pill'>Currency: <strong>AED</strong></span></header>
+        <div className='vat-monthly-wrap vat-desktop-table table-wrapper'><table className='vat-input-table'><thead><tr><th>Month</th><th>Sales</th><th>Purchases</th><th>Expenses</th><th>Adjustment <Tooltip title='Optional VAT adjustment for corrections or manual VAT adjustments.'><HelpOutlineOutlinedIcon sx={{ fontSize: 14, verticalAlign: 'middle', ml: 0.5 }} /></Tooltip></th></tr></thead><tbody>{entries.map((entry) => <tr key={entry.month}><td data-label='Month'><span className='month-cell'><CalendarMonthOutlinedIcon fontSize='small' />{entry.month}</span></td><td data-label='Sales'><input type='number' min='0' placeholder='0.00' value={entry.sales} onChange={e => updateEntry(entry.month, 'sales', e.target.value)} /></td><td data-label='Purchases'><input type='number' min='0' placeholder='0.00' value={entry.purchases} onChange={e => updateEntry(entry.month, 'purchases', e.target.value)} /></td><td data-label='Expenses'><input type='number' min='0' placeholder='0.00' value={entry.expenses} onChange={e => updateEntry(entry.month, 'expenses', e.target.value)} /></td><td data-label='Adjustment'><input type='number' placeholder='0.00' value={n(entry.adjustment)} onChange={e => updateEntry(entry.month, 'adjustment', e.target.value)} /></td></tr>)}</tbody></table></div>
+      </section>
+      <Stack direction='row' spacing={1} flexWrap='wrap' sx={{ mt: 1 }}>{[
+        { label: 'Total Sales', value: totals.sales },
+        { label: 'Total Purchases', value: totals.purchases },
+        { label: 'Total Expenses', value: totals.expenses },
+        { label: 'Total Adjustments', value: totals.adjustments }
+      ].map((item) => <Box key={item.label} sx={{ px: 1.2, py: 0.7, border: '1px solid #dbe3ef', borderRadius: 2, bgcolor: '#f8fafc', minWidth: 170 }}><Typography sx={{ fontSize: 12, color: '#64748b' }}>{item.label}</Typography><Typography sx={{ fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>{money(item.value)}</Typography></Box>)}</Stack>
     </section>}
     {false && step === 99 && <Box>
       <Stack direction='row' spacing={1.5} alignItems='center' sx={{ mb: 2.5 }}>
@@ -318,7 +326,7 @@ export function VatWizard({ data, setData, onSave, onReset, onProgressChange, fo
     </Box>}
     {step === 3 && <Card sx={{ borderRadius: '14px', border: '1px solid #e5e7eb', bgcolor: '#ffffff', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
       <CardContent sx={{ p: { xs: 1.5, md: 2.2 } }}>
-        <Typography sx={{ fontSize: 28, lineHeight: 1.2, fontWeight: 700, color: '#111827' }}>VAT Return Review</Typography>
+        <Typography sx={{ fontSize: 28, lineHeight: 1.2, fontWeight: 700, color: '#111827' }}>FTA VAT Return Summary</Typography>
         <Typography sx={{ fontSize: 14, color: '#6b7280', mt: 0.5, mb: 1.5 }}>Review your VAT return values before moving to Export.</Typography>
         <Alert icon={<InfoOutlinedIcon fontSize='inherit' />} severity='info' sx={{ mb: 1.8, borderRadius: '10px', border: '1px solid #dbeafe', bgcolor: '#f8fbff', color: '#1e40af', py: 0.2 }}>This summary is generated from your entered VAT sales, purchases, expenses, and adjustments.</Alert>
         <Grid container spacing={1.2} sx={{ mb: 1.6, gridTemplateColumns: { xs: 'repeat(2, minmax(0, 1fr))', md: 'repeat(auto-fit, minmax(160px, 1fr))' }, display: 'grid' }}>
