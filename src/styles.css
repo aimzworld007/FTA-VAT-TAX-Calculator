@@ -473,11 +473,15 @@ tr:nth-child(even) td{background:#fbfdff}
 .wizardPercent{white-space:nowrap}
 .wizardStepper{margin-top:6px;display:flex;align-items:center;gap:10px;-webkit-overflow-scrolling:touch;scrollbar-width:thin}
 .stepCard{position:relative;border-radius:18px!important;border:1px solid #dbe4f0!important;padding:14px 16px!important;background:#fff!important;min-width:220px;display:flex!important;justify-content:flex-start;text-transform:none!important;color:#334155!important;box-shadow:none!important}
+.stepIconWrap{width:40px;height:40px;border-radius:999px;display:flex;align-items:center;justify-content:center;background:#f1f5f9;color:#94a3b8}
 .stepCard.completed{background:linear-gradient(135deg,#2563eb,#1d4ed8)!important;color:#fff!important;border-color:#1d4ed8!important}
 .stepCard.completed .MuiSvgIcon-root{color:#fff}
+.stepCard.completed .stepIconWrap{background:rgba(255,255,255,.16);color:#fff}
 .stepCard.active{border-color:#2563eb!important;background:#eff6ff!important;box-shadow:0 8px 24px rgba(37,99,235,.12)!important;color:#1e3a8a!important}
 .stepCard.active .MuiSvgIcon-root{color:#2563eb}
+.stepCard.active .stepIconWrap{background:#dbeafe;color:#1d4ed8}
 .stepCard.pending .MuiSvgIcon-root{color:#94a3b8}
+.stepCard.pending .stepIconWrap{background:#f1f5f9;color:#94a3b8}
 .stepConnector{height:2px;flex:1;min-width:20px;background:#cbd5e1;border-radius:999px}
 .stepConnector.completed{background:#2563eb}
 .businessCard{border-radius:16px!important;border:1px solid #dbe4f0!important}

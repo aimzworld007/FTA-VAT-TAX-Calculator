@@ -1,9 +1,10 @@
 import React from 'react';
 import { Alert, Box, Button, Card, CardContent, Chip, FormControl, FormHelperText, Grid, InputAdornment, InputLabel, MenuItem, Select, Stack, TextField, Typography } from '@mui/material';
 import BusinessOutlinedIcon from '@mui/icons-material/BusinessOutlined';
+import CalculateOutlinedIcon from '@mui/icons-material/CalculateOutlined';
 import CheckRoundedIcon from '@mui/icons-material/CheckRounded';
-import RadioButtonUncheckedRoundedIcon from '@mui/icons-material/RadioButtonUncheckedRounded';
-import FiberManualRecordRoundedIcon from '@mui/icons-material/FiberManualRecordRounded';
+import IosShareOutlinedIcon from '@mui/icons-material/IosShareOutlined';
+import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import CalendarMonthOutlinedIcon from '@mui/icons-material/CalendarMonthOutlined';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import TrendingUpOutlinedIcon from '@mui/icons-material/TrendingUpOutlined';
@@ -11,7 +12,6 @@ import ShoppingCartOutlinedIcon from '@mui/icons-material/ShoppingCartOutlined';
 import AccountBalanceWalletOutlinedIcon from '@mui/icons-material/AccountBalanceWalletOutlined';
 import NorthOutlinedIcon from '@mui/icons-material/NorthOutlined';
 import SouthOutlinedIcon from '@mui/icons-material/SouthOutlined';
-import CalculateOutlinedIcon from '@mui/icons-material/CalculateOutlined';
 import PlaylistAddCheckCircleOutlinedIcon from '@mui/icons-material/PlaylistAddCheckCircleOutlined';
 import NotesOutlinedIcon from '@mui/icons-material/NotesOutlined';
 import AssessmentOutlinedIcon from '@mui/icons-material/AssessmentOutlined';
@@ -21,7 +21,6 @@ import TuneOutlinedIcon from '@mui/icons-material/TuneOutlined';
 import BalanceOutlinedIcon from '@mui/icons-material/BalanceOutlined';
 import GppGoodOutlinedIcon from '@mui/icons-material/GppGoodOutlined';
 import PrintOutlinedIcon from '@mui/icons-material/PrintOutlined';
-import IosShareOutlinedIcon from '@mui/icons-material/IosShareOutlined';
 import DownloadOutlinedIcon from '@mui/icons-material/DownloadOutlined';
 import ArrowBackOutlinedIcon from '@mui/icons-material/ArrowBackOutlined';
 import ArrowLeftIcon from '@mui/icons-material/ArrowLeft';
@@ -35,7 +34,12 @@ import { MONTHS, formatVatPeriodLabel, getPeriodFromSelection } from './lib/vatP
 import { VAT_PRICING_MODES, splitVatFromAmount } from './lib/vatPricing';
 import { downloadPdf, generateVatPdfBlob } from './services/vatPdfApi';
 
-const steps = ['Business Details', 'VAT Input', 'Preview', 'Export'];
+const steps = [
+  { key: 'business', label: 'Business Details', icon: BusinessOutlinedIcon },
+  { key: 'input', label: 'VAT Input', icon: CalculateOutlinedIcon },
+  { key: 'preview', label: 'Preview', icon: VisibilityOutlinedIcon },
+  { key: 'export', label: 'Export', icon: IosShareOutlinedIcon }
+];
 const n = (v) => Number(v) || 0;
 const clampInput = (v) => Math.max(0, n(v));
 const currentYear = new Date().getFullYear();
@@ -143,10 +147,10 @@ export function VatWizard({ data, setData, onSave, onReset, onProgressChange, fo
     }
   };
   const continueDisabled = (step === 1 && Boolean(reqErr)) || step === 4;
-  const stepMeta = steps.map((label, i) => {
+  const stepMeta = steps.map((stepItem, i) => {
     const stepNumber = i + 1;
     const status = stepNumber < step ? 'completed' : stepNumber === step ? 'active' : 'pending';
-    return { label, stepNumber, status };
+    return { ...stepItem, stepNumber, status };
   });
   return <div className='vat-wizard vatWizardPage'>
     <Button
@@ -170,8 +174,8 @@ export function VatWizard({ data, setData, onSave, onReset, onProgressChange, fo
             {stepMeta.map((item, idx) => <React.Fragment key={item.label}>
               <Button disableRipple onClick={() => navigateToStep ? navigateToStep(stepToPath[item.stepNumber]) : setStep(item.stepNumber)} className={`stepCard ${item.status}`}>
                 <Stack spacing={1}>
-                  <Box sx={{ width: 28, height: 28, borderRadius: '999px', display: 'grid', placeItems: 'center' }}>
-                    {item.status === 'completed' ? <CheckRoundedIcon sx={{ fontSize: 18 }} /> : item.status === 'active' ? <FiberManualRecordRoundedIcon sx={{ fontSize: 12 }} /> : <RadioButtonUncheckedRoundedIcon sx={{ fontSize: 16 }} />}
+                  <Box className='stepIconWrap'>
+                    {item.status === 'completed' ? <CheckRoundedIcon sx={{ fontSize: 20 }} /> : <item.icon style={{ fontSize: 19 }} />}
                   </Box>
                   <Box>
                     <Typography sx={{ fontSize: 13, fontWeight: 700, textAlign: 'left', textTransform: 'none', color: 'inherit' }}>{item.label}</Typography>
