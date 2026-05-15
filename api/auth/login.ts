@@ -15,5 +15,5 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (!match) return fail(res, 401, 'Invalid credentials');
   const token = signAuthToken({ sub: user.id, email: user.email, role: user.role as 'USER' | 'SUPERADMIN' });
   setAuthCookie(res, token);
-  return ok(res, { user: { id: user.id, name: user.name, email: user.email, role: user.role } });
+  return ok(res, { user: { id: user.id, name: user.fullName, email: user.email, role: user.role } });
 }

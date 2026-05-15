@@ -46,7 +46,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const passwordHash = await bcrypt.hash(password, 12);
     const user = await prisma.user.create({
       data: {
-        name: name.trim(),
+        fullName: name.trim(),
         email: normalizedEmail,
         passwordHash,
         role: 'USER'
@@ -65,7 +65,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       ok: true,
       user: {
         id: user.id,
-        name: user.name,
+        name: user.fullName,
         email: user.email,
         role: user.role
       }

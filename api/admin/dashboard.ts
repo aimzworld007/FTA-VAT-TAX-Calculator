@@ -12,7 +12,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     prisma.user.count(),
     prisma.user.count({ where: { isActive: true } }),
     prisma.vatRecord.count(),
-    prisma.taxRecord.count(),
+    prisma.corporateTaxRecord.count(),
   ]);
 
   return ok(res, { totalUsers, activeUsers, vatRecordsCount, taxRecordsCount, systemHealth: 'ok' });
