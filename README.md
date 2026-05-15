@@ -30,6 +30,28 @@ VITE_API_BASE_URL=https://your-api-domain.com
 
 in a local `.env` file.
 
+## Database Setup (Prisma + PostgreSQL)
+
+After setting `DATABASE_URL` in your local `.env`, run Prisma in this order:
+
+```bash
+npm install
+npx prisma generate
+npx prisma migrate dev --name init
+npx prisma studio
+```
+
+Notes:
+- `prisma generate` creates Prisma Client only.
+- `prisma migrate dev` creates SQL migration files and applies them to create tables.
+- If Prisma Studio shows no models/tables, migrations were likely not applied yet.
+
+For production deployments (for example Vercel), run migrations during deployment with:
+
+```bash
+npx prisma migrate deploy
+```
+
 ## Production Build
 
 ```bash
