@@ -46,7 +46,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const passwordHash = await bcrypt.hash(password, 12);
     const user = await prisma.user.create({
       data: {
-        fullName: name.trim(),
+        name: name.trim(),
         email: normalizedEmail,
         passwordHash,
         role: 'USER'
@@ -56,7 +56,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const token = signAuthToken({
       sub: user.id,
       email: user.email,
-      role: user.role as 'USER' | 'ADMIN' | 'SUPERADMIN'
+      role: user.role as 'USER' | 'SUPERADMIN'
     });
 
     setAuthCookie(res, token);
@@ -65,7 +65,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       ok: true,
       user: {
         id: user.id,
-        name: user.fullName,
+        name: user.name,
         email: user.email,
         role: user.role
       }

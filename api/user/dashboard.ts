@@ -9,7 +9,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const userId = auth.sub;
   const [vatCount, taxCount] = await Promise.all([
     prisma.vatRecord.count({ where: { userId } }),
-    prisma.corporateTaxRecord.count({ where: { userId } }),
+    prisma.taxRecord.count({ where: { userId } }),
   ]);
   return ok(res, { totalVatRecords: vatCount, totalCorporateTaxRecords: taxCount });
 }

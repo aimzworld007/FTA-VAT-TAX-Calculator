@@ -13,7 +13,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (!user || !user.isActive) return fail(res, 401, 'Invalid credentials');
   const match = await bcrypt.compare(password, user.passwordHash);
   if (!match) return fail(res, 401, 'Invalid credentials');
-  const token = signAuthToken({ sub: user.id, email: user.email, role: user.role as 'USER' | 'ADMIN' | 'SUPERADMIN' });
+  const token = signAuthToken({ sub: user.id, email: user.email, role: user.role as 'USER' | 'SUPERADMIN' });
   setAuthCookie(res, token);
-  return ok(res, { user: { id: user.id, name: user.fullName, email: user.email, role: user.role } });
+  return ok(res, { user: { id: user.id, name: user.name, email: user.email, role: user.role } });
 }

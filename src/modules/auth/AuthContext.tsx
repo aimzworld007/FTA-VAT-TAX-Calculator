@@ -5,7 +5,7 @@ type AuthUser = {
   email: string;
   fullName?: string;
   phone?: string;
-  role?: 'USER' | 'ADMIN' | 'SUPERADMIN';
+  role?: 'USER' | 'SUPERADMIN';
   isActive?: boolean;
 };
 
