@@ -19,7 +19,8 @@ type AuthContextValue = {
 };
 
 const AuthContext = React.createContext<AuthContextValue | undefined>(undefined);
-const API = '/api/auth';
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '');
+const API = `${API_BASE_URL}/api/auth`;
 const ACCESS_KEY = 'fta_access_token';
 const USER_KEY = 'fta_auth_user';
 
@@ -37,16 +38,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     else localStorage.removeItem(USER_KEY);
   };
 
+  const readResponseBody = async (res: Response) => {
+    const contentType = res.headers.get('content-type') || '';
+    if (contentType.includes('application/json')) return res.json();
+    const text = await res.text();
+    return { error: text || 'Unexpected server response' };
+  };
+
   const login = React.useCallback(async (email: string, password: string) => {
     setLoading(true);
     try {
       const res = await fetch(`${API}/login`, { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password }) });
-      const data = await res.json();
+      const data = await readResponseBody(res);
       if (!res.ok) return { ok: false, error: data?.error || 'Login failed' };
       localStorage.setItem(ACCESS_KEY, data.accessToken);
       persistUser(data.user);
       return { ok: true };
-    } catch { return { ok: false, error: 'Unable to reach server' }; }
+    } catch {
+      return {
+        ok: false,
+        error: 'Unable to reach server. Ensure backend is running and VITE_API_BASE_URL is configured if API is hosted separately.',
+      };
+    }
     finally { setLoading(false); }
   }, []);
 
@@ -54,10 +67,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setLoading(true);
     try {
       const res = await fetch(`${API}/register`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-      const data = await res.json();
+      const data = await readResponseBody(res);
       if (!res.ok) return { ok: false, error: data?.error || 'Registration failed' };
       return await login(payload.email, payload.password);
-    } catch { return { ok: false, error: 'Unable to reach server' }; }
+    } catch {
+      return {
+        ok: false,
+        error: 'Unable to reach server. Ensure backend is running and VITE_API_BASE_URL is configured if API is hosted separately.',
+      };
+    }
     finally { setLoading(false); }
   }, [login]);
 
@@ -71,11 +89,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const token = localStorage.getItem(ACCESS_KEY);
       const res = await fetch(`${API}/profile`, { method: 'PATCH', credentials: 'include', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify(next) });
-      const data = await res.json();
+      const data = await readResponseBody(res);
       if (!res.ok) return { ok: false, error: data?.error || 'Update failed' };
       persistUser(data.user);
       return { ok: true };
-    } catch { return { ok: false, error: 'Unable to reach server' }; }
+    } catch {
+      return {
+        ok: false,
+        error: 'Unable to reach server. Ensure backend is running and VITE_API_BASE_URL is configured if API is hosted separately.',
+      };
+    }
   }, []);
 
   return <AuthContext.Provider value={{ user, loading, login, register, logout, updateProfile }}>{children}</AuthContext.Provider>;

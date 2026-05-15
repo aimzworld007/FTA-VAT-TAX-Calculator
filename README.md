@@ -18,8 +18,17 @@ Deploy-ready Vite + React app for UAE VAT Return and UAE Corporate Tax estimatio
 
 ```bash
 npm install
+npm run dev:api
 npm run dev
 ```
+
+If your API runs on another host (instead of `http://localhost:8787`), add:
+
+```bash
+VITE_API_BASE_URL=https://your-api-domain.com
+```
+
+in a local `.env` file.
 
 ## Production Build
 
