@@ -8,6 +8,7 @@ import { VatWizard } from '../features/tax/VatWizard';
 import { CorporateTaxWizard } from '../features/tax/CorporateTaxWizard';
 import { PremiumHome, AppShell } from '../features/home/PremiumHome';
 import { PublicLandingPage } from '../features/home/PublicLandingPage';
+import { AuthProvider, useAuth } from '../modules/auth/AuthContext';
 
 const mapStep = { 'business-details': 1, input: 2, preview: 3, export: 4 };
 const mapTaxStep = { 'business-details': 1, input: 3, preview: 5, export: 6 };
@@ -81,8 +82,10 @@ function ResourcePage({ page, onBack }: { page: (typeof resourcePages)['/documen
 function LoginPage() {
   const { navigate } = usePathname();
   const { login, loading } = useAuth();
+  const [fullName, setFullName] = React.useState('');
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
+  const [confirmPassword, setConfirmPassword] = React.useState('');
   const [error, setError] = React.useState('');
 
   const onSubmit = async (event: React.FormEvent) => {
@@ -104,14 +107,14 @@ function LoginPage() {
 
 function ProfilePage() {
   const { user, updateProfile } = useAuth();
-  const [name, setName] = React.useState(user?.name || '');
-  const [email, setEmail] = React.useState(user?.email || '');
+  const [name, setName] = React.useState(user?.fullName || '');
+  const [phone, setPhone] = React.useState(user?.phone || '');
 
   return <AppShell><Card sx={{ maxWidth: 560 }}><CardContent><Stack spacing={2}>
     <Typography variant='h5' sx={{ fontWeight: 800 }}>Profile Management</Typography>
-    <TextField label='Name' value={name} onChange={(e) => setName(e.target.value)} />
-    <TextField label='Email' value={email} onChange={(e) => setEmail(e.target.value)} />
-    <Button variant='contained' onClick={() => updateProfile({ name, email })}>Save Profile</Button>
+    <TextField label='Full Name' value={name} onChange={(e) => setName(e.target.value)} />
+    <TextField label='Phone' value={phone} onChange={(e) => setPhone(e.target.value)} />
+    <Button variant='contained' onClick={() => updateProfile({ fullName: name, phone })}>Save Profile</Button>
   </Stack></CardContent></Card></AppShell>;
 }
 
@@ -119,21 +122,25 @@ function ProfilePage() {
 function RegisterPage() {
   const { navigate } = usePathname();
   const { register, loading } = useAuth();
+  const [fullName, setFullName] = React.useState('');
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
+  const [confirmPassword, setConfirmPassword] = React.useState('');
   const [error, setError] = React.useState('');
 
   const onSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    const result = await register(email, password);
+    const result = await register({ fullName, email, password, confirmPassword });
     if (result.ok) navigate('/');
     else setError(result.error || 'Registration failed');
   };
 
   return <AppShell><Card sx={{ maxWidth: 440, mx: 'auto' }}><CardContent><Stack component='form' spacing={2} onSubmit={onSubmit}>
     <Typography variant='h5' sx={{ fontWeight: 800 }}>Register</Typography>
+    <TextField label='Full Name' value={fullName} onChange={(e) => setFullName(e.target.value)} required />
     <TextField label='Email' type='email' value={email} onChange={(e) => setEmail(e.target.value)} required />
     <TextField label='Password' type='password' value={password} onChange={(e) => setPassword(e.target.value)} helperText='Minimum 8 characters' required />
+    <TextField label='Confirm Password' type='password' value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required />
     {error ? <Alert severity='error'>{error}</Alert> : null}
     <Button type='submit' variant='contained' disabled={loading}>{loading ? 'Please wait...' : 'Create account'}</Button>
   </Stack></CardContent></Card></AppShell>;
@@ -142,7 +149,7 @@ function RegisterPage() {
 function UserDashboardPage() {
   const { user } = useAuth();
   return <AppShell><Stack spacing={2}><Typography variant='h4' sx={{ fontWeight: 800 }}>User Dashboard</Typography>
-    <Typography sx={{ color: '#475569' }}>Welcome, {user?.name}. Manage VAT, Corporate Tax and your profile from one place.</Typography>
+    <Typography sx={{ color: '#475569' }}>Welcome, {user?.fullName || user?.email}. Manage VAT, Corporate Tax and your profile from one place.</Typography>
     <Stack direction={{ xs: 'column', md: 'row' }} spacing={1.2}>
       <Button component={RouteLink} to='/vat/business-details' variant='contained'>Start VAT Return</Button>
       <Button component={RouteLink} to='/tax/business-details' variant='contained' color='secondary'>Start Corporate Tax</Button>
@@ -178,7 +185,11 @@ function RoutedModules() {
   }, [pathname, module, step, guardVat, guardTax, navigate]);
 
   if (pathname === '/') return <PublicLandingPage />;
-  if (pathname === '/dashboard') return <PremiumHome />;
+  if (pathname === '/login') return <LoginPage />;
+  if (pathname === '/register') return <RegisterPage />;
+  if (pathname === '/profile') return user ? <ProfilePage /> : <LoginPage />;
+  if (pathname === '/admin') return user?.role === 'ADMIN' ? <AppShell><Typography variant='h4'>Admin Dashboard</Typography></AppShell> : <AppShell><Alert severity='error'>Admin access required.</Alert></AppShell>;
+  if (pathname === '/dashboard') return user ? <UserDashboardPage /> : <LoginPage />;
   if (pathname in resourcePages) return <ResourcePage page={resourcePages[pathname as keyof typeof resourcePages]} onBack={() => navigate('/')} />;
   if (module === 'vat') {
     return <AppShell><VatWizard data={vat} setData={setVat} forcedStep={mapStep[step] || 1} navigateToStep={navigate} /></AppShell>;

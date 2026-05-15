@@ -26,6 +26,17 @@ export async function createTaxRecord(req, res) {
     },
   });
 
+
+  if (taxType === 'VAT') {
+    await prisma.vatRecord.create({
+      data: { userId: req.user.id, periodStart: periodStart ? new Date(periodStart) : null, periodEnd: periodEnd ? new Date(periodEnd) : null, inputPayload, resultPayload },
+    });
+  } else {
+    await prisma.corporateTaxRecord.create({
+      data: { userId: req.user.id, periodStart: periodStart ? new Date(periodStart) : null, periodEnd: periodEnd ? new Date(periodEnd) : null, inputPayload, resultPayload },
+    });
+  }
+
   return res.status(201).json({ record: created });
 }
 
