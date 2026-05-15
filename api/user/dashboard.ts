@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { prisma } from '../../src/lib/prisma';
-import { ok } from '../../src/server/apiResponse';
-import { requireAuth } from '../../src/server/requireAuth';
+import { prisma } from '../../src/lib/prisma.js';
+import { ok } from '../../src/server/apiResponse.js';
+import { requireAuth } from '../../src/server/requireAuth.js';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   const auth = requireAuth(req, res);

@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import { getDatabaseUrl } from '../server/env';
+import { getDatabaseUrl } from '../server/env.js';
 
 declare global {
   // Prevent duplicate PrismaClient instances during local hot-reload in development.

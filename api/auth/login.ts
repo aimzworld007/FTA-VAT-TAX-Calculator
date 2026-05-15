@@ -1,9 +1,9 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import bcrypt from 'bcrypt';
-import { prisma } from '../../src/lib/prisma';
-import { fail, ok } from '../../src/server/apiResponse';
-import { signAuthToken } from '../../src/server/auth';
-import { setAuthCookie } from '../../src/server/cookies';
+import { prisma } from '../../src/lib/prisma.js';
+import { fail, ok } from '../../src/server/apiResponse.js';
+import { signAuthToken } from '../../src/server/auth.js';
+import { setAuthCookie } from '../../src/server/cookies.js';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') return fail(res, 405, 'Method not allowed');
