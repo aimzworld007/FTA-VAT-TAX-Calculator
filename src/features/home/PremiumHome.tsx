@@ -3,7 +3,6 @@ import {
   Avatar,
   Box,
   Button,
-  Chip,
   Drawer,
   IconButton,
   InputBase,
@@ -20,11 +19,11 @@ import PolicyIcon from '@mui/icons-material/Policy';
 import GavelIcon from '@mui/icons-material/Gavel';
 import ChevronRightRoundedIcon from '@mui/icons-material/ChevronRightRounded';
 import GridViewRoundedIcon from '@mui/icons-material/GridViewRounded';
-import ArrowForwardRoundedIcon from '@mui/icons-material/ArrowForwardRounded';
 import HelpOutlineRoundedIcon from '@mui/icons-material/HelpOutlineRounded';
 import { Building2, FileSpreadsheet } from 'lucide-react';
 import { RouteLink, usePathname } from '../../components/Router';
 import { AppFooter } from '../layout/AppFooter';
+import { useAuth } from '../../modules/auth/AuthContext';
 
 const SHELL = {
   sidebarWidth: 260,
@@ -35,10 +34,6 @@ const SHELL = {
   colorBorder: '#e5eaf2',
 };
 
-const moduleItems = [
-  { title: 'FTA VAT Return', description: 'Prepare VAT returns with guided period and transaction workflows.', image: '/FTA_VAT_RETRUN.PNG', to: '/vat/business-details' },
-  { title: 'FTA Corporate Tax', description: 'Estimate corporate tax and organize annual filing data quickly.', image: '/FTA_CORPORATE_TAX.PNG', to: '/tax/business-details' },
-];
 const resourceItems = [
   { title: 'Documentation', description: 'User guides, manuals, and technical documentation', to: '/documentation', icon: <DescriptionIcon fontSize='small' /> },
   { title: 'Privacy Policy', description: 'Learn how we collect, use, and protect your data', to: '/privacy-policy', icon: <PolicyIcon fontSize='small' /> },
@@ -72,22 +67,43 @@ function Sidebar({ mobile = false, onClose }: { mobile?: boolean; onClose?: () =
   </Box>;
 }
 
-function TopNavbar({ onMenuClick, mobile }: { onMenuClick: () => void; mobile: boolean }) { return <Box sx={{ position: 'sticky', top: 0, zIndex: 20, borderBottom: `1px solid ${SHELL.colorBorder}`, bgcolor: 'rgba(255,255,255,.98)', backdropFilter: 'blur(5px)' }}><Stack direction='row' alignItems='center' justifyContent='space-between' sx={{ minHeight: 72, px: { xs: 1.5, sm: 2.5 }, gap: 1.2 }}><Stack direction='row' alignItems='center' gap={1.2} sx={{ minWidth: 0, flex: 1 }}><IconButton onClick={onMenuClick} sx={{ width: 44, height: 44 }}><MenuIcon /></IconButton>{!mobile && <Stack direction='row' alignItems='center' sx={{ border: `1px solid ${SHELL.colorBorder}`, borderRadius: 1.8, px: 1.2, py: 0.8, width: 'min(460px,100%)', bgcolor: '#f8fafc' }}><SearchIcon sx={{ color: '#64748b', fontSize: 20 }} /><InputBase placeholder='Search modules, documents...' sx={{ ml: 1, fontSize: '0.95rem', flex: 1 }} /></Stack>}</Stack><Stack direction='row' alignItems='center' gap={1.4}><IconButton sx={{ width: 40, height: 40 }}><NotificationsNoneRoundedIcon /></IconButton><Box sx={{ display: { xs: 'none', sm: 'block' } }}><Typography sx={{ color: '#64748b', fontSize: '0.75rem' }}>Welcome back!</Typography><Typography sx={{ fontWeight: 700, fontSize: '0.95rem' }}>Admin User</Typography></Box><Avatar sx={{ bgcolor: SHELL.colorPrimary, width: 36, height: 36, fontSize: '0.9rem' }}>AD</Avatar></Stack></Stack>{mobile && <Box sx={{ px: 1.8, pb: 1.4 }}><Stack direction='row' alignItems='center' sx={{ border: `1px solid ${SHELL.colorBorder}`, borderRadius: 1.6, px: 1.2, py: 0.8, bgcolor: '#f8fafc' }}><SearchIcon sx={{ color: '#64748b', fontSize: 20 }} /><InputBase placeholder='Search modules, documents...' sx={{ ml: 1, fontSize: '0.95rem', flex: 1 }} /></Stack></Box>}</Box>; }
+function TopNavbar({ onMenuClick, mobile }: { onMenuClick: () => void; mobile: boolean }) {
+  const { user, logout } = useAuth();
+  return <Box sx={{ position: 'sticky', top: 0, zIndex: 20, borderBottom: `1px solid ${SHELL.colorBorder}`, bgcolor: 'rgba(255,255,255,.98)', backdropFilter: 'blur(5px)' }}><Stack direction='row' alignItems='center' justifyContent='space-between' sx={{ minHeight: 72, px: { xs: 1.5, sm: 2.5 }, gap: 1.2 }}><Stack direction='row' alignItems='center' gap={1.2} sx={{ minWidth: 0, flex: 1 }}><IconButton onClick={onMenuClick} sx={{ width: 44, height: 44 }}><MenuIcon /></IconButton>{!mobile && <Stack direction='row' alignItems='center' sx={{ border: `1px solid ${SHELL.colorBorder}`, borderRadius: 1.8, px: 1.2, py: 0.8, width: 'min(460px,100%)', bgcolor: '#f8fafc' }}><SearchIcon sx={{ color: '#64748b', fontSize: 20 }} /><InputBase placeholder='Search modules, documents...' sx={{ ml: 1, fontSize: '0.95rem', flex: 1 }} /></Stack>}</Stack><Stack direction='row' alignItems='center' gap={1.4}><IconButton sx={{ width: 40, height: 40 }}><NotificationsNoneRoundedIcon /></IconButton><Box sx={{ display: { xs: 'none', sm: 'block' } }}><Typography sx={{ color: '#64748b', fontSize: '0.75rem' }}>Welcome back!</Typography><Typography sx={{ fontWeight: 700, fontSize: '0.95rem' }}>{user?.name || 'Guest User'}</Typography></Box><Stack direction='row' spacing={1} alignItems='center'><Button component={RouteLink} to='/profile' variant='text' sx={{ textTransform: 'none' }}>Profile</Button><Button onClick={logout} variant='outlined' size='small' sx={{ textTransform: 'none' }}>Logout</Button><Avatar sx={{ bgcolor: SHELL.colorPrimary, width: 36, height: 36, fontSize: '0.9rem' }}>{(user?.name?.[0] || 'G').toUpperCase()}</Avatar></Stack></Stack></Stack>{mobile && <Box sx={{ px: 1.8, pb: 1.4 }}><Stack direction='row' alignItems='center' sx={{ border: `1px solid ${SHELL.colorBorder}`, borderRadius: 1.6, px: 1.2, py: 0.8, bgcolor: '#f8fafc' }}><SearchIcon sx={{ color: '#64748b', fontSize: 20 }} /><InputBase placeholder='Search modules, documents...' sx={{ ml: 1, fontSize: '0.95rem', flex: 1 }} /></Stack></Box>}</Box>; }
 
-function ModuleImage({ title, image }: { title: string; image: string }) {
-  const [hasImageError, setHasImageError] = React.useState(false);
-  const fallbackIcon = title.toLowerCase().includes('corporate') ? <Building2 size={26} /> : <FileSpreadsheet size={26} />;
 
-  if (hasImageError) {
-    return <Box sx={{ color: '#2563eb', display: 'grid', placeItems: 'center' }}>{fallbackIcon}</Box>;
-  }
+function HomeContent() {
+  return (
+    <Box sx={{ bgcolor: '#fff', border: `1px solid ${SHELL.colorBorder}`, borderRadius: SHELL.radiusCard, p: { xs: 2, md: 3 } }}>
+      <Stack spacing={2}>
+        <Typography sx={{ fontWeight: 800, fontSize: { xs: '1.8rem', md: '2.2rem' }, color: '#0f172a' }}>
+          UAE VAT & Tax Assistant
+        </Typography>
+        <Typography sx={{ color: '#475569', maxWidth: 760 }}>
+          A simple app to prepare VAT returns and estimate Corporate Tax with guided workflows.
+        </Typography>
 
-  return <Box component='img' src={image} alt={title} onError={() => setHasImageError(true)} sx={{ width: '100%', height: '100%', objectFit: 'contain' }} />;
+        <Box>
+          <Typography sx={{ fontWeight: 700, mb: 1 }}>Features</Typography>
+          <Box component='ul' sx={{ m: 0, pl: 2.5, color: '#334155' }}>
+            <li>Guided VAT return workflow with summaries.</li>
+            <li>Corporate Tax calculation and report preview.</li>
+            <li>Export-ready reports for filing records.</li>
+          </Box>
+        </Box>
+
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.2}>
+          <Button component={RouteLink} to='/vat/business-details' variant='contained' sx={{ textTransform: 'none', borderRadius: SHELL.radiusButton }}>
+            Get Started
+          </Button>
+          <Button component={RouteLink} to='/login' variant='outlined' sx={{ textTransform: 'none', borderRadius: SHELL.radiusButton }}>
+            Login
+          </Button>
+        </Stack>
+      </Stack>
+    </Box>
+  );
 }
-
-function HomeContent() { return <><Box sx={{ background: 'linear-gradient(135deg, #eff6ff 0%, #ffffff 55%, #dbeafe 100%)', border: `1px solid ${SHELL.colorBorder}`, borderRadius: SHELL.radiusCard, p: { xs: '18px 16px', sm: '22px 24px', md: '28px 32px' }, boxShadow: '0 8px 30px rgba(37,99,235,0.08)' }}><Stack direction={{ xs: 'column', md: 'row' }} justifyContent='space-between' alignItems='center' gap={{ xs: 1.75, md: 3 }}><Box sx={{ maxWidth: 860, display: 'flex', flexDirection: 'column', gap: 1.2 }}><Typography sx={{ m: 0, color: '#64748b', fontWeight: 700, fontSize: { xs: '1rem', md: '1.08rem' }, letterSpacing: '0.02em' }}>Welcome to</Typography><Typography sx={{ m: 0, color: '#0f1f49', fontWeight: 800, fontSize: { xs: 'clamp(2rem, 9vw, 3rem)', md: '2.7rem' }, lineHeight: 1.05 }}>UAE VAT & Tax Assistant</Typography><Typography sx={{ m: 0, color: '#475569', fontSize: { xs: '0.95rem', md: '1.1rem' } }}>Your all-in-one workspace for FTA compliance and tax management</Typography><Stack direction='row' gap={{ xs: 0.75, md: 1 }} flexWrap='wrap' sx={{ mt: 0.6 }}>{['FTA Ready', 'Secure', 'Smart Workflow'].map((chip) => <Chip key={chip} label={chip} sx={{ height: { xs: 28, md: 30 }, borderRadius: 999, bgcolor: '#fff', border: '1px solid #bfdbfe', '& .MuiChip-label': { fontWeight: 600, color: '#1d4ed8', px: { xs: 1.1, md: 1.5 } } }} />)}</Stack></Box><Box sx={{ alignSelf: 'center', display: { xs: 'none', md: 'block' }, width: { md: '22vw' }, maxWidth: 220 }}><img src='/dashboard-hero-illustration.svg?v=2' alt='FTA VAT and Tax Assistant' className='dashboardHeroImage' /></Box></Stack></Box>
-  <Typography sx={{ fontWeight: 800, fontSize: { xs: '1.4rem', md: '1.8rem' }, color: '#0f172a', px: 0.4, mt: 0.2 }}>Choose a tax module</Typography>
-  <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', lg: '1fr 1fr' }, gap: 2 }}>{moduleItems.map((item) => <Box key={item.title} component={RouteLink} to={item.to} sx={{ textDecoration: 'none', color: 'inherit', bgcolor: '#fff', border: `1px solid ${SHELL.colorBorder}`, borderRadius: SHELL.radiusCard, p: { xs: 1.8, md: 2.3 }, boxShadow: '0 2px 8px rgba(15,23,42,0.04)', transition: 'all .2s ease', '&:hover': { transform: 'translateY(-2px)', boxShadow: '0 10px 25px rgba(37,99,235,0.12)', borderColor: '#bfdbfe' } }}><Stack direction='row' gap={1.2} alignItems='center'><Box sx={{ width: { xs: 54, md: 64 }, height: { xs: 54, md: 64 }, border: `1px solid ${SHELL.colorBorder}`, borderRadius: 1.2, p: 0.6, display: 'grid', placeItems: 'center', flexShrink: 0 }}><ModuleImage title={item.title} image={item.image} /></Box><Box sx={{ flex: 1, minWidth: 0 }}><Typography sx={{ fontWeight: 800, fontSize: { xs: '1.1rem', md: '1.35rem' } }}>{item.title}</Typography><Typography sx={{ color: '#58657e', mt: 0.4, fontSize: { xs: '0.9rem', md: '0.98rem' } }}>{item.description}</Typography></Box><Box sx={{ width: 42, height: 42, borderRadius: SHELL.radiusButton, bgcolor: SHELL.colorPrimary, color: '#fff', display: 'grid', placeItems: 'center', flexShrink: 0 }}><ArrowForwardRoundedIcon fontSize='small' /></Box></Stack><Stack direction='row' flexWrap='wrap' gap={1} sx={{ mt: 1.6, pt: 1.4, borderTop: `1px solid ${SHELL.colorBorder}` }}>{['Guided workflow', 'Live summaries', 'Export options'].map((chip) => <Chip key={chip} label={chip} sx={{ height: 30, borderRadius: 10, bgcolor: '#f1f5fb', '& .MuiChip-label': { px: 1.2, fontSize: '0.79rem' } }} />)}</Stack></Box>)}</Box></>; }
 
 export function AppShell({ children }: { children?: React.ReactNode }) {
   const theme = useTheme();
