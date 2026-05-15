@@ -188,7 +188,7 @@ function RoutedModules() {
   if (pathname === '/login') return <LoginPage />;
   if (pathname === '/register') return <RegisterPage />;
   if (pathname === '/profile') return user ? <ProfilePage /> : <LoginPage />;
-  if (pathname === '/admin') return user?.role === 'ADMIN' ? <AppShell><Typography variant='h4'>Admin Dashboard</Typography></AppShell> : <AppShell><Alert severity='error'>Admin access required.</Alert></AppShell>;
+  if (pathname === '/admin') return ['ADMIN','SUPERADMIN'].includes(user?.role || '') ? <AppShell><Typography variant='h4'>Admin Dashboard</Typography></AppShell> : <AppShell><Alert severity='error'>Admin access required.</Alert></AppShell>;
   if (pathname === '/dashboard') return user ? <UserDashboardPage /> : <LoginPage />;
   if (pathname in resourcePages) return <ResourcePage page={resourcePages[pathname as keyof typeof resourcePages]} onBack={() => navigate('/')} />;
   if (module === 'vat') {

@@ -15,6 +15,7 @@ enum TaxType {
 enum UserRole {
   USER
   ADMIN
+  SUPERADMIN
 }
 
 enum ReminderType {

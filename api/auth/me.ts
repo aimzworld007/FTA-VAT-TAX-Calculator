@@ -1,0 +1,12 @@
+import type { VercelRequest, VercelResponse } from '@vercel/node';
+import { prisma } from '../../src/lib/prisma';
+import { fail, ok } from '../../src/server/apiResponse';
+import { requireAuth } from '../../src/server/requireAuth';
+
+export default async function handler(req: VercelRequest, res: VercelResponse) {
+  const auth = requireAuth(req, res);
+  if (!auth) return;
+  const user = await prisma.user.findUnique({ where: { id: auth.sub } });
+  if (!user) return fail(res, 404, 'User not found');
+  return ok(res, { user: { id: user.id, name: user.fullName, email: user.email, role: user.role } });
+}
