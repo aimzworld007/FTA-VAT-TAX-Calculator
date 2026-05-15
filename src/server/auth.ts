@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-import { getJwtSecret } from './env';
+import { getJwtSecret } from './env.js';
 
 export type Role = 'USER' | 'ADMIN' | 'SUPERADMIN';
 export type AuthClaims = { sub: string; email: string; role: Role };
