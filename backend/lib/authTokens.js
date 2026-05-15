@@ -5,7 +5,7 @@ const ACCESS_TOKEN_EXPIRES = process.env.ACCESS_TOKEN_EXPIRES || '15m';
 const REFRESH_TOKEN_EXPIRES_DAYS = Number(process.env.REFRESH_TOKEN_EXPIRES_DAYS || 30);
 
 export function signAccessToken(user) {
-  return jwt.sign({ sub: user.id, email: user.email }, process.env.JWT_ACCESS_SECRET, {
+  return jwt.sign({ sub: user.id, email: user.email, role: user.role, fullName: user.fullName, isActive: user.isActive }, process.env.JWT_ACCESS_SECRET, {
     expiresIn: ACCESS_TOKEN_EXPIRES,
   });
 }
