@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import { getDatabaseUrl } from '../server/env';
 
 declare global {
   // Prevent duplicate PrismaClient instances during local hot-reload in development.
@@ -11,6 +12,7 @@ declare global {
 const prismaClient =
   globalThis.__prisma__ ??
   new PrismaClient({
+    datasources: { db: { url: getDatabaseUrl() } },
     log: process.env.NODE_ENV === 'development' ? ['warn', 'error'] : ['error']
   });
 
