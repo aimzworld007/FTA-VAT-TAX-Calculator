@@ -1,0 +1,26 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    // Vercel's TypeScript step and Vite both expect ESM-aware module resolution.
+    // `bundler` avoids Node16-style extension enforcement in frontend code while
+    // still supporting modern ESM import analysis for serverless builds.
+    "moduleResolution": "bundler",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "jsx": "react-jsx",
+    // `node` types are required for serverless files that use Node globals like
+    // `process` and Prisma runtime APIs; `vite/client` keeps frontend typings intact.
+    "types": ["vite/client", "node"],
+    "strict": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "allowJs": true,
+    "checkJs": false,
+    "isolatedModules": true,
+    "resolveJsonModule": true,
+    "useDefineForClassFields": true,
+    "verbatimModuleSyntax": true
+  },
+  "include": ["src", "api", "vite.config.js"],
+  "exclude": ["node_modules", "dist", "backend"]
+}

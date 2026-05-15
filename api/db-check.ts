@@ -1,4 +1,4 @@
-import { prisma } from '../src/lib/prisma';
+import { prisma } from '../src/lib/prisma.ts';
 
 type ApiRequest = { method?: string };
 type ApiResponse = {
@@ -25,8 +25,11 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
       ok: true,
       message: 'Database connected successfully'
     });
-  } catch {
+  } catch (error) {
     // Never return raw database errors to avoid leaking credentials or topology.
+    // Avoid leaking runtime internals in API responses; keep details in server logs only.
+    console.error('db-check failed', error);
+
     await prisma.$disconnect().catch(() => undefined);
 
     return res.status(500).json({
