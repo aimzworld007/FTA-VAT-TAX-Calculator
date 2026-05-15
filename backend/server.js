@@ -30,6 +30,27 @@ app.get('/api/health', (_, res) => {
   res.json({ status: 'ok' });
 });
 
+
+app.use((error, _req, res, _next) => {
+  const isPrismaInitError =
+    error?.name === 'PrismaClientInitializationError' ||
+    error?.code === 'P1001' ||
+    error?.code === 'P1012';
+
+  if (isPrismaInitError) {
+    return res.status(503).json({
+      error: 'Database is not ready. Run Prisma migrations and ensure DATABASE_URL is valid.',
+      code: error?.code || 'PRISMA_INIT_ERROR',
+    });
+  }
+
+  console.error(error);
+  return res.status(500).json({
+    error: 'Internal server error',
+  });
+});
+
+
 const port = process.env.PORT || 8787;
 app.listen(port, () => {
   console.log(`VAT PDF server listening on ${port}`);
