@@ -1,9 +1,22 @@
-import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { prisma } from "../src/lib/prisma";
 
+type JsonValue = string | number | boolean | null | JsonValue[] | { [key: string]: JsonValue };
+
+type VercelRequestLike = {
+  method?: string;
+  body?: unknown;
+  query?: Record<string, string | string[] | undefined>;
+  headers?: Record<string, string | string[] | undefined>;
+};
+
+type VercelResponseLike = {
+  status: (code: number) => VercelResponseLike;
+  json: (body: JsonValue | Record<string, unknown>) => void;
+};
+
 export default async function handler(
-  req: VercelRequest,
-  res: VercelResponse
+  _req: VercelRequestLike,
+  res: VercelResponseLike
 ) {
   try {
     if (!process.env.DATABASE_URL) {
