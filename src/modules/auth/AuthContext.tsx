@@ -64,10 +64,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const register = React.useCallback(async (payload) => {
     setLoading(true);
     try {
-      const res = await fetch(`${API}/register`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+      const res = await fetch(`${API}/register`, { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
       const data = await readResponseBody(res);
-      if (!res.ok) return { ok: false, error: data?.error || 'Registration failed' };
-      return await login(payload.email, payload.password);
+      if (!res.ok) return { ok: false, error: data?.message || data?.error || 'Registration failed' };
+      persistUser(data.user);
+      return { ok: true };
     } catch {
       return {
         ok: false,
