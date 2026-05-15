@@ -6,7 +6,8 @@ import { TaxAssistantProvider, useTaxAssistant } from '../modules/taxAssistant/T
 import { TaxModuleLayout } from '../modules/taxAssistant/TaxModuleLayout';
 import { VatWizard } from '../features/tax/VatWizard';
 import { CorporateTaxWizard } from '../features/tax/CorporateTaxWizard';
-import { PremiumHome, AppShell } from '../features/home/PremiumHome';
+import { DashboardLayout } from '../features/layouts/DashboardLayout';
+import { AuthLayout } from '../features/layouts/AuthLayout';
 import { PublicLandingPage } from '../features/home/PublicLandingPage';
 import { AuthProvider, useAuth } from '../modules/auth/AuthContext';
 
@@ -45,7 +46,7 @@ const resourcePages = {
 
 function ResourcePage({ page, onBack }: { page: (typeof resourcePages)['/documentation']; onBack: () => void }) {
   return (
-    <AppShell>
+    <DashboardLayout>
       <Card elevation={0} sx={{ border: '1px solid #e2e8f0', borderRadius: 3, background: 'linear-gradient(180deg, #ffffff 0%, #f8fbff 100%)' }}>
         <CardContent sx={{ p: { xs: 2, md: 3.5 } }}>
           <Stack spacing={2}>
@@ -74,7 +75,7 @@ function ResourcePage({ page, onBack }: { page: (typeof resourcePages)['/documen
           </Stack>
         </CardContent>
       </Card>
-    </AppShell>
+    </DashboardLayout>
   );
 }
 
@@ -95,14 +96,14 @@ function LoginPage() {
     else setError(result.error || 'Login failed');
   };
 
-  return <AppShell><Card sx={{ maxWidth: 440, mx: 'auto' }}><CardContent><Stack component='form' spacing={2} onSubmit={onSubmit}>
+  return <AuthLayout><Card sx={{ maxWidth: 420, mx: 'auto', borderRadius: 3, border: '1px solid #e2e8f0', boxShadow: '0 14px 34px rgba(15, 23, 42, 0.08)' }}><CardContent sx={{ p: { xs: 2.3, sm: 2.8 } }}><Stack component='form' spacing={2} onSubmit={onSubmit}>
     <Typography variant='h5' sx={{ fontWeight: 800 }}>Login</Typography>
     <TextField label='Email' value={email} onChange={(e) => setEmail(e.target.value)} required />
     <TextField label='Password' type='password' value={password} onChange={(e) => setPassword(e.target.value)} required />
     {error ? <Alert severity='error'>{error}</Alert> : null}
     <Button type='submit' variant='contained' disabled={loading}>{loading ? 'Please wait...' : 'Login'}</Button>
     <Button onClick={() => navigate('/register')} variant='text'>Create account</Button>
-  </Stack></CardContent></Card></AppShell>;
+  </Stack></CardContent></Card></AuthLayout>;
 }
 
 function ProfilePage() {
@@ -110,12 +111,12 @@ function ProfilePage() {
   const [name, setName] = React.useState(user?.fullName || '');
   const [phone, setPhone] = React.useState(user?.phone || '');
 
-  return <AppShell><Card sx={{ maxWidth: 560 }}><CardContent><Stack spacing={2}>
+  return <DashboardLayout><Card sx={{ maxWidth: 560 }}><CardContent><Stack spacing={2}>
     <Typography variant='h5' sx={{ fontWeight: 800 }}>Profile Management</Typography>
     <TextField label='Full Name' value={name} onChange={(e) => setName(e.target.value)} />
     <TextField label='Phone' value={phone} onChange={(e) => setPhone(e.target.value)} />
     <Button variant='contained' onClick={() => updateProfile({ fullName: name, phone })}>Save Profile</Button>
-  </Stack></CardContent></Card></AppShell>;
+  </Stack></CardContent></Card></DashboardLayout>;
 }
 
 
@@ -135,7 +136,7 @@ function RegisterPage() {
     else setError(result.error || 'Registration failed');
   };
 
-  return <AppShell><Card sx={{ maxWidth: 440, mx: 'auto' }}><CardContent><Stack component='form' spacing={2} onSubmit={onSubmit}>
+  return <AuthLayout><Card sx={{ maxWidth: 420, mx: 'auto', borderRadius: 3, border: '1px solid #e2e8f0', boxShadow: '0 14px 34px rgba(15, 23, 42, 0.08)' }}><CardContent sx={{ p: { xs: 2.3, sm: 2.8 } }}><Stack component='form' spacing={2} onSubmit={onSubmit}>
     <Typography variant='h5' sx={{ fontWeight: 800 }}>Register</Typography>
     <TextField label='Full Name' value={fullName} onChange={(e) => setFullName(e.target.value)} required />
     <TextField label='Email' type='email' value={email} onChange={(e) => setEmail(e.target.value)} required />
@@ -143,19 +144,19 @@ function RegisterPage() {
     <TextField label='Confirm Password' type='password' value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required />
     {error ? <Alert severity='error'>{error}</Alert> : null}
     <Button type='submit' variant='contained' disabled={loading}>{loading ? 'Please wait...' : 'Create account'}</Button>
-  </Stack></CardContent></Card></AppShell>;
+  </Stack></CardContent></Card></AuthLayout>;
 }
 
 function UserDashboardPage() {
   const { user } = useAuth();
-  return <AppShell><Stack spacing={2}><Typography variant='h4' sx={{ fontWeight: 800 }}>User Dashboard</Typography>
+  return <DashboardLayout><Stack spacing={2}><Typography variant='h4' sx={{ fontWeight: 800 }}>User Dashboard</Typography>
     <Typography sx={{ color: '#475569' }}>Welcome, {user?.fullName || user?.email}. Manage VAT, Corporate Tax and your profile from one place.</Typography>
     <Stack direction={{ xs: 'column', md: 'row' }} spacing={1.2}>
       <Button component={RouteLink} to='/vat/business-details' variant='contained'>Start VAT Return</Button>
       <Button component={RouteLink} to='/tax/business-details' variant='contained' color='secondary'>Start Corporate Tax</Button>
       <Button component={RouteLink} to='/profile' variant='outlined'>Manage Profile</Button>
     </Stack>
-  </Stack></AppShell>;
+  </Stack></DashboardLayout>;
 }
 
 function RoutedModules() {
@@ -188,16 +189,16 @@ function RoutedModules() {
   if (pathname === '/login') return <LoginPage />;
   if (pathname === '/register') return <RegisterPage />;
   if (pathname === '/profile') return user ? <ProfilePage /> : <LoginPage />;
-  if (pathname === '/admin') return ['SUPERADMIN'].includes(user?.role || '') ? <AppShell><Typography variant='h4'>Admin Dashboard</Typography></AppShell> : <AppShell><Alert severity='error'>Admin access required.</Alert></AppShell>;
+  if (pathname === '/admin') return ['SUPERADMIN'].includes(user?.role || '') ? <DashboardLayout><Typography variant='h4'>Admin Dashboard</Typography></DashboardLayout> : <DashboardLayout><Alert severity='error'>Admin access required.</Alert></DashboardLayout>;
   if (pathname === '/dashboard') return user ? <UserDashboardPage /> : <LoginPage />;
   if (pathname in resourcePages) return <ResourcePage page={resourcePages[pathname as keyof typeof resourcePages]} onBack={() => navigate('/')} />;
   if (module === 'vat') {
-    return <AppShell><VatWizard data={vat} setData={setVat} forcedStep={mapStep[step] || 1} navigateToStep={navigate} /></AppShell>;
+    return <DashboardLayout><VatWizard data={vat} setData={setVat} forcedStep={mapStep[step] || 1} navigateToStep={navigate} /></DashboardLayout>;
   }
   if (module === 'tax') {
-    return <AppShell><TaxModuleLayout moduleTitle='Corporate Tax Module' basePath='/tax' currentStep={step || 'business-details'} showModuleHeader={false}><CorporateTaxWizard data={ct} setData={setCt} forcedStep={mapTaxStep[step] || 1} /></TaxModuleLayout></AppShell>;
+    return <DashboardLayout><TaxModuleLayout moduleTitle='Corporate Tax Module' basePath='/tax' currentStep={step || 'business-details'} showModuleHeader={false}><CorporateTaxWizard data={ct} setData={setCt} forcedStep={mapTaxStep[step] || 1} /></TaxModuleLayout></DashboardLayout>;
   }
-  return <AppShell><Alert severity='warning'>Page not found.</Alert></AppShell>;
+  return <DashboardLayout><Alert severity='warning'>Page not found.</Alert></DashboardLayout>;
 }
 
 export default function AppRoutes() {
