@@ -6,9 +6,11 @@ import { signAuthToken } from '../../src/server/auth.js';
 import { setAuthCookie } from '../../src/server/cookies.js';
 
 const jsonError = (res: VercelResponse, status: number, message: string, code?: string) =>
-  res.status(status).json({ ok: false, message, ...(code ? { code } : {}) });
+  res.status(status).json({ success: false, message, ...(code ? { code } : {}) });
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
+  res.setHeader('Content-Type', 'application/json; charset=utf-8');
+
   if (req.method !== 'POST') {
     return jsonError(res, 405, 'Method not allowed', 'METHOD_NOT_ALLOWED');
   }
@@ -22,10 +24,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return jsonError(res, 500, 'Server configuration error', 'MISSING_JWT_SECRET');
     }
 
-    const { name, email, password } = req.body || {};
+    const { fullName, email, password, confirmPassword } = req.body || {};
 
-    if (typeof name !== 'string' || name.trim().length === 0) {
-      return jsonError(res, 400, 'Name is required', 'INVALID_NAME');
+    if (typeof fullName !== 'string' || fullName.trim().length === 0) {
+      return jsonError(res, 400, 'fullName is required', 'INVALID_FULL_NAME');
     }
 
     if (typeof email !== 'string' || email.trim().length === 0) {
@@ -34,6 +36,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     if (typeof password !== 'string' || password.length < 8) {
       return jsonError(res, 400, 'Password must be at least 8 characters', 'INVALID_PASSWORD');
+    }
+
+    if (typeof confirmPassword !== 'string' || confirmPassword !== password) {
+      return jsonError(res, 400, 'confirmPassword must match password', 'PASSWORD_MISMATCH');
     }
 
     const normalizedEmail = email.trim().toLowerCase();
@@ -46,10 +52,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const passwordHash = await bcrypt.hash(password, 12);
     const user = await prisma.user.create({
       data: {
-        fullName: name.trim(),
+        fullName: fullName.trim(),
         email: normalizedEmail,
         passwordHash,
-        role: 'USER'
+        role: 'USER',
+        isActive: true
       }
     });
 
@@ -62,16 +69,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     setAuthCookie(res, token);
 
     return res.status(201).json({
-      ok: true,
+      success: true,
       user: {
         id: user.id,
-        name: user.fullName,
+        fullName: user.fullName,
         email: user.email,
         role: user.role
       }
     });
   } catch (error) {
-    console.error('REGISTER_ERROR', error);
+    console.error('REGISTER_ERROR registration failed', error);
 
     if (
       error instanceof Prisma.PrismaClientKnownRequestError &&
