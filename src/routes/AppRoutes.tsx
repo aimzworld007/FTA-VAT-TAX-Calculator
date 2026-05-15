@@ -7,6 +7,7 @@ import { TaxModuleLayout } from '../modules/taxAssistant/TaxModuleLayout';
 import { VatWizard } from '../features/tax/VatWizard';
 import { CorporateTaxWizard } from '../features/tax/CorporateTaxWizard';
 import { PremiumHome, AppShell } from '../features/home/PremiumHome';
+import { PublicLandingPage } from '../features/home/PublicLandingPage';
 
 const mapStep = { 'business-details': 1, input: 2, preview: 3, export: 4 };
 const mapTaxStep = { 'business-details': 1, input: 3, preview: 5, export: 6 };
@@ -88,7 +89,6 @@ function RoutedModules() {
   const guardTax = !ct.companyName || !ct.taxRegistrationNumber || !ct.businessActivity;
 
   React.useEffect(() => {
-    if (pathname === '/dashboard') navigate('/');
     if (pathname === '/terms') navigate('/terms-and-conditions');
     if (module === 'vat' && !step) navigate('/vat/business-details');
     if (module === 'tax' && !step) navigate('/tax/business-details');
@@ -102,7 +102,8 @@ function RoutedModules() {
     }
   }, [pathname, module, step, guardVat, guardTax, navigate]);
 
-  if (pathname === '/') return <PremiumHome />;
+  if (pathname === '/') return <PublicLandingPage />;
+  if (pathname === '/dashboard') return <PremiumHome />;
   if (pathname in resourcePages) return <ResourcePage page={resourcePages[pathname as keyof typeof resourcePages]} onBack={() => navigate('/')} />;
   if (module === 'vat') {
     return <AppShell><VatWizard data={vat} setData={setVat} forcedStep={mapStep[step] || 1} navigateToStep={navigate} /></AppShell>;
