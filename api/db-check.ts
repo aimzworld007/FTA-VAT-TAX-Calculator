@@ -1,40 +1,35 @@
-import { prisma } from '../src/lib/prisma.ts';
+import type { VercelRequest, VercelResponse } from "@vercel/node";
+import { prisma } from "../src/lib/prisma";
 
-type ApiRequest = { method?: string };
-type ApiResponse = {
-  setHeader: (name: string, value: string) => void;
-  status: (code: number) => { json: (payload: Record<string, unknown>) => void };
-};
-
-export default async function handler(req: ApiRequest, res: ApiResponse) {
-  if (req.method !== 'GET') {
-    res.setHeader('Allow', 'GET');
-    return res.status(405).json({
-      ok: false,
-      message: 'Method not allowed'
-    });
-  }
-
+export default async function handler(
+  req: VercelRequest,
+  res: VercelResponse
+) {
   try {
-    // `prisma generate` is a build-time step that generates the Prisma client.
-    // It does not prove that runtime DATABASE_URL credentials/network are valid.
-    // This runtime query verifies that deployed serverless code can reach PostgreSQL.
-    await prisma.$queryRaw`SELECT NOW()`;
+    if (!process.env.DATABASE_URL) {
+      return res.status(500).json({
+        ok: false,
+        message: "DATABASE_URL is missing",
+      });
+    }
+
+    const result = await prisma.$queryRaw`
+      SELECT NOW() as server_time
+    `;
 
     return res.status(200).json({
       ok: true,
-      message: 'Database connected successfully'
+      message: "Database connected successfully",
+      result,
     });
-  } catch (error) {
-    // Never return raw database errors to avoid leaking credentials or topology.
-    // Avoid leaking runtime internals in API responses; keep details in server logs only.
-    console.error('db-check failed', error);
-
-    await prisma.$disconnect().catch(() => undefined);
+  } catch (error: any) {
+    console.error("DB_CHECK_ERROR", error);
 
     return res.status(500).json({
       ok: false,
-      message: 'Database connection failed'
+      message: "Database check failed",
+      error: error?.message || "Unknown error",
+      code: error?.code || null,
     });
   }
 }
