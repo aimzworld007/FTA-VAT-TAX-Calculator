@@ -5,7 +5,7 @@ type AuthUser = {
   email: string;
   fullName?: string;
   phone?: string;
-  role?: 'USER' | 'ADMIN';
+  role?: 'USER' | 'ADMIN' | 'SUPERADMIN';
   isActive?: boolean;
 };
 
@@ -21,7 +21,6 @@ type AuthContextValue = {
 const AuthContext = React.createContext<AuthContextValue | undefined>(undefined);
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '');
 const API = `${API_BASE_URL}/api/auth`;
-const ACCESS_KEY = 'fta_access_token';
 const USER_KEY = 'fta_auth_user';
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -51,7 +50,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const res = await fetch(`${API}/login`, { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password }) });
       const data = await readResponseBody(res);
       if (!res.ok) return { ok: false, error: data?.error || 'Login failed' };
-      localStorage.setItem(ACCESS_KEY, data.accessToken);
       persistUser(data.user);
       return { ok: true };
     } catch {
@@ -80,15 +78,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [login]);
 
   const logout = React.useCallback(async () => {
-    localStorage.removeItem(ACCESS_KEY);
     persistUser(null);
     await fetch(`${API}/logout`, { method: 'POST', credentials: 'include' }).catch(() => {});
   }, []);
 
   const updateProfile = React.useCallback(async (next) => {
     try {
-      const token = localStorage.getItem(ACCESS_KEY);
-      const res = await fetch(`${API}/profile`, { method: 'PATCH', credentials: 'include', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify(next) });
+      const res = await fetch(`${API}/profile`, { method: 'PATCH', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(next) });
       const data = await readResponseBody(res);
       if (!res.ok) return { ok: false, error: data?.error || 'Update failed' };
       persistUser(data.user);
