@@ -10,7 +10,12 @@
     "build": "prisma generate && vite build",
     "preview": "node node_modules/vite/bin/vite.js preview",
     "test": "node --test",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:deploy": "prisma migrate deploy",
+    "prisma:studio": "prisma studio",
+    "seed": "node prisma/seed.js"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
@@ -37,5 +42,8 @@
   },
   "devDependencies": {
     "@types/node": "^24.10.0"
+  },
+  "prisma": {
+    "seed": "node prisma/seed.js"
   }
 }

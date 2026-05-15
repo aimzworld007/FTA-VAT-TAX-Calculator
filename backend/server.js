@@ -7,6 +7,7 @@ import authRoutes from './routes/authRoutes.js';
 import taxRecordRoutes from './routes/taxRecordRoutes.js';
 import vatPdfRoutes from './routes/vatPdfRoutes.js';
 import dashboardRoutes from './routes/dashboardRoutes.js';
+import appRoutes from './routes/appRoutes.js';
 
 const app = express();
 
@@ -25,6 +26,7 @@ app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/tax-records', taxRecordRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api', vatPdfRoutes);
+app.use('/api', appRoutes);
 
 app.get('/api/health', (_, res) => {
   res.json({ status: 'ok' });
