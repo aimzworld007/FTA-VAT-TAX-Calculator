@@ -13,24 +13,23 @@ const registerSchema = z.object({
   fullName: z.string().min(2),
   email: z.string().email(),
   password: z.string().min(8),
-  confirmPassword: z.string().min(8),
-  phone: z.string().optional(),
+  confirmPassword: z.string().min(8)
 });
 const loginSchema = z.object({ email: z.string().email(), password: z.string().min(8) });
-const profileSchema = z.object({ fullName: z.string().min(2).optional(), phone: z.string().optional() });
+const profileSchema = z.object({ fullName: z.string().min(2).optional() });
 
 const cookieOpts = { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', path: '/api/auth' };
-const safeUser = (u) => ({ id: u.id, email: u.email, fullName: u.fullName, phone: u.phone, role: u.role, isActive: u.isActive });
+const safeUser = (u) => ({ id: u.id, email: u.email, fullName: u.fullName, role: u.role, isActive: u.isActive });
 
 export async function register(req, res) {
   const parsed = registerSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: 'Invalid payload' });
-  const { fullName, email, password, confirmPassword, phone } = parsed.data;
+  const { fullName, email, password, confirmPassword } = parsed.data;
   if (password !== confirmPassword) return res.status(400).json({ error: 'Passwords do not match' });
   const existing = await prisma.user.findUnique({ where: { email } });
   if (existing) return res.status(409).json({ error: 'Email already exists' });
   const passwordHash = await bcrypt.hash(password, 12);
-  const user = await prisma.user.create({ data: { fullName, email, phone, passwordHash } });
+  const user = await prisma.user.create({ data: { fullName, email, passwordHash } });
   return res.status(201).json({ user: safeUser(user) });
 }
 
