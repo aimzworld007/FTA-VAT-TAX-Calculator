@@ -8,5 +8,5 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (!auth) return;
   const user = await prisma.user.findUnique({ where: { id: auth.sub } });
   if (!user) return fail(res, 404, 'User not found');
-  return ok(res, { user: { id: user.id, name: user.fullName, email: user.email, role: user.role } });
+  return ok(res, { user: { id: user.id, name: user.name, email: user.email, role: user.role } });
 }

@@ -7,169 +7,66 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum TaxType {
-  VAT
-  CORPORATE
-}
-
-enum UserRole {
+enum Role {
   USER
-  ADMIN
   SUPERADMIN
 }
 
-enum ReminderType {
-  VAT
-  CORPORATE
-}
-
-enum ReminderStatus {
-  UPCOMING
-  DUE_SOON
-  OVERDUE
-  COMPLETED
-}
-
 model User {
-  id                 String              @id @default(uuid())
-  email              String              @unique
-  passwordHash       String
-  fullName           String?
-  phone              String?
-  role               UserRole            @default(USER)
-  isActive           Boolean             @default(true)
-  createdAt          DateTime            @default(now())
-  taxRecords         TaxRecord[]
-  refreshTokens      RefreshToken[]
-  businessProfiles   BusinessProfile[]
-  vatRecords         VatRecord[]
-  corporateTaxRecords CorporateTaxRecord[]
-  filingReminders    FilingReminder[]
-  notifications      Notification[]
-  emailLogs          EmailLog[]
+  id              String           @id @default(cuid())
+  name            String
+  email           String           @unique
+  passwordHash    String
+  role            Role             @default(USER)
+  isActive        Boolean          @default(true)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  businessProfile BusinessProfile?
+  vatRecords      VatRecord[]
+  taxRecords      TaxRecord[]
 }
 
 model BusinessProfile {
-  id                  String   @id @default(uuid())
-  userId              String
-  legalName           String
-  tradeName           String?
-  trn                 String?
-  corporateTaxNumber  String?
-  email               String?
-  phone               String?
-  emirate             String?
-  address             String?
-  createdAt           DateTime @default(now())
-  updatedAt           DateTime @updatedAt
+  id           String   @id @default(cuid())
+  userId       String   @unique
+  businessName String
+  trn          String?
+  emirate      String?
+  phone        String?
+  address      String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId, createdAt])
-}
-
-model TaxRecord {
-  id            String   @id @default(uuid())
-  userId        String
-  taxType       TaxType
-  periodStart   DateTime?
-  periodEnd     DateTime?
-  inputPayload  Json
-  resultPayload Json
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId, createdAt])
 }
 
 model VatRecord {
-  id            String   @id @default(uuid())
+  id             String   @id @default(cuid())
+  userId         String
+  periodLabel    String
+  taxableSales   Float    @default(0)
+  outputVat      Float    @default(0)
+  recoverableVat Float    @default(0)
+  netVat         Float    @default(0)
+  filingDueDate  DateTime?
+  status         String   @default("draft")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model TaxRecord {
+  id            String   @id @default(cuid())
   userId        String
-  periodStart   DateTime?
-  periodEnd     DateTime?
-  inputPayload  Json
-  resultPayload Json
+  periodLabel   String
+  income        Float    @default(0)
+  expense       Float    @default(0)
+  taxableProfit Float    @default(0)
+  corporateTax  Float    @default(0)
+  status        String   @default("draft")
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId, createdAt])
-}
-
-model CorporateTaxRecord {
-  id            String   @id @default(uuid())
-  userId        String
-  periodStart   DateTime?
-  periodEnd     DateTime?
-  inputPayload  Json
-  resultPayload Json
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId, createdAt])
-}
-
-model FilingReminder {
-  id          String         @id @default(uuid())
-  userId      String
-  type        ReminderType
-  title       String
-  dueDate     DateTime
-  status      ReminderStatus @default(UPCOMING)
-  completedAt DateTime?
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId, dueDate])
-}
-
-model Notification {
-  id        String   @id @default(uuid())
-  userId    String
-  title     String
-  message   String
-  isRead    Boolean  @default(false)
-  createdAt DateTime @default(now())
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId, createdAt])
-}
-
-model EmailLog {
-  id          String   @id @default(uuid())
-  userId      String
-  reminderId  String?
-  subject     String
-  templateKey String
-  status      String
-  error       String?
-  sentAt      DateTime?
-  createdAt   DateTime @default(now())
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId, createdAt])
-  @@index([reminderId])
-  @@unique([userId, reminderId, templateKey])
-}
-
-model RefreshToken {
-  id        String    @id @default(uuid())
-  userId    String
-  tokenHash String
-  expiresAt DateTime
-  revokedAt DateTime?
-  createdAt DateTime  @default(now())
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId, expiresAt])
 }
