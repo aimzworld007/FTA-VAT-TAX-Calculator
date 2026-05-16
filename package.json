@@ -7,16 +7,18 @@
     "dev": "node node_modules/vite/bin/vite.js",
     "dev:api": "node backend/server.js",
     "dev:full": "node backend/server.js & node node_modules/vite/bin/vite.js",
-    "build": "prisma generate && vite build",
+    "build": "vite build",
     "preview": "node node_modules/vite/bin/vite.js preview",
     "test": "node --test",
     "postinstall": "prisma generate",
     "prisma:generate": "prisma generate",
-    "prisma:migrate": "prisma migrate dev",
+    "prisma:migrate": "prisma migrate deploy",
     "prisma:deploy": "prisma migrate deploy",
     "prisma:studio": "prisma studio",
     "seed": "node prisma/seed.js",
-    "db:push": "prisma db push"
+    "db:push": "prisma db push",
+    "start": "node server/index.js",
+    "server:start": "node server/index.js"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",

@@ -18,7 +18,7 @@ const registerSchema = z.object({
 const loginSchema = z.object({ email: z.string().email(), password: z.string().min(8) });
 const profileSchema = z.object({ fullName: z.string().min(2).optional() });
 
-const cookieOpts = { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', path: '/api/auth' };
+const cookieOpts = { httpOnly: true, secure: true, sameSite: 'lax', path: '/api/auth' };
 const safeUser = (u) => ({ id: u.id, email: u.email, fullName: u.fullName, role: u.role, isActive: u.isActive });
 
 export async function register(req, res) {
