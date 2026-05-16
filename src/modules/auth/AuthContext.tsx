@@ -19,8 +19,7 @@ type AuthContextValue = {
 };
 
 const AuthContext = React.createContext<AuthContextValue | undefined>(undefined);
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '');
-const API = `${API_BASE_URL}/api/auth`;
+const API = '/api/auth';
 const USER_KEY = 'fta_auth_user';
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -55,7 +54,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch {
       return {
         ok: false,
-        error: 'Unable to reach server. Ensure backend is running and VITE_API_BASE_URL is configured if API is hosted separately.',
+        error: 'Unable to reach server. Ensure backend is running and reachable.',
       };
     }
     finally { setLoading(false); }
@@ -72,7 +71,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch {
       return {
         ok: false,
-        error: 'Unable to reach server. Ensure backend is running and VITE_API_BASE_URL is configured if API is hosted separately.',
+        error: 'Unable to reach server. Ensure backend is running and reachable.',
       };
     }
     finally { setLoading(false); }
@@ -93,7 +92,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch {
       return {
         ok: false,
-        error: 'Unable to reach server. Ensure backend is running and VITE_API_BASE_URL is configured if API is hosted separately.',
+        error: 'Unable to reach server. Ensure backend is running and reachable.',
       };
     }
   }, []);
