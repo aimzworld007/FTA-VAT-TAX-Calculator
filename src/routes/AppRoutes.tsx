@@ -1,5 +1,5 @@
 import React from 'react';
-import { Alert, Box, Button, Card, CardContent, Chip, Divider, LinearProgress, Stack, Tab, Tabs, TextField, Typography } from '@mui/material';
+import { Alert, Box, Button, Card, CardContent, Chip, Dialog, DialogActions, DialogContent, DialogTitle, Divider, Drawer, LinearProgress, Stack, Tab, Tabs, TextField, Typography } from '@mui/material';
 import { RouteLink, usePathname } from '../components/Router';
 import { TaxAssistantProvider, useTaxAssistant } from '../modules/taxAssistant/TaxAssistantContext';
 import { TaxModuleLayout } from '../modules/taxAssistant/TaxModuleLayout';
@@ -96,43 +96,47 @@ function DashboardPage() {
   </Stack></DashboardLayout>;
 }
 function BusinessProfilePage(){return <DashboardLayout><Typography variant='h5'>Business Profile</Typography></DashboardLayout>}
-function HistoryList({ records, emptyMessage }: { records: any[]; emptyMessage: string }) {
-  if (!records.length) return <Alert severity='info'>{emptyMessage}</Alert>;
-  return (
-    <Stack spacing={1.2}>
-      {records.map((record) => (
-        <Card key={record.id} variant='outlined'>
-          <CardContent>
-            <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent='space-between' spacing={1}>
-              <Box>
-                <Typography sx={{ fontWeight: 700 }}>{record.period_label || record.payload?.periodLabel || 'No filing period label'}</Typography>
-                <Typography variant='body2' color='text.secondary'>Record ID: {record.id}</Typography>
-              </Box>
-              <Chip size='small' label={`Updated ${new Date(record.updated_at).toLocaleString()}`} />
-            </Stack>
-          </CardContent>
-        </Card>
-      ))}
-    </Stack>
-  );
-}
 function HistoryHubPage({ initialTab }: { initialTab: 'vat' | 'tax' }) {
   const [tab, setTab] = React.useState<'vat' | 'tax'>(initialTab);
-  const [vatRecords, setVatRecords] = React.useState<any[]>([]);
-  const [taxRecords, setTaxRecords] = React.useState<any[]>([]);
+  const [records, setRecords] = React.useState<any[]>([]);
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState('');
-  React.useEffect(() => {
+  const [q, setQ] = React.useState('');
+  const [year, setYear] = React.useState('');
+  const [startDate, setStartDate] = React.useState('');
+  const [endDate, setEndDate] = React.useState('');
+  const [detail, setDetail] = React.useState<any>(null);
+  const [confirmDelete, setConfirmDelete] = React.useState<any>(null);
+  const [editPayload, setEditPayload] = React.useState<any>(null);
+
+  const load = React.useCallback(() => {
     setLoading(true);
-    Promise.all([fetchJson('/api/vat-records'), fetchJson('/api/corporate-tax-records')])
-      .then(([vatResponse, taxResponse]) => {
-        setVatRecords(Array.isArray(vatResponse?.data) ? vatResponse.data : []);
-        setTaxRecords(Array.isArray(taxResponse?.data) ? taxResponse.data : []);
-      })
-      .catch(() => setError('Unable to load saved history right now.'))
-      .finally(() => setLoading(false));
-  }, []);
-  return <DashboardLayout><Stack spacing={2.2}><Box><Typography variant='h5' sx={{ fontWeight: 700 }}>Saved History</Typography><Typography color='text.secondary'>View your saved VAT and Corporate Tax records in one place.</Typography></Box><Tabs value={tab} onChange={(_, value) => setTab(value)}><Tab value='vat' label={`VAT History (${vatRecords.length})`} /><Tab value='tax' label={`Tax History (${taxRecords.length})`} /></Tabs><Divider />{loading && <Alert severity='info'>Loading history...</Alert>}{error && <Alert severity='error'>{error}</Alert>}{!loading && !error && (tab === 'vat' ? <HistoryList records={vatRecords} emptyMessage='No saved VAT history found yet.' /> : <HistoryList records={taxRecords} emptyMessage='No saved corporate tax history found yet.' />)}</Stack></DashboardLayout>;
+    const p = new URLSearchParams();
+    if (q) p.set('q', q); if (year) p.set('year', year); if (startDate) p.set('startDate', startDate); if (endDate) p.set('endDate', endDate);
+    const endpoint = tab === 'vat' ? '/api/vat-records' : '/api/corporate-tax-records';
+    fetchJson(`${endpoint}?${p.toString()}`).then((r)=>setRecords(Array.isArray(r?.data)?r.data:[])).catch(()=>setError('Unable to load saved history right now.')).finally(()=>setLoading(false));
+  }, [tab,q,year,startDate,endDate]);
+  React.useEffect(() => { load(); }, [load]);
+
+  const onDelete = async () => { if (!confirmDelete) return; await fetch(`/${confirmDelete.type==='vat'?'api/vat-records':'api/corporate-tax-records'}/${confirmDelete.id}`,{method:'DELETE',credentials:'include'}); setConfirmDelete(null); load(); };
+  const onDuplicate = async (r:any) => { await fetch(`/${tab==='vat'?'api/vat-records':'api/corporate-tax-records'}/${r.id}/duplicate`,{method:'POST',credentials:'include'}); load(); };
+  const onSaveEdit = async () => { if (!editPayload) return; await fetch(`/${tab==='vat'?'api/vat-records':'api/corporate-tax-records'}/${editPayload.id}`,{method:'PUT',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify(editPayload.payload||{})}); setEditPayload(null); load(); };
+
+  return <DashboardLayout><Stack spacing={2.2}><Box><Typography variant='h5' sx={{ fontWeight: 700 }}>Saved History</Typography><Typography color='text.secondary'>Manage VAT and Corporate Tax history with search, filters, details, edit, duplicate, and delete actions.</Typography></Box>
+    <Tabs value={tab} onChange={(_, value) => setTab(value)}><Tab value='vat' label='VAT History' /><Tab value='tax' label='Corporate Tax History' /></Tabs>
+    <Stack direction={{xs:'column',md:'row'}} spacing={1}><TextField size='small' label='Search' value={q} onChange={(e)=>setQ(e.target.value)} /><TextField size='small' label='Year' value={year} onChange={(e)=>setYear(e.target.value)} /><TextField size='small' type='date' label='Start' InputLabelProps={{shrink:true}} value={startDate} onChange={(e)=>setStartDate(e.target.value)} /><TextField size='small' type='date' label='End' InputLabelProps={{shrink:true}} value={endDate} onChange={(e)=>setEndDate(e.target.value)} /><Button onClick={load} variant='contained'>Apply</Button></Stack>
+    {loading && <Alert severity='info'>Loading history...</Alert>}{error && <Alert severity='error'>{error}</Alert>}
+    {!loading && !error && <>
+      <Box sx={{ display: { xs: 'none', md: 'block' } }}>
+        <table style={{ width:'100%', borderCollapse:'collapse' }}><thead><tr><th align='left'>Period</th><th align='left'>Sales</th><th align='left'>Purchases</th><th align='left'>Expenses</th><th align='left'>Taxable</th><th align='left'>{tab==='vat'?'VAT Payable/Refundable':'Corporate Tax Estimate'}</th><th align='left'>Actions</th></tr></thead><tbody>{records.map((r:any)=><tr key={r.id}><td>{r.period_label||'N/A'}</td><td>{Number(r.sales_total||0).toFixed(2)}</td><td>{Number(r.purchase_total||0).toFixed(2)}</td><td>{Number(r.expenses_total||0).toFixed(2)}</td><td>{Number(r.taxable_amount||0).toFixed(2)}</td><td>{tab==='vat'?Number((r.vat_payable||0)-(r.vat_refundable||0)).toFixed(2):Number(r.corporate_tax_estimate||0).toFixed(2)}</td><td><Stack direction='row' spacing={1}><Button size='small' onClick={()=>setDetail(r)}>View</Button><Button size='small' onClick={()=>setEditPayload(r)}>Edit</Button><Button size='small' onClick={()=>onDuplicate(r)}>Duplicate</Button><Button size='small' color='error' onClick={()=>setConfirmDelete({id:r.id,type:tab})}>Delete</Button></Stack></td></tr>)}</tbody></table>
+      </Box>
+      <Stack spacing={1.2} sx={{ display: { xs: 'flex', md: 'none' } }}>{records.map((r:any)=><Card key={r.id} variant='outlined'><CardContent><Typography sx={{fontWeight:700}}>{r.period_label||'N/A'}</Typography><Typography variant='body2'>Sales: {Number(r.sales_total||0).toFixed(2)} | Purchases: {Number(r.purchase_total||0).toFixed(2)} | Expenses: {Number(r.expenses_total||0).toFixed(2)}</Typography><Typography variant='body2'>Taxable: {Number(r.taxable_amount||0).toFixed(2)} | {tab==='vat'?'VAT Net':'CT Est'}: {tab==='vat'?Number((r.vat_payable||0)-(r.vat_refundable||0)).toFixed(2):Number(r.corporate_tax_estimate||0).toFixed(2)}</Typography><Stack direction='row' spacing={1} sx={{mt:1}}><Button size='small' onClick={()=>setDetail(r)}>View</Button><Button size='small' onClick={()=>setEditPayload(r)}>Edit</Button><Button size='small' onClick={()=>onDuplicate(r)}>Duplicate</Button><Button size='small' color='error' onClick={()=>setConfirmDelete({id:r.id,type:tab})}>Delete</Button></Stack></CardContent></Card>)}</Stack>
+    </>}
+  </Stack>
+  <Drawer anchor='right' open={Boolean(detail)} onClose={()=>setDetail(null)}><Box sx={{width:{xs:340,sm:460},p:2}}><Typography variant='h6'>Record Details</Typography><Typography variant='body2' sx={{whiteSpace:'pre-wrap'}}>{detail?.analysis}</Typography><pre style={{fontSize:12,overflow:'auto'}}>{JSON.stringify(detail?.payload||{},null,2)}</pre></Box></Drawer>
+  <Dialog open={Boolean(confirmDelete)} onClose={()=>setConfirmDelete(null)}><DialogTitle>Delete record?</DialogTitle><DialogContent><Typography>This action cannot be undone.</Typography></DialogContent><DialogActions><Button onClick={()=>setConfirmDelete(null)}>Cancel</Button><Button color='error' onClick={onDelete}>Delete</Button></DialogActions></Dialog>
+  <Dialog open={Boolean(editPayload)} onClose={()=>setEditPayload(null)} fullWidth maxWidth='md'><DialogTitle>Edit saved record payload</DialogTitle><DialogContent><TextField multiline minRows={14} fullWidth value={JSON.stringify(editPayload?.payload||{},null,2)} onChange={(e)=>{try{setEditPayload({...editPayload,payload:JSON.parse(e.target.value)})}catch{}}} /></DialogContent><DialogActions><Button onClick={()=>setEditPayload(null)}>Cancel</Button><Button variant='contained' onClick={onSaveEdit}>Save</Button></DialogActions></Dialog>
+  </DashboardLayout>;
 }
 function VatHistoryPage(){return <HistoryHubPage initialTab='vat' />}
 function TaxHistoryPage(){return <HistoryHubPage initialTab='tax' />}
