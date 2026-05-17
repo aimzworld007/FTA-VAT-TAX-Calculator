@@ -31,9 +31,9 @@ function TaxHistoryPage(){return <DashboardLayout><Typography variant='h5'>Tax H
 function RemindersPage(){return <DashboardLayout><Typography variant='h5'>Reminders</Typography></DashboardLayout>}
 function ProfilePage(){return <DashboardLayout><Typography variant='h5'>Settings</Typography></DashboardLayout>}
 
-function RoutedModules() { const { pathname, navigate } = usePathname(); const { vat, setVat, ct, setCt } = useTaxAssistant(); const parts = pathname.split('/').filter(Boolean); const module = parts[0]; const step = parts[1] || ''; const guardVat = !vat.businessName || !vat.trn; const guardTax = !ct.companyName || !ct.taxRegistrationNumber || !ct.businessActivity;
+function RoutedModules() { const { pathname, navigate } = usePathname(); const { user } = useAuth(); const { vat, setVat, ct, setCt } = useTaxAssistant(); const parts = pathname.split('/').filter(Boolean); const module = parts[0]; const step = parts[1] || ''; const guardVat = !vat.businessName || !vat.trn; const guardTax = !ct.companyName || !ct.taxRegistrationNumber || !ct.businessActivity;
   React.useEffect(() => { if (module === 'vat' && !step) navigate('/vat/business-details'); if (module === 'tax' && !step) navigate('/tax/business-details'); if (module === 'vat' && ['preview', 'export'].includes(step) && guardVat) navigate('/vat/business-details'); if (module === 'tax' && ['preview', 'export'].includes(step) && guardTax) navigate('/tax/business-details'); }, [pathname]);
-  if (pathname === '/') return <PublicLandingPage />;
+  if (pathname === '/') return user ? <ProtectedRoute><DashboardPage /></ProtectedRoute> : <PublicLandingPage />;
   if (pathname === '/login') return <GuestRoute><LoginPage /></GuestRoute>;
   if (pathname === '/register') return <GuestRoute><RegisterPage /></GuestRoute>;
   if (pathname === '/dashboard') return <ProtectedRoute><DashboardPage /></ProtectedRoute>;
