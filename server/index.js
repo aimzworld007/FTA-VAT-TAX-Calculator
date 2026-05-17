@@ -8,6 +8,7 @@ import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import authRoutes from '../backend/routes/authRoutes.js';
 import appRoutes from '../backend/routes/appRoutes.js';
+import { ensureSchema } from '../backend/db/ensureSchema.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -54,6 +55,15 @@ app.use((error, _req, res, _next) => {
 });
 
 const port = Number(process.env.PORT) || 5000;
-app.listen(port, () => {
-  console.log(`Server listening on ${port}`);
+
+async function startServer() {
+  await ensureSchema();
+  app.listen(port, () => {
+    console.log(`Server listening on ${port}`);
+  });
+}
+
+startServer().catch((error) => {
+  console.error('Failed to initialize server:', error);
+  process.exit(1);
 });
