@@ -5,8 +5,17 @@ import App from './App';
 import { appTheme } from './theme';
 
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').catch(() => {});
+  window.addEventListener('load', async () => {
+    try {
+      const registrations = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(registrations.map((registration) => registration.unregister()));
+      if (window.caches?.keys) {
+        const keys = await window.caches.keys();
+        await Promise.all(keys.map((key) => window.caches.delete(key)));
+      }
+    } catch {
+      // Ignore cleanup errors so rendering is never blocked.
+    }
   });
 }
 
