@@ -19,9 +19,15 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-createRoot(document.getElementById('root')).render(
-  <ThemeProvider theme={appTheme}>
-    <CssBaseline />
-    <App />
-  </ThemeProvider>
-);
+const rootElement = document.getElementById('root');
+
+if (!rootElement) {
+  document.body.innerHTML = '<div style="padding:16px;font-family:Arial,sans-serif;color:#b42318;">Application failed to start: missing root element (#root).</div>';
+} else {
+  createRoot(rootElement).render(
+    <ThemeProvider theme={appTheme}>
+      <CssBaseline />
+      <App />
+    </ThemeProvider>
+  );
+}
