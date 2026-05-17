@@ -1,0 +1,1 @@
+export { listTax as listCorporateTaxRecords, createTax as createCorporateTaxRecord, getTax as getCorporateTaxRecord, updateTax as updateCorporateTaxRecord, duplicateTax as duplicateCorporateTaxRecord, deleteTax as deleteCorporateTaxRecord } from './appController.js';

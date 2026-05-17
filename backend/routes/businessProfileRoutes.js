@@ -1,0 +1,10 @@
+import { Router } from 'express';
+import { asyncHandler } from '../middleware/asyncHandler.js';
+import { requireAuth } from '../middleware/requireAuth.js';
+import { getBusinessProfile, upsertBusinessProfile } from '../controllers/businessProfileController.js';
+const router = Router();
+router.use(requireAuth);
+router.get('/', asyncHandler(getBusinessProfile));
+router.post('/', asyncHandler(upsertBusinessProfile));
+router.put('/', asyncHandler(upsertBusinessProfile));
+export default router;
