@@ -19,6 +19,67 @@ const buildSummary = (payload = {}, taxType = 'VAT') => {
   return { sales, purchases, expenses, taxable };
 };
 
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const normalize = (value) => {
+  if (value === undefined || value === null) return null;
+  const text = String(value).trim();
+  return text ? text : null;
+};
+
+const normalizeBusinessProfilePayload = (body = {}) => {
+  const businessName = normalize(body.businessName ?? body.business_name);
+  const trn = normalize(body.trn ?? body.TRN);
+  const emirate = normalize(body.emirate);
+  const address = normalize(body.address);
+  const phone = normalize(body.phone);
+  const email = normalize(body.email);
+  const vatFilingFrequency = normalize(body.vatFilingFrequency ?? body.vat_filing_frequency);
+  const corporateTaxYearStart = normalize(body.corporateTaxYearStart ?? body.corporate_tax_year_start);
+  const corporateTaxYearEnd = normalize(body.corporateTaxYearEnd ?? body.corporate_tax_year_end);
+  const defaultVatPricingMode = normalize(body.defaultVatPricingMode ?? body.default_vat_pricing_mode);
+
+  if (!businessName) return { error: 'Business name is required.' };
+  if (trn && !/^\d+$/.test(trn)) return { error: 'TRN must contain only numbers.' };
+  if (email && !EMAIL_RE.test(email)) return { error: 'Email is invalid.' };
+
+  return {
+    value: {
+      businessName,
+      trn,
+      emirate,
+      address,
+      phone,
+      email,
+      vatFilingFrequency,
+      corporateTaxYearStart,
+      corporateTaxYearEnd,
+      defaultVatPricingMode,
+      taxSettings: body.taxSettings || null,
+    },
+  };
+};
+
+const mapBusinessProfileRow = (row) => {
+  if (!row) return null;
+  return {
+    id: row.id,
+    userId: row.user_id,
+    businessName: row.business_name,
+    trn: row.trn,
+    emirate: row.emirate,
+    address: row.address,
+    phone: row.phone,
+    email: row.email,
+    vatFilingFrequency: row.vat_filing_frequency,
+    corporateTaxYearStart: row.corporate_tax_year_start,
+    corporateTaxYearEnd: row.corporate_tax_year_end,
+    defaultVatPricingMode: row.default_vat_pricing_mode,
+    taxSettings: row.tax_settings,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+};
+
 const analysisText = (record, type) => {
   const vatNet = toNumber(record.vat_payable) - toNumber(record.vat_refundable);
   if (type === 'VAT') {
@@ -31,16 +92,22 @@ export const getMe = async (req, res) => {
   const r = await query('SELECT id, full_name, email, role, is_active, created_at FROM users WHERE id=$1', [req.user.id]);
   return ok(res, r.rows[0] || null);
 };
-export const upsertBusiness = async (req, res) => { /* unchanged */
-  const b = req.body || {};
-  const r = await query(`INSERT INTO business_profiles (user_id,business_name,trn,address,phone,email,tax_settings,updated_at)
-VALUES ($1,$2,$3,$4,$5,$6,$7,NOW())
-ON CONFLICT (user_id) DO UPDATE SET business_name=EXCLUDED.business_name,trn=EXCLUDED.trn,address=EXCLUDED.address,phone=EXCLUDED.phone,email=EXCLUDED.email,tax_settings=EXCLUDED.tax_settings,updated_at=NOW()
-RETURNING *`, [req.user.id, b.businessName, b.trn || b.TRN, b.address, b.phone, b.email, b.taxSettings || null]);
-  return ok(res, r.rows[0]);
-};
-export const getBusiness = async (req,res)=>ok(res, (await query('SELECT * FROM business_profiles WHERE user_id=$1 LIMIT 1',[req.user.id])).rows[0] || null);
 
+export const upsertBusiness = async (req, res) => {
+  const normalized = normalizeBusinessProfilePayload(req.body || {});
+  if (normalized.error) return fail(res, 400, normalized.error, 'VALIDATION_ERROR');
+  const b = normalized.value;
+
+  const r = await query(`INSERT INTO business_profiles (user_id,business_name,trn,emirate,address,phone,email,vat_filing_frequency,corporate_tax_year_start,corporate_tax_year_end,default_vat_pricing_mode,tax_settings,updated_at)
+VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,NOW())
+ON CONFLICT (user_id) DO UPDATE SET business_name=EXCLUDED.business_name,trn=EXCLUDED.trn,emirate=EXCLUDED.emirate,address=EXCLUDED.address,phone=EXCLUDED.phone,email=EXCLUDED.email,vat_filing_frequency=EXCLUDED.vat_filing_frequency,corporate_tax_year_start=EXCLUDED.corporate_tax_year_start,corporate_tax_year_end=EXCLUDED.corporate_tax_year_end,default_vat_pricing_mode=EXCLUDED.default_vat_pricing_mode,tax_settings=EXCLUDED.tax_settings,updated_at=NOW()
+RETURNING *`, [req.user.id, b.businessName, b.trn, b.emirate, b.address, b.phone, b.email, b.vatFilingFrequency, b.corporateTaxYearStart, b.corporateTaxYearEnd, b.defaultVatPricingMode, b.taxSettings]);
+  return ok(res, mapBusinessProfileRow(r.rows[0]));
+};
+
+export const getBusiness = async (req,res)=>ok(res, mapBusinessProfileRow((await query('SELECT * FROM business_profiles WHERE user_id=$1 LIMIT 1',[req.user.id])).rows[0] || null));
+
+// ... rest unchanged
 const listByType = async (req, res, table, type) => {
   const { q = '', year, startDate, endDate } = req.query || {};
   const params = [req.user.id, `%${String(q).trim()}%`];
@@ -58,24 +125,17 @@ const listByType = async (req, res, table, type) => {
 };
 
 export const listVat = async (req,res)=>listByType(req,res,'vat_records','VAT');
-export const createVat = async (req,res)=>{
-  const payload = req.body || {};
-  const summary = buildSummary(payload, 'VAT');
-  const r = await query('INSERT INTO vat_records (user_id,payload,period_label,filing_period_start,filing_period_end,sales_total,purchase_total,expenses_total,taxable_amount,vat_payable,vat_refundable,created_at,updated_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,NOW(),NOW()) RETURNING *',[req.user.id, payload, payload?.periodLabel || null, payload?.taxPeriodStart || null, payload?.taxPeriodEnd || null, summary.sales, summary.purchases, summary.expenses, summary.taxable, toNumber(payload?.result?.netVat || payload?.netVat) > 0 ? toNumber(payload?.result?.netVat || payload?.netVat) : 0, toNumber(payload?.result?.netVat || payload?.netVat) < 0 ? Math.abs(toNumber(payload?.result?.netVat || payload?.netVat)) : 0]);
-  return ok(res, r.rows[0]);
-};
+export const createVat = async (req,res)=>{ const payload = req.body || {}; const summary = buildSummary(payload, 'VAT'); const r = await query('INSERT INTO vat_records (user_id,payload,period_label,filing_period_start,filing_period_end,sales_total,purchase_total,expenses_total,taxable_amount,vat_payable,vat_refundable,created_at,updated_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,NOW(),NOW()) RETURNING *',[req.user.id, payload, payload?.periodLabel || null, payload?.taxPeriodStart || null, payload?.taxPeriodEnd || null, summary.sales, summary.purchases, summary.expenses, summary.taxable, toNumber(payload?.result?.netVat || payload?.netVat) > 0 ? toNumber(payload?.result?.netVat || payload?.netVat) : 0, toNumber(payload?.result?.netVat || payload?.netVat) < 0 ? Math.abs(toNumber(payload?.result?.netVat || payload?.netVat)) : 0]); return ok(res, r.rows[0]);};
 export const getVat = async (req,res)=>{const r=await query('SELECT *,(vat_payable-vat_refundable) AS vat_net FROM vat_records WHERE id=$1 AND user_id=$2',[parseId(req),req.user.id]); if(!r.rowCount)return fail(res,404,'Not found','NOT_FOUND'); return ok(res,{...r.rows[0],analysis:analysisText(r.rows[0],'VAT')});};
 export const updateVat = async (req,res)=>{ const payload=req.body||{}; const summary=buildSummary(payload,'VAT'); return ok(res, (await query('UPDATE vat_records SET payload=$1,period_label=COALESCE($2,period_label),filing_period_start=COALESCE($3,filing_period_start),filing_period_end=COALESCE($4,filing_period_end),sales_total=$5,purchase_total=$6,expenses_total=$7,taxable_amount=$8,vat_payable=$9,vat_refundable=$10,updated_at=NOW() WHERE id=$11 AND user_id=$12 RETURNING *',[payload,payload?.periodLabel||null,payload?.taxPeriodStart||null,payload?.taxPeriodEnd||null,summary.sales,summary.purchases,summary.expenses,summary.taxable,toNumber(payload?.result?.netVat||payload?.netVat)>0?toNumber(payload?.result?.netVat||payload?.netVat):0,toNumber(payload?.result?.netVat||payload?.netVat)<0?Math.abs(toNumber(payload?.result?.netVat||payload?.netVat)):0,parseId(req),req.user.id])).rows[0]);};
 export const duplicateVat = async (req,res)=>ok(res, (await query('INSERT INTO vat_records (user_id,business_profile_id,period_label,filing_period_start,filing_period_end,sales_total,purchase_total,expenses_total,taxable_amount,vat_payable,vat_refundable,payload,export_metadata,created_at,updated_at) SELECT user_id,business_profile_id,period_label,filing_period_start,filing_period_end,sales_total,purchase_total,expenses_total,taxable_amount,vat_payable,vat_refundable,payload,export_metadata,NOW(),NOW() FROM vat_records WHERE id=$1 AND user_id=$2 RETURNING *',[parseId(req),req.user.id])).rows[0]);
 export const deleteVat = async (req,res)=>{await query('DELETE FROM vat_records WHERE id=$1 AND user_id=$2',[parseId(req),req.user.id]); return ok(res,{deleted:true});};
-
 export const listTax = async (req,res)=>listByType(req,res,'corporate_tax_records','CORPORATE');
 export const createTax = async (req,res)=>{ const payload=req.body||{}; const summary=buildSummary(payload,'CORPORATE'); return ok(res, (await query('INSERT INTO corporate_tax_records (user_id,payload,period_label,filing_period_start,filing_period_end,sales_total,purchase_total,expenses_total,taxable_amount,corporate_tax_estimate,created_at,updated_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,NOW(),NOW()) RETURNING *',[req.user.id,payload,payload?.periodLabel||null,payload?.financialYearStart||null,payload?.financialYearEnd||null,summary.sales,summary.purchases,summary.expenses,summary.taxable,toNumber(payload?.result?.taxPayable||payload?.taxPayable)])).rows[0]);};
 export const getTax = async (req,res)=>{const r=await query('SELECT * FROM corporate_tax_records WHERE id=$1 AND user_id=$2',[parseId(req),req.user.id]); if(!r.rowCount)return fail(res,404,'Not found','NOT_FOUND'); return ok(res,{...r.rows[0],analysis:analysisText(r.rows[0],'CORPORATE')});};
 export const updateTax = async (req,res)=>{ const payload=req.body||{}; const summary=buildSummary(payload,'CORPORATE'); return ok(res, (await query('UPDATE corporate_tax_records SET payload=$1,period_label=COALESCE($2,period_label),filing_period_start=COALESCE($3,filing_period_start),filing_period_end=COALESCE($4,filing_period_end),sales_total=$5,purchase_total=$6,expenses_total=$7,taxable_amount=$8,corporate_tax_estimate=$9,updated_at=NOW() WHERE id=$10 AND user_id=$11 RETURNING *',[payload,payload?.periodLabel||null,payload?.financialYearStart||null,payload?.financialYearEnd||null,summary.sales,summary.purchases,summary.expenses,summary.taxable,toNumber(payload?.result?.taxPayable||payload?.taxPayable),parseId(req),req.user.id])).rows[0]);};
 export const duplicateTax = async (req,res)=>ok(res, (await query('INSERT INTO corporate_tax_records (user_id,business_profile_id,period_label,filing_period_start,filing_period_end,sales_total,purchase_total,expenses_total,taxable_amount,corporate_tax_estimate,payload,export_metadata,created_at,updated_at) SELECT user_id,business_profile_id,period_label,filing_period_start,filing_period_end,sales_total,purchase_total,expenses_total,taxable_amount,corporate_tax_estimate,payload,export_metadata,NOW(),NOW() FROM corporate_tax_records WHERE id=$1 AND user_id=$2 RETURNING *',[parseId(req),req.user.id])).rows[0]);
 export const deleteTax = async (req,res)=>{await query('DELETE FROM corporate_tax_records WHERE id=$1 AND user_id=$2',[parseId(req),req.user.id]); return ok(res,{deleted:true});};
-
 export const listReminders = async (req,res)=>ok(res, (await query('SELECT * FROM filing_reminders WHERE user_id=$1 ORDER BY due_date ASC',[req.user.id])).rows);
 export const createReminder = async (req,res)=>ok(res, (await query('INSERT INTO filing_reminders (user_id,title,type,due_date,status,created_at,updated_at) VALUES ($1,$2,$3,$4,COALESCE($5,\'pending\'),NOW(),NOW()) RETURNING *',[req.user.id, req.body?.title, req.body?.type || 'GENERAL', req.body?.dueDate, req.body?.status])).rows[0]);
 export const updateReminder = async (req,res)=>ok(res, (await query('UPDATE filing_reminders SET title=COALESCE($1,title),type=COALESCE($2,type),due_date=COALESCE($3,due_date),status=COALESCE($4,status),updated_at=NOW() WHERE id=$5 AND user_id=$6 RETURNING *',[req.body?.title,req.body?.type,req.body?.dueDate,req.body?.status,parseId(req),req.user.id])).rows[0]);
