@@ -141,7 +141,70 @@ function HistoryHubPage({ initialTab }: { initialTab: 'vat' | 'tax' }) {
 }
 function VatHistoryPage(){return <HistoryHubPage initialTab='vat' />}
 function TaxHistoryPage(){return <HistoryHubPage initialTab='tax' />}
-function RemindersPage(){return <DashboardLayout><Typography variant='h5'>Reminders</Typography></DashboardLayout>}
+function RemindersPage() {
+  const [items, setItems] = React.useState<any[]>([]);
+  const [loading, setLoading] = React.useState(false);
+  const [error, setError] = React.useState('');
+  const [editing, setEditing] = React.useState<any | null>(null);
+  const defaultForm = { title: '', type: 'VAT', dueDate: '', notes: '', status: 'pending', emailReminderEnabled: false, reminderDaysBefore: 3 };
+  const [form, setForm] = React.useState<any>(defaultForm);
+
+  const load = React.useCallback(() => {
+    setLoading(true);
+    fetchJson('/api/reminders').then((r) => setItems(r?.data || [])).catch(() => setError('Unable to load reminders.')).finally(() => setLoading(false));
+  }, []);
+
+  React.useEffect(() => { load(); }, [load]);
+
+  const saveReminder = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const method = editing ? 'PUT' : 'POST';
+    const url = editing ? `/api/reminders/${editing.id}` : '/api/reminders';
+    await fetch(url, { method, credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form) });
+    setForm(defaultForm);
+    setEditing(null);
+    load();
+  };
+
+  const onEdit = (row: any) => {
+    setEditing(row);
+    setForm({ title: row.title || '', type: row.type || 'VAT', dueDate: row.due_date ? new Date(row.due_date).toISOString().slice(0, 10) : '', notes: row.notes || '', status: row.status || 'pending', emailReminderEnabled: Boolean(row.email_reminder_enabled), reminderDaysBefore: Number(row.reminder_days_before || 3) });
+  };
+  const onComplete = async (id: string) => { await fetch(`/api/reminders/${id}/complete`, { method: 'PATCH', credentials: 'include' }); load(); };
+  const onDelete = async (id: string) => { await fetch(`/api/reminders/${id}`, { method: 'DELETE', credentials: 'include' }); load(); };
+
+  const today = new Date();
+  const upcoming = items.filter((r) => r.status !== 'completed' && new Date(r.due_date) >= today).sort((a, b) => +new Date(a.due_date) - +new Date(b.due_date));
+  const overdue = items.filter((r) => r.status !== 'completed' && new Date(r.due_date) < today);
+
+  return <DashboardLayout><Stack spacing={2.2}>
+    <Box><Typography variant='h5' sx={{ fontWeight: 700 }}>Filing Reminders</Typography><Typography color='text.secondary'>Manage VAT and Corporate Tax filing reminders with completion tracking and due-date alerts.</Typography></Box>
+    {error && <Alert severity='error'>{error}</Alert>}
+    {!!overdue.length && <Alert severity='warning'>{overdue.length} reminder(s) are overdue and need immediate action.</Alert>}
+
+    <Card variant='outlined'><CardContent><Stack spacing={2} component='form' onSubmit={saveReminder}>
+      <Typography variant='h6'>{editing ? 'Edit Reminder' : 'Create Reminder'}</Typography>
+      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.2}>
+        <TextField fullWidth label='Title' value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} required />
+        <TextField select SelectProps={{ native: true }} label='Type' value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })}><option value='VAT'>VAT</option><option value='CORPORATE_TAX'>CORPORATE_TAX</option></TextField>
+        <TextField type='date' label='Due date' InputLabelProps={{ shrink: true }} value={form.dueDate} onChange={(e) => setForm({ ...form, dueDate: e.target.value })} required />
+      </Stack>
+      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.2}>
+        <TextField fullWidth label='Notes' value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
+        <TextField select SelectProps={{ native: true }} label='Status' value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })}><option value='pending'>pending</option><option value='completed'>completed</option></TextField>
+        <TextField type='number' label='Reminder days before' value={form.reminderDaysBefore} onChange={(e) => setForm({ ...form, reminderDaysBefore: Number(e.target.value || 0) })} />
+      </Stack>
+      <Stack direction='row' alignItems='center' spacing={1}><input id='emailReminderEnabled' type='checkbox' checked={form.emailReminderEnabled} onChange={(e) => setForm({ ...form, emailReminderEnabled: e.target.checked })} /><Typography>Email reminder enabled</Typography></Stack>
+      <Stack direction='row' spacing={1}><Button type='submit' variant='contained'>{editing ? 'Update' : 'Create'}</Button>{editing && <Button onClick={() => { setEditing(null); setForm(defaultForm); }}>Cancel</Button>}</Stack>
+    </Stack></CardContent></Card>
+
+    <Card variant='outlined'><CardContent><Typography variant='h6' sx={{ mb: 1 }}>Upcoming Reminders</Typography>{upcoming.length === 0 ? <Alert severity='info'>No upcoming reminders.</Alert> : <Stack spacing={1}>{upcoming.slice(0, 5).map((r) => <Chip key={r.id} color='warning' label={`${r.title} • ${new Date(r.due_date).toLocaleDateString()} • ${r.type}`} />)}</Stack>}</CardContent></Card>
+
+    <Card variant='outlined'><CardContent><Typography variant='h6' sx={{ mb: 1 }}>All Reminders</Typography>
+      {loading ? <Alert severity='info'>Loading reminders…</Alert> : <Stack spacing={1.2}>{items.map((r) => <Card key={r.id} variant='outlined'><CardContent><Stack spacing={1}><Stack direction={{ xs: 'column', sm: 'row' }} justifyContent='space-between'><Box><Typography sx={{ fontWeight: 700 }}>{r.title}</Typography><Typography variant='body2' color='text.secondary'>{r.type} • Due {new Date(r.due_date).toLocaleDateString()}</Typography>{r.notes && <Typography variant='body2'>{r.notes}</Typography>}</Box><Chip label={r.status} color={r.status === 'completed' ? 'success' : (new Date(r.due_date) < today ? 'error' : 'warning')} /></Stack><Stack direction='row' spacing={1}><Button size='small' onClick={() => onEdit(r)}>Edit</Button>{r.status !== 'completed' && <Button size='small' onClick={() => onComplete(r.id)}>Mark Completed</Button>}<Button size='small' color='error' onClick={() => onDelete(r.id)}>Delete</Button></Stack></Stack></CardContent></Card>)}</Stack>}
+    </CardContent></Card>
+  </Stack></DashboardLayout>;
+}
 
 function RoutedModules() { const { pathname, navigate } = usePathname(); const { user } = useAuth(); const { vat, setVat, ct, setCt } = useTaxAssistant(); const parts = pathname.split('/').filter(Boolean); const module = parts[0]; const step = parts[1] || ''; const guardVat = !vat.businessName || !vat.trn; const guardTax = !ct.companyName || !ct.taxRegistrationNumber || !ct.businessActivity;
   const [saveMsg, setSaveMsg] = React.useState<{ type: 'success' | 'error'; text: string } | null>(null);
