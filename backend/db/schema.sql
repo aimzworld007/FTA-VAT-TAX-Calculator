@@ -98,12 +98,17 @@ CREATE TABLE IF NOT EXISTS filing_reminders (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   title TEXT NOT NULL,
-  type TEXT NOT NULL DEFAULT 'GENERAL',
+  type TEXT NOT NULL DEFAULT 'VAT',
   due_date TIMESTAMPTZ NOT NULL,
+  notes TEXT,
   status TEXT NOT NULL DEFAULT 'pending',
+  email_reminder_enabled BOOLEAN NOT NULL DEFAULT false,
+  reminder_days_before INTEGER NOT NULL DEFAULT 3,
   email_sent BOOLEAN NOT NULL DEFAULT false,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  CONSTRAINT filing_reminders_type_check CHECK (type IN ('VAT','CORPORATE_TAX')),
+  CONSTRAINT filing_reminders_status_check CHECK (status IN ('pending','completed'))
 );
 
 CREATE TABLE IF NOT EXISTS smtp_settings (
