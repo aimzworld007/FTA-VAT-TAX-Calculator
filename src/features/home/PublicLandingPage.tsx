@@ -39,7 +39,12 @@ const steps = [
 ];
 
 function isLoggedIn() {
-  return Boolean(localStorage.getItem('token') || localStorage.getItem('authToken') || localStorage.getItem('accessToken'));
+  return Boolean(
+    localStorage.getItem('fta_auth_user') ||
+      localStorage.getItem('token') ||
+      localStorage.getItem('authToken') ||
+      localStorage.getItem('accessToken'),
+  );
 }
 
 export function PublicLandingPage() {
