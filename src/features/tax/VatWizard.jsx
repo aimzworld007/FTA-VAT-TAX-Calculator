@@ -28,6 +28,7 @@ import { Vat201Report } from './components/Vat201Report.jsx';
 import { MONTHS, formatVatPeriodLabel, getPeriodFromSelection } from './lib/vatPeriod';
 import { VAT_PRICING_MODES, splitVatFromAmount } from './lib/vatPricing';
 import { downloadPdf, generateVatPdfBlob } from './services/vatPdfApi';
+import SaveOutlinedIcon from '@mui/icons-material/SaveOutlined';
 
 const steps = [
   { key: 'business', label: 'Business Details', icon: Building2 },
@@ -377,6 +378,7 @@ export function VatWizard({ data, setData, onSave, onReset, onProgressChange, fo
     {step === 4 && <div className='export-action-bar'>
       <Button className='wizardNavBtn export-action-back' variant='outlined' startIcon={<ArrowBackOutlinedIcon />} onClick={back}>Back</Button>
       <div className='export-action-right'>
+        <Button variant='outlined' startIcon={<SaveOutlinedIcon />} onClick={onSave}>Save Record</Button>
         <Button className='danger-soft-btn' variant='outlined' onClick={onReset}>Reset</Button>
         <Button variant='outlined' startIcon={<PrintOutlinedIcon />} onClick={() => window.print()}>Print</Button>
         <Button className='primary-gradient-btn' variant='contained' startIcon={<DownloadOutlinedIcon />} onClick={handleDownloadPdf} disabled={downloadLoading}>{downloadLoading ? 'Downloading PDF…' : 'Download PDF'}</Button>
