@@ -1,5 +1,5 @@
 import React from 'react';
-import { Alert, Box, Button, Card, CardContent, Chip, Stack, TextField, Typography } from '@mui/material';
+import { Alert, Box, Button, Card, CardContent, Chip, Divider, Stack, Tab, Tabs, TextField, Typography } from '@mui/material';
 import { RouteLink, usePathname } from '../components/Router';
 import { TaxAssistantProvider, useTaxAssistant } from '../modules/taxAssistant/TaxAssistantContext';
 import { TaxModuleLayout } from '../modules/taxAssistant/TaxModuleLayout';
@@ -42,8 +42,46 @@ function RegisterPage() { const { navigate } = usePathname(); const { register, 
 
 function DashboardPage() { const { user } = useAuth(); const [stats, setStats] = React.useState<any>(null); React.useEffect(() => { fetchJson('/api/dashboard/stats').then(setStats).catch(() => {}); }, []); return <DashboardLayout><Stack spacing={2}><Typography variant='h4'>Welcome back, {user?.fullName || user?.email}</Typography><Typography>{new Date().toLocaleString()}</Typography><Stack direction='row' spacing={1}><Button component={RouteLink} to='/vat/business-details' variant='contained'>New VAT Return</Button><Button component={RouteLink} to='/tax/business-details' variant='contained'>New Corporate Tax</Button></Stack><Stack direction={{ xs: 'column', md: 'row' }} spacing={2}><Card><CardContent><Typography>Total VAT Records</Typography><Typography variant='h4'>{stats?.totalVatRecords ?? 0}</Typography></CardContent></Card><Card><CardContent><Typography>Total Corporate Tax Records</Typography><Typography variant='h4'>{stats?.totalCorporateTaxRecords ?? 0}</Typography></CardContent></Card></Stack></Stack></DashboardLayout>; }
 function BusinessProfilePage(){return <DashboardLayout><Typography variant='h5'>Business Profile</Typography></DashboardLayout>}
-function VatHistoryPage(){return <DashboardLayout><Typography variant='h5'>VAT History</Typography></DashboardLayout>}
-function TaxHistoryPage(){return <DashboardLayout><Typography variant='h5'>Tax History</Typography></DashboardLayout>}
+function HistoryList({ records, emptyMessage }: { records: any[]; emptyMessage: string }) {
+  if (!records.length) return <Alert severity='info'>{emptyMessage}</Alert>;
+  return (
+    <Stack spacing={1.2}>
+      {records.map((record) => (
+        <Card key={record.id} variant='outlined'>
+          <CardContent>
+            <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent='space-between' spacing={1}>
+              <Box>
+                <Typography sx={{ fontWeight: 700 }}>{record.period_label || record.payload?.periodLabel || 'No filing period label'}</Typography>
+                <Typography variant='body2' color='text.secondary'>Record ID: {record.id}</Typography>
+              </Box>
+              <Chip size='small' label={`Updated ${new Date(record.updated_at).toLocaleString()}`} />
+            </Stack>
+          </CardContent>
+        </Card>
+      ))}
+    </Stack>
+  );
+}
+function HistoryHubPage({ initialTab }: { initialTab: 'vat' | 'tax' }) {
+  const [tab, setTab] = React.useState<'vat' | 'tax'>(initialTab);
+  const [vatRecords, setVatRecords] = React.useState<any[]>([]);
+  const [taxRecords, setTaxRecords] = React.useState<any[]>([]);
+  const [loading, setLoading] = React.useState(false);
+  const [error, setError] = React.useState('');
+  React.useEffect(() => {
+    setLoading(true);
+    Promise.all([fetchJson('/api/vat-records'), fetchJson('/api/corporate-tax-records')])
+      .then(([vatResponse, taxResponse]) => {
+        setVatRecords(Array.isArray(vatResponse?.data) ? vatResponse.data : []);
+        setTaxRecords(Array.isArray(taxResponse?.data) ? taxResponse.data : []);
+      })
+      .catch(() => setError('Unable to load saved history right now.'))
+      .finally(() => setLoading(false));
+  }, []);
+  return <DashboardLayout><Stack spacing={2.2}><Box><Typography variant='h5' sx={{ fontWeight: 700 }}>Saved History</Typography><Typography color='text.secondary'>View your saved VAT and Corporate Tax records in one place.</Typography></Box><Tabs value={tab} onChange={(_, value) => setTab(value)}><Tab value='vat' label={`VAT History (${vatRecords.length})`} /><Tab value='tax' label={`Tax History (${taxRecords.length})`} /></Tabs><Divider />{loading && <Alert severity='info'>Loading history...</Alert>}{error && <Alert severity='error'>{error}</Alert>}{!loading && !error && (tab === 'vat' ? <HistoryList records={vatRecords} emptyMessage='No saved VAT history found yet.' /> : <HistoryList records={taxRecords} emptyMessage='No saved corporate tax history found yet.' />)}</Stack></DashboardLayout>;
+}
+function VatHistoryPage(){return <HistoryHubPage initialTab='vat' />}
+function TaxHistoryPage(){return <HistoryHubPage initialTab='tax' />}
 function RemindersPage(){return <DashboardLayout><Typography variant='h5'>Reminders</Typography></DashboardLayout>}
 function ProfilePage(){return <DashboardLayout><Typography variant='h5'>Settings</Typography></DashboardLayout>}
 
