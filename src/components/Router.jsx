@@ -12,7 +12,7 @@ export function usePathname() {
   const navigate = React.useCallback((to) => {
     if (window.location.pathname === to) return;
     window.history.pushState({}, '', to);
-    setPathname(to);
+    window.dispatchEvent(new PopStateEvent('popstate'));
   }, []);
 
   return { pathname, navigate };
