@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { prisma } from '../lib/prisma.js';
+import { query } from '../db/query.js';
 
 const createRecordSchema = z.object({
   taxType: z.enum(['VAT', 'CORPORATE']),
@@ -11,39 +11,34 @@ const createRecordSchema = z.object({
 
 export async function createTaxRecord(req, res) {
   const parsed = createRecordSchema.safeParse(req.body);
-  if (!parsed.success) return res.status(400).json({ error: 'Invalid payload' });
+  if (!parsed.success) return res.status(400).json({ success: false, message: 'Invalid payload' });
 
   const { taxType, periodStart, periodEnd, inputPayload, resultPayload } = parsed.data;
 
-  const created = await prisma.taxRecord.create({
-    data: {
-      userId: req.user.id,
-      taxType,
-      periodStart: periodStart ? new Date(periodStart) : null,
-      periodEnd: periodEnd ? new Date(periodEnd) : null,
-      inputPayload,
-      resultPayload,
-    },
-  });
-
+  const created = await query(
+    `INSERT INTO tax_records (user_id,tax_type,filing_period_start,filing_period_end,input_payload,result_payload)
+     VALUES ($1,$2,$3,$4,$5,$6) RETURNING *`,
+    [req.user.id, taxType, periodStart ? new Date(periodStart) : null, periodEnd ? new Date(periodEnd) : null, inputPayload, resultPayload]
+  );
 
   if (taxType === 'VAT') {
-    await prisma.vatRecord.create({
-      data: { userId: req.user.id, periodStart: periodStart ? new Date(periodStart) : null, periodEnd: periodEnd ? new Date(periodEnd) : null, inputPayload, resultPayload },
-    });
+    await query(
+      `INSERT INTO vat_records (user_id,filing_period_start,filing_period_end,payload)
+       VALUES ($1,$2,$3,$4)`,
+      [req.user.id, periodStart ? new Date(periodStart) : null, periodEnd ? new Date(periodEnd) : null, resultPayload]
+    );
   } else {
-    await prisma.corporateTaxRecord.create({
-      data: { userId: req.user.id, periodStart: periodStart ? new Date(periodStart) : null, periodEnd: periodEnd ? new Date(periodEnd) : null, inputPayload, resultPayload },
-    });
+    await query(
+      `INSERT INTO corporate_tax_records (user_id,filing_period_start,filing_period_end,payload)
+       VALUES ($1,$2,$3,$4)`,
+      [req.user.id, periodStart ? new Date(periodStart) : null, periodEnd ? new Date(periodEnd) : null, resultPayload]
+    );
   }
 
-  return res.status(201).json({ record: created });
+  return res.status(201).json({ success: true, data: { record: created.rows[0] } });
 }
 
 export async function listTaxRecords(req, res) {
-  const rows = await prisma.taxRecord.findMany({
-    where: { userId: req.user.id },
-    orderBy: { createdAt: 'desc' },
-  });
-  return res.json({ records: rows });
+  const rows = await query('SELECT * FROM tax_records WHERE user_id = $1 ORDER BY created_at DESC', [req.user.id]);
+  return res.json({ success: true, data: { records: rows.rows } });
 }

@@ -5,7 +5,7 @@ export function requireAuth(req, res, next) {
   const [scheme, token] = authHeader.split(' ');
 
   if (scheme !== 'Bearer' || !token) {
-    return res.status(401).json({ error: 'Unauthorized' });
+    return res.status(401).json({ success: false, message: 'Unauthorized' });
   }
 
   try {
@@ -13,6 +13,6 @@ export function requireAuth(req, res, next) {
     req.user = { id: payload.sub, email: payload.email, role: payload.role || 'USER' };
     return next();
   } catch {
-    return res.status(401).json({ error: 'Invalid or expired token' });
+    return res.status(401).json({ success: false, message: 'Invalid or expired token' });
   }
 }

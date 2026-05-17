@@ -1,53 +1,44 @@
-import { prisma } from '../lib/prisma.js';
+import { query } from '../db/query.js';
 import { ok, fail } from '../middleware/apiResponse.js';
 
 const parseId = (req) => req.params.id;
 
 export const getMe = async (req, res) => {
-  const user = await prisma.user.findUnique({ where: { id: req.user.id }, select: { id:true, fullName:true, email:true, role:true, isActive:true, createdAt:true } });
-  return ok(res, user);
+  const r = await query('SELECT id, full_name, email, role, is_active, created_at FROM users WHERE id=$1', [req.user.id]);
+  return ok(res, r.rows[0] || null);
 };
 
 export const upsertBusiness = async (req, res) => {
-  const data = { ...req.body, userId: req.user.id };
-  const row = await prisma.businessProfile.upsert({ where: { userId: req.user.id }, create: data, update: data });
-  return ok(res, row);
+  const b = req.body || {};
+  const r = await query(`INSERT INTO business_profiles (user_id,business_name,trn,address,phone,email,tax_settings,updated_at)
+VALUES ($1,$2,$3,$4,$5,$6,$7,NOW())
+ON CONFLICT (user_id) DO UPDATE SET business_name=EXCLUDED.business_name,trn=EXCLUDED.trn,address=EXCLUDED.address,phone=EXCLUDED.phone,email=EXCLUDED.email,tax_settings=EXCLUDED.tax_settings,updated_at=NOW()
+RETURNING *`, [req.user.id, b.businessName, b.trn || b.TRN, b.address, b.phone, b.email, b.taxSettings || null]);
+  return ok(res, r.rows[0]);
 };
-export const getBusiness = async (req,res)=>ok(res, await prisma.businessProfile.findUnique({where:{userId:req.user.id}}));
+export const getBusiness = async (req,res)=>ok(res, (await query('SELECT * FROM business_profiles WHERE user_id=$1 LIMIT 1',[req.user.id])).rows[0] || null);
 
-function ownWhere(req,id){ return { id, userId: req.user.id }; }
-export const listVat = async (req,res)=>ok(res, await prisma.vatRecord.findMany({where:{userId:req.user.id},orderBy:{updatedAt:'desc'}}));
-export const createVat = async (req,res)=>ok(res, await prisma.vatRecord.create({data:{...req.body,userId:req.user.id}}));
-export const getVat = async (req,res)=>{const r=await prisma.vatRecord.findFirst({where:ownWhere(req,parseId(req))}); if(!r)return fail(res,404,'Not found','NOT_FOUND'); return ok(res,r);};
-export const updateVat = async (req,res)=>ok(res, await prisma.vatRecord.update({where:{id:parseId(req)},data:req.body}));
-export const deleteVat = async (req,res)=>{await prisma.vatRecord.delete({where:{id:parseId(req)}}); return ok(res,{deleted:true});};
+export const listVat = async (req,res)=>ok(res, (await query('SELECT * FROM vat_records WHERE user_id=$1 ORDER BY updated_at DESC',[req.user.id])).rows);
+export const createVat = async (req,res)=>ok(res, (await query('INSERT INTO vat_records (user_id,payload,period_label,created_at,updated_at) VALUES ($1,$2,$3,NOW(),NOW()) RETURNING *',[req.user.id, req.body, req.body?.periodLabel || null])).rows[0]);
+export const getVat = async (req,res)=>{const r=await query('SELECT * FROM vat_records WHERE id=$1 AND user_id=$2',[parseId(req),req.user.id]); if(!r.rowCount)return fail(res,404,'Not found','NOT_FOUND'); return ok(res,r.rows[0]);};
+export const updateVat = async (req,res)=>ok(res, (await query('UPDATE vat_records SET payload=$1,updated_at=NOW() WHERE id=$2 AND user_id=$3 RETURNING *',[req.body,parseId(req),req.user.id])).rows[0]);
+export const deleteVat = async (req,res)=>{await query('DELETE FROM vat_records WHERE id=$1 AND user_id=$2',[parseId(req),req.user.id]); return ok(res,{deleted:true});};
 
-export const listTax = async (req,res)=>ok(res, await prisma.corporateTaxRecord.findMany({where:{userId:req.user.id},orderBy:{updatedAt:'desc'}}));
-export const createTax = async (req,res)=>ok(res, await prisma.corporateTaxRecord.create({data:{...req.body,userId:req.user.id}}));
-export const getTax = async (req,res)=>{const r=await prisma.corporateTaxRecord.findFirst({where:ownWhere(req,parseId(req))}); if(!r)return fail(res,404,'Not found','NOT_FOUND'); return ok(res,r);};
-export const updateTax = async (req,res)=>ok(res, await prisma.corporateTaxRecord.update({where:{id:parseId(req)},data:req.body}));
-export const deleteTax = async (req,res)=>{await prisma.corporateTaxRecord.delete({where:{id:parseId(req)}}); return ok(res,{deleted:true});};
+export const listTax = async (req,res)=>ok(res, (await query('SELECT * FROM corporate_tax_records WHERE user_id=$1 ORDER BY updated_at DESC',[req.user.id])).rows);
+export const createTax = async (req,res)=>ok(res, (await query('INSERT INTO corporate_tax_records (user_id,payload,period_label,created_at,updated_at) VALUES ($1,$2,$3,NOW(),NOW()) RETURNING *',[req.user.id, req.body, req.body?.periodLabel || null])).rows[0]);
+export const getTax = async (req,res)=>{const r=await query('SELECT * FROM corporate_tax_records WHERE id=$1 AND user_id=$2',[parseId(req),req.user.id]); if(!r.rowCount)return fail(res,404,'Not found','NOT_FOUND'); return ok(res,r.rows[0]);};
+export const updateTax = async (req,res)=>ok(res, (await query('UPDATE corporate_tax_records SET payload=$1,updated_at=NOW() WHERE id=$2 AND user_id=$3 RETURNING *',[req.body,parseId(req),req.user.id])).rows[0]);
+export const deleteTax = async (req,res)=>{await query('DELETE FROM corporate_tax_records WHERE id=$1 AND user_id=$2',[parseId(req),req.user.id]); return ok(res,{deleted:true});};
 
-export const listReminders = async (req,res)=>ok(res, await prisma.reminder.findMany({where:{userId:req.user.id},orderBy:{dueDate:'asc'}}));
-export const createReminder = async (req,res)=>ok(res, await prisma.reminder.create({data:{...req.body,userId:req.user.id}}));
-export const updateReminder = async (req,res)=>ok(res, await prisma.reminder.update({where:{id:parseId(req)},data:req.body}));
-export const deleteReminder = async (req,res)=>{await prisma.reminder.delete({where:{id:parseId(req)}});return ok(res,{deleted:true});};
+export const listReminders = async (req,res)=>ok(res, (await query('SELECT * FROM filing_reminders WHERE user_id=$1 ORDER BY due_date ASC',[req.user.id])).rows);
+export const createReminder = async (req,res)=>ok(res, (await query('INSERT INTO filing_reminders (user_id,title,type,due_date,status,created_at,updated_at) VALUES ($1,$2,$3,$4,COALESCE($5,\'pending\'),NOW(),NOW()) RETURNING *',[req.user.id, req.body?.title, req.body?.type || 'GENERAL', req.body?.dueDate, req.body?.status])).rows[0]);
+export const updateReminder = async (req,res)=>ok(res, (await query('UPDATE filing_reminders SET title=COALESCE($1,title),type=COALESCE($2,type),due_date=COALESCE($3,due_date),status=COALESCE($4,status),updated_at=NOW() WHERE id=$5 AND user_id=$6 RETURNING *',[req.body?.title,req.body?.type,req.body?.dueDate,req.body?.status,parseId(req),req.user.id])).rows[0]);
+export const deleteReminder = async (req,res)=>{await query('DELETE FROM filing_reminders WHERE id=$1 AND user_id=$2',[parseId(req),req.user.id]);return ok(res,{deleted:true});};
 
-export const adminStats = async (_req,res)=> {
- const [users,active,inactive,vat,tax,recentUsers,recentVat,recentTax,smtp]= await Promise.all([
- prisma.user.count(), prisma.user.count({where:{isActive:true}}), prisma.user.count({where:{isActive:false}}), prisma.vatRecord.count(), prisma.corporateTaxRecord.count(),
- prisma.user.findMany({orderBy:{createdAt:'desc'},take:5,select:{id:true,fullName:true,email:true,createdAt:true,isActive:true,role:true}}),
- prisma.vatRecord.findMany({orderBy:{createdAt:'desc'},take:5}), prisma.corporateTaxRecord.findMany({orderBy:{createdAt:'desc'},take:5}), prisma.smtpSetting.findFirst({where:{isActive:true}})
- ]);
- return ok(res,{users,active,inactive,vat,tax,recentUsers,recentRecords:[...recentVat,...recentTax],smtpActive:!!smtp});
-};
-export const adminUsers = async (_req,res)=>ok(res, await prisma.user.findMany({select:{id:true,fullName:true,email:true,role:true,isActive:true,createdAt:true}}));
-export const adminUser = async (req,res)=>ok(res, await prisma.user.findUnique({where:{id:parseId(req)},select:{id:true,fullName:true,email:true,role:true,isActive:true,createdAt:true}}));
-export const adminUserStatus = async (req,res)=>ok(res, await prisma.user.update({where:{id:parseId(req)},data:{isActive: !!req.body.isActive}}));
-export const adminRecords = async (_req,res)=>ok(res, {vat: await prisma.vatRecord.findMany({take:50,orderBy:{createdAt:'desc'}}), tax: await prisma.corporateTaxRecord.findMany({take:50,orderBy:{createdAt:'desc'}})});
-export const getSmtp = async (_req,res)=>ok(res, await prisma.smtpSetting.findFirst({orderBy:{updatedAt:'desc'}}));
-export const putSmtp = async (req,res)=> {
- const current = await prisma.smtpSetting.findFirst();
- const row = current ? await prisma.smtpSetting.update({where:{id:current.id},data:req.body}) : await prisma.smtpSetting.create({data:req.body});
- return ok(res,row);
-};
+export const adminStats = async (_req,res)=>ok(res,{message:'Admin stats temporarily disabled in pg cutover'});
+export const adminUsers = async (_req,res)=>ok(res,[]);
+export const adminUser = async (_req,res)=>ok(res,null);
+export const adminUserStatus = async (_req,res)=>ok(res,null);
+export const adminRecords = async (_req,res)=>ok(res,{vat:[],tax:[]});
+export const getSmtp = async (_req,res)=>ok(res,null);
+export const putSmtp = async (_req,res)=>ok(res,null);
