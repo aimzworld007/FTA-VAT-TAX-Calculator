@@ -1,0 +1,2 @@
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from '@mui/material';
+export function ConfirmDialog({ open, title, text, onClose, onConfirm }: { open: boolean; title: string; text: string; onClose: () => void; onConfirm: () => void }) { return <Dialog open={open} onClose={onClose}><DialogTitle>{title}</DialogTitle><DialogContent><Typography>{text}</Typography></DialogContent><DialogActions><Button onClick={onClose}>Cancel</Button><Button color='error' onClick={onConfirm}>Confirm</Button></DialogActions></Dialog>; }

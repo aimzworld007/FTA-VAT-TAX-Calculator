@@ -12,6 +12,10 @@ import vatPdfRoutes from './routes/vatPdfRoutes.js';
 import dashboardRoutes from './routes/dashboardRoutes.js';
 import appRoutes from './routes/appRoutes.js';
 import userRoutes from './routes/userRoutes.js';
+import businessProfileRoutes from './routes/businessProfileRoutes.js';
+import vatRecordRoutes from './routes/vatRecordRoutes.js';
+import corporateTaxRecordRoutes from './routes/corporateTaxRecordRoutes.js';
+import reminderRoutes from './routes/reminderRoutes.js';
 import { ensureSchema } from './db/ensureSchema.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -36,6 +40,10 @@ export function createApp() {
   app.use('/api/tax-records', taxRecordRoutes);
   app.use('/api/dashboard', dashboardRoutes);
   app.use('/api/users', userRoutes);
+  app.use('/api/business-profile', businessProfileRoutes);
+  app.use('/api/vat-records', vatRecordRoutes);
+  app.use('/api/corporate-tax-records', corporateTaxRecordRoutes);
+  app.use('/api/reminders', reminderRoutes);
   app.use('/api', vatPdfRoutes);
   app.use('/api', appRoutes);
 
