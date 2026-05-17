@@ -15,11 +15,12 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
+app.set("trust proxy", 1);
 
 app.use(helmet());
 app.use(
   cors({
-    origin: process.env.FRONTEND_ORIGIN?.split(',') || true,
+    origin: process.env.FRONTEND_URL?.split(',') || process.env.FRONTEND_ORIGIN?.split(',') || true,
     credentials: true,
   })
 );
@@ -43,21 +44,10 @@ app.get('/', (_req, res) => {
 
 
 app.use((error, _req, res, _next) => {
-  const isPrismaInitError =
-    error?.name === 'PrismaClientInitializationError' ||
-    error?.code === 'P1001' ||
-    error?.code === 'P1012';
-
-  if (isPrismaInitError) {
-    return res.status(503).json({
-      error: 'Database is not ready. Run Prisma migrations and ensure DATABASE_URL is valid.',
-      code: error?.code || 'PRISMA_INIT_ERROR',
-    });
-  }
-
   console.error(error);
-  return res.status(500).json({
-    error: 'Internal server error',
+  return res.status(error?.status || 500).json({
+    success: false,
+    message: error?.message || 'Internal server error',
   });
 });
 

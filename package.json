@@ -10,15 +10,9 @@
     "build": "vite build",
     "preview": "node node_modules/vite/bin/vite.js preview",
     "test": "node --test",
-    "postinstall": "prisma generate",
-    "prisma:generate": "prisma generate",
-    "prisma:migrate": "prisma migrate deploy",
-    "prisma:deploy": "prisma migrate deploy",
-    "prisma:studio": "prisma studio",
-    "seed": "node prisma/seed.js",
-    "db:push": "prisma db push",
     "start": "node server/index.js",
-    "server:start": "node server/index.js"
+    "server:start": "node server/index.js",
+    "db:migrate": "node backend/db/migrate.js"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
@@ -33,20 +27,16 @@
     "react": "19.2.6",
     "react-dom": "19.2.6",
     "vite": "8.0.11",
-    "@prisma/client": "^6.8.2",
     "bcrypt": "^5.1.1",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "express-rate-limit": "^7.4.1",
     "helmet": "^8.0.0",
     "jsonwebtoken": "^9.0.2",
-    "prisma": "^6.8.2",
-    "zod": "^3.24.1"
+    "zod": "^3.24.1",
+    "pg": "^8.13.1"
   },
   "devDependencies": {
     "@types/node": "^24.10.0"
-  },
-  "prisma": {
-    "seed": "node prisma/seed.js"
   }
 }
