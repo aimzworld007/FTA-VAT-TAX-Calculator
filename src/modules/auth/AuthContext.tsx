@@ -43,13 +43,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return { error: text || 'Unexpected server response' };
   };
 
+  const getUserFromResponse = (payload: any): AuthUser | null => {
+    if (!payload || typeof payload !== 'object') return null;
+    return payload.user ?? payload.data?.user ?? null;
+  };
+
+  const getErrorFromResponse = (payload: any, fallback: string) => {
+    return payload?.message || payload?.error || fallback;
+  };
+
   const login = React.useCallback(async (email: string, password: string) => {
     setLoading(true);
     try {
       const res = await fetch(`${API}/login`, { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password }) });
       const data = await readResponseBody(res);
-      if (!res.ok) return { ok: false, error: data?.error || 'Login failed' };
-      persistUser(data.user);
+      if (!res.ok) return { ok: false, error: getErrorFromResponse(data, 'Login failed') };
+      const loggedInUser = getUserFromResponse(data);
+      if (!loggedInUser) return { ok: false, error: 'Login failed: invalid server response' };
+      persistUser(loggedInUser);
       return { ok: true };
     } catch {
       return {
@@ -65,8 +76,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const res = await fetch(`${API}/register`, { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
       const data = await readResponseBody(res);
-      if (!res.ok) return { ok: false, error: data?.message || data?.error || 'Registration failed' };
-      persistUser(data.user);
+      if (!res.ok) return { ok: false, error: getErrorFromResponse(data, 'Registration failed') };
+      const registeredUser = getUserFromResponse(data);
+      if (!registeredUser) return { ok: false, error: 'Registration failed: invalid server response' };
+      persistUser(registeredUser);
       return { ok: true };
     } catch {
       return {
@@ -86,8 +99,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const res = await fetch(`${API}/profile`, { method: 'PATCH', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(next) });
       const data = await readResponseBody(res);
-      if (!res.ok) return { ok: false, error: data?.error || 'Update failed' };
-      persistUser(data.user);
+      if (!res.ok) return { ok: false, error: getErrorFromResponse(data, 'Update failed') };
+      const updatedUser = getUserFromResponse(data);
+      if (!updatedUser) return { ok: false, error: 'Update failed: invalid server response' };
+      persistUser(updatedUser);
       return { ok: true };
     } catch {
       return {
