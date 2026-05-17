@@ -1,4 +1,5 @@
 import path from 'node:path';
+import fs from 'node:fs';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
@@ -40,9 +41,22 @@ export function createApp() {
     res.json({ status: 'ok' });
   });
 
-  app.get('/', (_req, res) => {
-    res.sendFile(path.resolve(__dirname, '../index.html'));
-  });
+  const distDir = path.resolve(__dirname, '../dist');
+  const hasDistBuild = fs.existsSync(path.join(distDir, 'index.html'));
+
+  if (hasDistBuild) {
+    app.use(express.static(distDir));
+    app.get('*', (_req, res) => {
+      res.sendFile(path.join(distDir, 'index.html'));
+    });
+  } else {
+    app.get('/', (_req, res) => {
+      res
+        .status(503)
+        .type('text/html')
+        .send('<h1>Frontend build not found</h1><p>Run <code>npm run build</code> before starting the server.</p>');
+    });
+  }
 
   app.use((error, _req, res, _next) => {
     console.error(error);
