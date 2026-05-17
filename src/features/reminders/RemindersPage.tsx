@@ -1,1 +1,1 @@
-export { RemindersPage } from './legacyPages';
+export { RemindersPage } from '../history/legacyPages';
