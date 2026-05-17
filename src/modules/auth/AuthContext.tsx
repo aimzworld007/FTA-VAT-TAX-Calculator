@@ -23,17 +23,27 @@ const API = '/api/auth';
 const USER_KEY = 'fta_auth_user';
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = React.useState<AuthUser | null>(() => {
-    const saved = localStorage.getItem(USER_KEY);
-    if (!saved) return null;
-    try { return JSON.parse(saved); } catch { return null; }
-  });
+  const readStoredUser = (): AuthUser | null => {
+    try {
+      const saved = window.localStorage.getItem(USER_KEY);
+      if (!saved) return null;
+      return JSON.parse(saved);
+    } catch {
+      return null;
+    }
+  };
+
+  const [user, setUser] = React.useState<AuthUser | null>(() => readStoredUser());
   const [loading, setLoading] = React.useState(false);
 
   const persistUser = (next: AuthUser | null) => {
     setUser(next);
-    if (next) localStorage.setItem(USER_KEY, JSON.stringify(next));
-    else localStorage.removeItem(USER_KEY);
+    try {
+      if (next) window.localStorage.setItem(USER_KEY, JSON.stringify(next));
+      else window.localStorage.removeItem(USER_KEY);
+    } catch {
+      // Ignore storage failures so auth state still works in restricted browsers.
+    }
   };
 
   const readResponseBody = async (res: Response) => {
