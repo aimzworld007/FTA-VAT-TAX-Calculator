@@ -31,6 +31,14 @@ app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok' });
 });
 
+if (process.env.NODE_ENV !== 'production') {
+  app.get('/', (_req, res) => {
+    return res.status(200).json({
+      message: 'API is running. Use /api/health to verify status.',
+    });
+  });
+}
+
 app.use((error, _req, res, _next) => {
   const isPrismaInitError =
     error?.name === 'PrismaClientInitializationError' ||
