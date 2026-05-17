@@ -1,3 +1,5 @@
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import express from 'express';
@@ -8,6 +10,9 @@ import taxRecordRoutes from './routes/taxRecordRoutes.js';
 import vatPdfRoutes from './routes/vatPdfRoutes.js';
 import dashboardRoutes from './routes/dashboardRoutes.js';
 import appRoutes from './routes/appRoutes.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 
@@ -33,9 +38,7 @@ app.get('/api/health', (_, res) => {
 });
 
 app.get('/', (_req, res) => {
-  res.status(200).json({
-    message: 'API is running. Use /api/health to verify status.',
-  });
+  res.sendFile(path.resolve(__dirname, '../index.html'));
 });
 
 

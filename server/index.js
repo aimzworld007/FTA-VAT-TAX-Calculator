@@ -33,9 +33,7 @@ app.get('/api/health', (_req, res) => {
 
 if (process.env.NODE_ENV !== 'production') {
   app.get('/', (_req, res) => {
-    return res.status(200).json({
-      message: 'API is running. Use /api/health to verify status.',
-    });
+    return res.sendFile(path.resolve(__dirname, '../index.html'));
   });
 }
 
