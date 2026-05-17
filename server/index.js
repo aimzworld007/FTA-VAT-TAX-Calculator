@@ -1,5 +1,6 @@
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import fs from 'node:fs';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import express from 'express';
@@ -32,7 +33,16 @@ app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok' });
 });
 
-if (process.env.NODE_ENV !== 'production') {
+const distPath = path.resolve(__dirname, '../dist');
+const hasBuiltFrontend = fs.existsSync(path.join(distPath, 'index.html'));
+
+if (hasBuiltFrontend) {
+  app.use(express.static(distPath));
+  app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api/')) return next();
+    return res.sendFile(path.join(distPath, 'index.html'));
+  });
+} else {
   app.get('/', (_req, res) => {
     return res.sendFile(path.resolve(__dirname, '../index.html'));
   });
@@ -42,15 +52,6 @@ app.use((error, _req, res, _next) => {
   console.error(error);
   return res.status(error?.status || 500).json({ success: false, message: error?.message || 'Internal server error' });
 });
-
-if (process.env.NODE_ENV === 'production') {
-  const distPath = path.resolve(__dirname, '../dist');
-  app.use(express.static(distPath));
-  app.get('*', (req, res, next) => {
-    if (req.path.startsWith('/api/')) return next();
-    return res.sendFile(path.join(distPath, 'index.html'));
-  });
-}
 
 const port = Number(process.env.PORT) || 5000;
 app.listen(port, () => {
