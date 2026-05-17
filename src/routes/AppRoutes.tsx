@@ -13,6 +13,7 @@ import { createTaxRecord, listTaxRecords } from '../features/tax/services/taxRec
 import { calculateVat } from '../features/tax/lib/vatCalculator';
 import { calculateCorporateTax } from '../features/tax/lib/corporateTaxCalculator';
 import { ProfileSettingsPage } from '../features/profile/ProfileSettingsPage';
+import { BusinessProfilePage } from '../features/profile/BusinessProfilePage';
 
 const mapStep = { 'business-details': 1, input: 2, preview: 3, export: 4 } as const;
 const mapTaxStep = { 'business-details': 1, input: 3, preview: 5, export: 6 } as const;
@@ -96,7 +97,6 @@ function DashboardPage() {
     </>}
   </Stack></DashboardLayout>;
 }
-function BusinessProfilePage(){return <DashboardLayout><Typography variant='h5'>Business Profile</Typography></DashboardLayout>}
 function HistoryHubPage({ initialTab }: { initialTab: 'vat' | 'tax' }) {
   const [tab, setTab] = React.useState<'vat' | 'tax'>(initialTab);
   const [records, setRecords] = React.useState<any[]>([]);
