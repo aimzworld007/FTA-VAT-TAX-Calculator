@@ -12,6 +12,7 @@ import { AuthProvider, useAuth } from '../modules/auth/AuthContext';
 import { createTaxRecord, listTaxRecords } from '../features/tax/services/taxRecordsApi';
 import { calculateVat } from '../features/tax/lib/vatCalculator';
 import { calculateCorporateTax } from '../features/tax/lib/corporateTaxCalculator';
+import { ProfileSettingsPage } from '../features/profile/ProfileSettingsPage';
 
 const mapStep = { 'business-details': 1, input: 2, preview: 3, export: 4 } as const;
 const mapTaxStep = { 'business-details': 1, input: 3, preview: 5, export: 6 } as const;
@@ -141,7 +142,6 @@ function HistoryHubPage({ initialTab }: { initialTab: 'vat' | 'tax' }) {
 function VatHistoryPage(){return <HistoryHubPage initialTab='vat' />}
 function TaxHistoryPage(){return <HistoryHubPage initialTab='tax' />}
 function RemindersPage(){return <DashboardLayout><Typography variant='h5'>Reminders</Typography></DashboardLayout>}
-function ProfilePage(){return <DashboardLayout><Typography variant='h5'>Settings</Typography></DashboardLayout>}
 
 function RoutedModules() { const { pathname, navigate } = usePathname(); const { user } = useAuth(); const { vat, setVat, ct, setCt } = useTaxAssistant(); const parts = pathname.split('/').filter(Boolean); const module = parts[0]; const step = parts[1] || ''; const guardVat = !vat.businessName || !vat.trn; const guardTax = !ct.companyName || !ct.taxRegistrationNumber || !ct.businessActivity;
   const [saveMsg, setSaveMsg] = React.useState<{ type: 'success' | 'error'; text: string } | null>(null);
@@ -180,7 +180,7 @@ function RoutedModules() { const { pathname, navigate } = usePathname(); const {
   if (pathname.startsWith('/login')) return <GuestRoute><LoginPage /></GuestRoute>;
   if (pathname === '/register') return <GuestRoute><RegisterPage /></GuestRoute>;
   if (pathname === '/dashboard') return <ProtectedRoute><DashboardPage /></ProtectedRoute>;
-  if (pathname === '/dashboard/profile') return <ProtectedRoute><ProfilePage /></ProtectedRoute>;
+  if (pathname === '/dashboard/profile') return <ProtectedRoute><ProfileSettingsPage /></ProtectedRoute>;
   if (pathname === '/dashboard/business-profile') return <ProtectedRoute><BusinessProfilePage /></ProtectedRoute>;
   if (pathname === '/dashboard/vat-history') return <ProtectedRoute><VatHistoryPage /></ProtectedRoute>;
   if (pathname === '/dashboard/tax-history') return <ProtectedRoute><TaxHistoryPage /></ProtectedRoute>;

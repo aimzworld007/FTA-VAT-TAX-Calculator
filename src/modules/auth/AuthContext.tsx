@@ -5,6 +5,7 @@ type AuthUser = {
   email: string;
   fullName?: string;
   phone?: string;
+  address?: string;
   role?: 'USER' | 'SUPERADMIN';
   isActive?: boolean;
 };
@@ -15,11 +16,14 @@ type AuthContextValue = {
   login: (email: string, password: string) => Promise<{ ok: boolean; error?: string }>;
   register: (payload: { fullName: string; email: string; password: string; confirmPassword: string; phone?: string }) => Promise<{ ok: boolean; error?: string }>;
   logout: () => Promise<void>;
-  updateProfile: (next: Pick<AuthUser, 'fullName' | 'phone'>) => Promise<{ ok: boolean; error?: string }>;
+  refreshUser: () => Promise<void>;
+  updateProfile: (next: Pick<AuthUser, 'fullName' | 'phone' | 'address'>) => Promise<{ ok: boolean; error?: string }>;
+  changePassword: (currentPassword: string, newPassword: string) => Promise<{ ok: boolean; error?: string }>;
 };
 
 const AuthContext = React.createContext<AuthContextValue | undefined>(undefined);
-const API = '/api/auth';
+const AUTH_API = '/api/auth';
+const USERS_API = '/api/users';
 const USER_KEY = 'fta_auth_user';
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -65,7 +69,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = React.useCallback(async (email: string, password: string) => {
     setLoading(true);
     try {
-      const res = await fetch(`${API}/login`, { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password }) });
+      const res = await fetch(`${AUTH_API}/login`, { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password }) });
       const data = await readResponseBody(res);
       if (!res.ok) return { ok: false, error: getErrorFromResponse(data, 'Login failed') };
       const loggedInUser = getUserFromResponse(data);
@@ -84,7 +88,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const register = React.useCallback(async (payload) => {
     setLoading(true);
     try {
-      const res = await fetch(`${API}/register`, { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+      const res = await fetch(`${AUTH_API}/register`, { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
       const data = await readResponseBody(res);
       if (!res.ok) return { ok: false, error: getErrorFromResponse(data, 'Registration failed') };
       const registeredUser = getUserFromResponse(data);
@@ -102,12 +106,42 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = React.useCallback(async () => {
     persistUser(null);
-    await fetch(`${API}/logout`, { method: 'POST', credentials: 'include' }).catch(() => {});
+    await fetch(`${AUTH_API}/logout`, { method: 'POST', credentials: 'include' }).catch(() => {});
   }, []);
+
+
+
+  const refreshUser = React.useCallback(async () => {
+    try {
+      const res = await fetch(`${USERS_API}/me`, { method: 'GET', credentials: 'include' });
+      const data = await readResponseBody(res);
+      if (!res.ok) return;
+      const refreshedUser = getUserFromResponse(data);
+      if (refreshedUser) persistUser(refreshedUser);
+    } catch {}
+  }, []);
+
+  const changePassword = React.useCallback(async (currentPassword: string, newPassword: string) => {
+    try {
+      const res = await fetch(`${USERS_API}/me/password`, {
+        method: 'PUT',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ currentPassword, newPassword }),
+      });
+      const data = await readResponseBody(res);
+      if (!res.ok) return { ok: false, error: getErrorFromResponse(data, 'Password change failed') };
+      const next = getUserFromResponse(data);
+      if (next) persistUser({ ...user, ...next } as AuthUser);
+      return { ok: true };
+    } catch {
+      return { ok: false, error: 'Unable to reach server. Ensure backend is running and reachable.' };
+    }
+  }, [user]);
 
   const updateProfile = React.useCallback(async (next) => {
     try {
-      const res = await fetch(`${API}/profile`, { method: 'PATCH', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(next) });
+      const res = await fetch(`${USERS_API}/me`, { method: 'PUT', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(next) });
       const data = await readResponseBody(res);
       if (!res.ok) return { ok: false, error: getErrorFromResponse(data, 'Update failed') };
       const updatedUser = getUserFromResponse(data);
@@ -122,7 +156,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  return <AuthContext.Provider value={{ user, loading, login, register, logout, updateProfile }}>{children}</AuthContext.Provider>;
+  return <AuthContext.Provider value={{ user, loading, login, register, logout, refreshUser, updateProfile, changePassword }}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth() {
