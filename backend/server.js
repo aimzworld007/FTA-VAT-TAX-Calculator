@@ -10,6 +10,7 @@ import taxRecordRoutes from './routes/taxRecordRoutes.js';
 import vatPdfRoutes from './routes/vatPdfRoutes.js';
 import dashboardRoutes from './routes/dashboardRoutes.js';
 import appRoutes from './routes/appRoutes.js';
+import { ensureSchema } from './db/ensureSchema.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -53,6 +54,15 @@ app.use((error, _req, res, _next) => {
 
 
 const port = process.env.PORT || 8787;
-app.listen(port, () => {
-  console.log(`VAT PDF server listening on ${port}`);
+
+async function startServer() {
+  await ensureSchema();
+  app.listen(port, () => {
+    console.log(`VAT PDF server listening on ${port}`);
+  });
+}
+
+startServer().catch((error) => {
+  console.error('Failed to initialize API server:', error);
+  process.exit(1);
 });
