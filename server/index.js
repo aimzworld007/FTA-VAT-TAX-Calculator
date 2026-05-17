@@ -31,10 +31,6 @@ app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok' });
 });
 
-app.get('/', (_req, res) => {
-  res.status(200).json({ status: 'ok' });
-});
-
 app.use((error, _req, res, _next) => {
   const isPrismaInitError =
     error?.name === 'PrismaClientInitializationError' ||
